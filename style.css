@@ -59,14 +59,15 @@ body {
 /* TOP BAR */
 .topbar {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 14px 24px;
+  padding: 10px 24px;
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 18px;
   backdrop-filter: blur(12px);
+  height: 74px;
 }
-.brand { display: flex; align-items: center; }
-.logo-horiz { width: 220px; height: auto; object-fit: contain; }
+.brand { display: flex; align-items: center; height: 100%; }
+.logo-horiz { height: 100%; width: 220px; object-fit: contain; transform: scale(1.6); transform-origin: left center; }
 .logo-dark-mode { display: block; }
 .logo-light-mode { display: none; }
 body.light .logo-dark-mode { display: none; }
