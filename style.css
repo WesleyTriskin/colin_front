@@ -54,7 +54,7 @@ body {
   margin: -20px 0 0 0;
 }
 
-.wrap { width: 100%; padding: 20px 28px; display: flex; flex-direction: column; gap: 18px; }
+.wrap { width: 100%; max-width: 1600px; margin: 0 auto; padding: 20px 28px; display: flex; flex-direction: column; gap: 18px; }
 
 /* TOP BAR */
 .topbar {
