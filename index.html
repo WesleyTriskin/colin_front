@@ -8,26 +8,28 @@
 <body>
 <div class="wrap">
 
-  <header class="topbar">
-    <div class="brand">
-      <img class="logo" src="images/logo.png" onerror="this.src='https://via.placeholder.com/44/8B5CF6/fff?text=DA'" alt="DA">
-      <div>
-        <div class="brand-name">DATA AGRIN</div>
-        <div class="brand-tag">Management • Intelligence • Provider</div>
+  <div class="sticky-header">
+    <header class="topbar">
+      <div class="brand">
+        <img class="logo" src="images/logo.png" onerror="this.src='https://via.placeholder.com/44/8B5CF6/fff?text=DA'" alt="DA">
+        <div>
+          <div class="brand-name">DATA AGRIN</div>
+          <div class="brand-tag">Management • Intelligence • Provider</div>
+        </div>
       </div>
-    </div>
-    <nav class="tabs">
-      <button class="tab active" onclick="switchTab('dashboard')">Painel Mensageria</button>
-      <button class="tab" onclick="switchTab('api')">Endpoints API</button>
-      <button class="tab" onclick="switchTab('colin')">Colin Interativo</button>
-    </nav>
-    <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️ Modo Claro</button>
-  </header>
+      <nav class="tabs">
+        <button class="tab active" onclick="switchTab('dashboard')">Painel Mensageria</button>
+        <button class="tab" onclick="switchTab('api')">Endpoints API</button>
+        <button class="tab" onclick="switchTab('colin')">Colin Interativo</button>
+      </nav>
+      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️ Modo Claro</button>
+    </header>
 
-  <!-- Ticker de Alertas (Global) -->
-  <div class="ticker-wrap">
-    <div class="ticker" id="ticker-content">
-      <span class="ticker-item info">Verificando status dos sistemas...</span>
+    <!-- Ticker de Alertas (Global) -->
+    <div class="ticker-wrap">
+      <div class="ticker" id="ticker-content">
+        <span class="ticker-item info">Verificando status dos sistemas...</span>
+      </div>
     </div>
   </div>
 
@@ -55,9 +57,12 @@
 
     <!-- Painel de status do número principal da fazenda ativa -->
     <div class="status-panel">
-      <div class="status-panel-left">
-        <div class="status-panel-label">Número principal da fazenda</div>
-        <div class="status-panel-phone" id="status-phone">—</div>
+      <div class="status-panel-left" style="flex-direction: row; align-items: center; gap: 18px;">
+        <img src="images/colin_avatar.png" alt="Colin" style="width:56px; height:56px; border-radius:50%; object-fit:cover; object-position:center 15%; border:2px solid var(--primary); box-shadow: 0 4px 12px rgba(139,92,246,0.2);">
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <div class="status-panel-label">Número principal (Agente Ativo)</div>
+          <div class="status-panel-phone" id="status-phone">—</div>
+        </div>
       </div>
       <div class="status-panel-right">
         <button class="sbtn ok"    id="sstatus-ok"    onclick="setFarmStatus('ok')">🟢 OK</button>
@@ -290,7 +295,7 @@ function updateTicker() {
 
   if (msgs.length === 0) msgs.push(`<span class="ticker-item info">✅ Todos os sistemas e endpoints operacionais.</span>`);
   
-  ticker.innerHTML = msgs.join('<span style="color:var(--muted); margin: 0 20px;"> • </span>');
+  ticker.innerHTML = msgs.join('<span style="color:var(--muted); margin: 0 40px;"> • </span>');
 }
 
 // Atualização local imediata + Chamada para API DataAgrin (Opção 2)
