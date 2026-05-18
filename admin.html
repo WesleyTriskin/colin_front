@@ -76,7 +76,7 @@ function renderAdminPanel() {
           <div class="farm-name">${f.name}</div>
           <div class="farm-info">Carteira ${f.wallet} • ${formatPhone(f.phone)}</div>
         </div>
-        <div style="display: flex; gap: 8px;">
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
           <button class="sbtn ok ${st==='ok'?'on':''}" onclick="setStatus('${f.key}', '${f.phone}', 'ok')">🟢 OK</button>
           <button class="sbtn inc ${st==='inc'?'on':''}" onclick="setStatus('${f.key}', '${f.phone}', 'inc')">🟡 Instável</button>
           <button class="sbtn ban ${st==='ban'?'on':''}" onclick="setStatus('${f.key}', '${f.phone}', 'ban')">🔴 Banido</button>
