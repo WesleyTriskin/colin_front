@@ -248,6 +248,15 @@ function switchTab(id){
 let isDark = true;
 let farmPhone = ''; // numero principal da fazenda ativa
 
+function formatPhone(phone) {
+  if (!phone) return 'Sem número';
+  let p = phone.toString().replace(/\D/g, '');
+  if (p.startsWith('55') && p.length > 11) p = p.substring(2);
+  if (p.length === 11) return `(${p.substring(0,2)}) ${p.substring(2,7)}-${p.substring(7)}`;
+  if (p.length === 10) return `(${p.substring(0,2)}) ${p.substring(2,6)}-${p.substring(6)}`;
+  return phone;
+}
+
 function toggleTheme(){
   isDark = !isDark;
   document.body.classList.toggle('light', !isDark);
@@ -294,9 +303,9 @@ function updateTicker() {
 
   if (msgs.length === 0) msgs.push(`<span class="ticker-item info">✅ Todos os sistemas e endpoints operacionais.</span>`);
   
-  const html = msgs.join('<span style="color:var(--muted); margin: 0 40px;"> • </span>') + '<span style="color:var(--muted); margin: 0 40px;"> • </span>';
-  document.getElementById('ticker-content').innerHTML = html;
-  document.getElementById('ticker-content-clone').innerHTML = html;
+  const content = msgs.join('<span style="color:var(--muted); margin: 0 40px;"> • </span>') + '<span style="color:var(--muted); margin: 0 40px;"> • </span>';
+  document.getElementById('ticker-content').innerHTML = content;
+  document.getElementById('ticker-content-clone').innerHTML = content;
 }
 
 // Atualização local imediata + Chamada para API DataAgrin (Opção 2)
@@ -347,7 +356,7 @@ function selectFarm(key, name, wallet, phone){
   document.getElementById('btn-'+key).classList.add('active');
   
   farmPhone = phone;
-  document.getElementById('status-phone').innerText = phone || 'Sem número';
+  document.getElementById('status-phone').innerText = formatPhone(phone);
   
   // Carrega status do localStorage ao trocar de fazenda
   highlightStatusPanel(getFarmStatus(key));
@@ -425,13 +434,6 @@ async function fetchLogs(){
     setImg('img-daily',  dailytxt ? findNearestImage(fl, dailytxt) : null);
     setImg('img-hour',   hourtxt  ? findNearestImage(fl, hourtxt)  : null);
     setImg('img-hidrico',hidrtxt  ? findNearestImage(fl, hidrtxt)  : null);
-
-    // Extrai o numero principal direto dos logs (não depende do banco local)
-    const logWithPhone = fl.find(l => l.phone_number && l.phone_number.length > 5);
-    if (logWithPhone) {
-      farmPhone = logWithPhone.phone_number;
-      document.getElementById('status-phone').innerText = farmPhone;
-    }
 
   } catch(e){
     console.error(e);
