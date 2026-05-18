@@ -378,9 +378,9 @@ async function fetchLogs(){
       const res = fmt(log ? log.sent_at : null);
       timeEl.innerText = res.text;
       if (res.isAlert) {
-        timeEl.style.border = "1.5px solid var(--red)";
+        timeEl.style.border = "1px solid var(--red)";
         timeEl.style.color = "var(--red)";
-        timeEl.style.fontWeight = "700";
+        timeEl.style.fontWeight = "600";
       } else {
         timeEl.style.border = "";
         timeEl.style.color = "";
@@ -486,7 +486,7 @@ async function loadContacts() {
         const l = ul.find(x => x.message_content.includes(kw)); 
         const res = fmt(l ? l.sent_at : null);
         if (res.isAlert) {
-          return `<span class="date-cell" style="border: 1.5px solid var(--red); color: var(--red); padding: 4px 10px; border-radius: 6px; display: inline-block; font-weight: 700; line-height: 1;" title="Alerta: Relatório não é de hoje!">${res.text}</span>`;
+          return `<span class="date-cell" style="border: 1px solid var(--red); color: var(--red); padding: 2px 5px; border-radius: 4px; display: inline-block; font-weight: 600; line-height: 1;" title="Alerta: Relatório não é de hoje!">${res.text}</span>`;
         }
         return `<span class="date-cell">${res.text}</span>`;
       };
