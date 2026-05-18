@@ -394,11 +394,13 @@ async function fetchLogs(){
   loadContacts();
 }
 
-async function loadContacts(){
+async function loadContacts() {
   const tbody = document.getElementById('tbody');
+  try {
     let contacts = [];
+    
+    // 1. Tenta buscar da API Oficial (que o backend vai criar)
     try {
-      // Tenta buscar da API Oficial (que o backend vai criar)
       const r = await fetch('https://data.trisk-in.com.br/api_data/v1/farms/contacts');
       if (r.ok) {
         const raw = await r.json();
@@ -408,7 +410,7 @@ async function loadContacts(){
       console.warn("API de contatos oficial indisponível ainda.");
     }
 
-    // Fallback: Se a API estiver offline ou vazia, extraímos os números direto do histórico de logs!
+    // 2. Fallback: Se a API estiver offline ou vazia, extraímos os números direto do histórico de logs!
     if (contacts.length === 0 && allLogs && allLogs.length > 0) {
       const uniquePhones = [...new Set(allLogs.map(l => l.phone_number).filter(Boolean))];
       contacts = uniquePhones.map(p => {
@@ -423,7 +425,7 @@ async function loadContacts(){
       });
     }
 
-    // Sincroniza status do BD para o LocalStorage se vieram do banco
+    // 3. Sincroniza status do BD para o LocalStorage se vieram do banco
     if (contacts.length > 0) {
       FARMS_DATA.forEach(f => {
         const contact = contacts.find(c => c.phone_number === f.phone);
@@ -442,10 +444,10 @@ async function loadContacts(){
       });
     }
 
-    // Filtra os contatos da fazenda ativa para a tabela
+    // 4. Filtra os contatos da fazenda ativa para a tabela
     const farmContacts = contacts.filter(c => c.farm_key === farm);
 
-    // Renderiza tabela
+    // 5. Renderiza tabela
     if (!farmContacts.length) {
       tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Nenhum contato para ${farm}.</td></tr>`;
       return;
@@ -461,8 +463,10 @@ async function loadContacts(){
       if (d.notes?.includes('[STATUS:inc]'))   st = 'inc';
       if (d.notes?.includes('[STATUS:ban]'))   st = 'ban';
       if (d.notes?.includes('[STATUS:maint]')) st = 'maint';
+      
       const ul = allLogs.filter(l => l.phone_number === phone && l.message_type === 'text');
       const ld = kw => { const l = ul.find(x => x.message_content.includes(kw)); return l ? `<span class="date-cell">${fmt(l.sent_at)}</span>` : '<span class="date-cell">—</span>'; };
+      
       tbody.innerHTML += `<tr>
         <td><div class="phone">${phone}</div><div class="cname">${d.name || 'Sem nome'}</div></td>
         <td>
@@ -483,7 +487,7 @@ async function loadContacts(){
       </tr>`;
     }
   } catch(e) {
-    tbody.innerHTML = `<tr><td colspan="7" style="color:var(--red);text-align:center;padding:20px">Erro ao carregar contatos: ${e.message}<br><small style="color:var(--muted)">Verifique se o servidor local está rodando e a VPN está ativa.</small></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" style="color:var(--red);text-align:center;padding:20px">Erro ao carregar contatos: ${e.message}<br><small style="color:var(--muted)">Aguarde a atualização da API.</small></td></tr>`;
   }
 }
 
