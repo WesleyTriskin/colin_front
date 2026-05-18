@@ -32,8 +32,7 @@ body.light {
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
-html { overflow-y: scroll; }
+html { font-size: 13px; overflow-y: scroll; }
 
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
@@ -54,7 +53,7 @@ body {
   margin: -20px 0 0 0;
 }
 
-.wrap { width: 100%; max-width: 1600px; margin: 0 auto; padding: 20px 28px; display: flex; flex-direction: column; gap: 18px; }
+.wrap { width: 100%; padding: 16px 22px; display: flex; flex-direction: column; gap: 14px; }
 
 /* TOP BAR */
 .topbar {
