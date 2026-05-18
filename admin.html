@@ -16,8 +16,14 @@
 
 <div class="admin-wrap">
   <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
-    <h1 style="font-family:'Outfit',sans-serif; color:var(--text); font-size:2rem; margin:0;">Painel de Status</h1>
-    <button class="theme-btn" onclick="document.body.classList.toggle('light')">☀️ Tema</button>
+    <div>
+      <h1 style="font-family:'Outfit',sans-serif; color:var(--text); font-size:2rem; margin:0;">Painel de Status</h1>
+      <p style="color:var(--muted); margin-top: 4px;">Gerenciamento interno de telefones das fazendas.</p>
+    </div>
+    <div style="display:flex; gap:12px;">
+      <button class="theme-btn" onclick="window.location.href='/'">⬅ Voltar ao Painel</button>
+      <button class="theme-btn" onclick="document.body.classList.toggle('light')">☀️ Tema</button>
+    </div>
   </div>
   
   <div id="admin-list">Carregando...</div>
