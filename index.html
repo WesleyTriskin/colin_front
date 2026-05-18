@@ -5,7 +5,7 @@
 <title>Painel DataAgrin</title>
 <link rel="stylesheet" href="style.css?v=3">
 </head>
-<body>
+<body class="light">
 <div class="wrap">
 
   <div class="sticky-header">
@@ -19,7 +19,7 @@
         <button class="tab" onclick="switchTab('api')">Endpoints API</button>
         <button class="tab" onclick="switchTab('colin')">Colin Interativo</button>
       </nav>
-      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️ Modo Claro</button>
+      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">🌙 Modo Escuro</button>
     </header>
 
     <!-- Ticker de Alertas (Global) -->
@@ -239,7 +239,7 @@ function switchTab(id){
   }
 }
 
-let isDark = true;
+let isDark = false;
 let farmPhone = ''; // numero principal da fazenda ativa
 
 function formatPhone(phone) {
