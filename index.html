@@ -428,39 +428,21 @@ async function loadContacts() {
     
     // 1. Tenta buscar da API Oficial (que o backend vai criar)
     try {
-      const r = await fetch('https://prx.triskin.tech/api_data/v1/farms/contacts');
+      const r = await fetch('https://prx.triskin.tech/api_data/v1/farms/overview');
       if (r.ok) {
         const raw = await r.json();
-        contacts = Array.isArray(raw) ? raw : (raw.contacts || []);
+        contacts = Array.isArray(raw) ? raw : (raw.farms || []);
       }
     } catch(e) {
-      console.warn("API de contatos oficial indisponível ainda.");
+      console.warn("API de farms overview indisponível ainda.");
     }
 
-    // 2. Fallback: Se a API estiver offline ou vazia, extraímos os números direto do histórico de logs!
-    if (contacts.length === 0 && allLogs && allLogs.length > 0) {
-      const uniquePhones = [...new Set(allLogs.map(l => l.phone_number).filter(Boolean))];
-      contacts = uniquePhones.map(p => {
-        // Encontra o último log desse telefone para tentar deduzir a fazenda
-        const log = allLogs.find(l => l.phone_number === p);
-        return {
-          farm_key: log ? log.farm_key : farm,
-          phone_number: p,
-          contact_name: 'Usuário do Histórico',
-          notes: ''
-        };
-      });
-    }
-
-    // 3. Sincroniza status do BD para o LocalStorage se vieram do banco
+    // 2. Sincroniza status do BD para o LocalStorage se vieram do banco
     if (contacts.length > 0) {
       FARMS_DATA.forEach(f => {
-        const contact = contacts.find(c => c.phone_number === f.phone);
-        if(contact && contact.notes) {
-          let st = 'ok';
-          if (contact.notes.includes('[STATUS:inc]')) st = 'inc';
-          if (contact.notes.includes('[STATUS:ban]')) st = 'ban';
-          if (contact.notes.includes('[STATUS:none]')) st = 'none';
+        const farmDb = contacts.find(c => c.farm_key === f.key);
+        if(farmDb && farmDb.status) {
+          let st = farmDb.status;
           
           const lsKey = 'farm_status_' + f.key;
           if(localStorage.getItem(lsKey) !== st) {

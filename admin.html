@@ -50,6 +50,23 @@ function getFarmStatus(key) {
   return localStorage.getItem('farm_status_' + key) || 'ok';
 }
 
+async function initAdminPanel() {
+  // Sincroniza do banco
+  try {
+    const res = await fetch('https://prx.triskin.tech/api_data/v1/farms/overview');
+    if(res.ok) {
+      const raw = await res.json();
+      const dbFarms = Array.isArray(raw) ? raw : (raw.farms || []);
+      dbFarms.forEach(f => {
+        if(f.status) localStorage.setItem('farm_status_' + f.farm_key, f.status);
+      });
+    }
+  } catch(e) {
+    console.error("Erro ao puxar dados", e);
+  }
+  renderAdminPanel();
+}
+
 function renderAdminPanel() {
   const html = FARMS_DATA.map(f => {
     const st = getFarmStatus(f.key);
@@ -72,7 +89,7 @@ function renderAdminPanel() {
 }
 
 async function setStatus(farmKey, phone, status) {
-  // Atualiza UI
+  // Atualiza UI temporariamente para visual rápido
   localStorage.setItem('farm_status_' + farmKey, status);
   renderAdminPanel();
   
@@ -89,15 +106,15 @@ async function setStatus(farmKey, phone, status) {
     });
     const data = await res.json();
     if(!data.success) {
-      alert("Erro ao salvar no banco: " + (data.error || data.detail || "Resposta inválida (Possivelmente rota 404, reinicie o servidor)"));
+      alert("Erro ao salvar no banco: " + (data.error || data.detail || "Resposta inválida"));
     }
   } catch(e) {
-    alert("Erro de conexão com o servidor local. Verifique se o server.py está rodando.");
+    alert("Erro de conexão com a API.");
   }
 }
 
 // Render initial
-renderAdminPanel();
+initAdminPanel();
 </script>
 
 </body>
