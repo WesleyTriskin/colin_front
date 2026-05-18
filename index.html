@@ -418,7 +418,7 @@ async function loadContacts() {
     
     // 1. Tenta buscar da API Oficial (que o backend vai criar)
     try {
-      const r = await fetch('https://data.trisk-in.com.br/api_data/v1/farms/contacts');
+      const r = await fetch('https://prx.triskin.tech/api_data/v1/farms/contacts');
       if (r.ok) {
         const raw = await r.json();
         contacts = Array.isArray(raw) ? raw : (raw.contacts || []);

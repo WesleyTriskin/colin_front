@@ -78,7 +78,7 @@ async function setStatus(farmKey, phone, status) {
   
   // Atualiza DB
   try {
-    const res = await fetch('https://data.trisk-in.com.br/api_data/v1/farms/status', {
+    const res = await fetch('https://prx.triskin.tech/api_data/v1/farms/status', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
