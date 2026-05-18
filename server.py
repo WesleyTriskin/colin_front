@@ -29,35 +29,6 @@ engine = create_engine(
     }
 )
 
-@app.post("/api_data/v1/farms/status")
-async def update_status(req: Request):
-    data = await req.json()
-    farm_key = data.get('farm_key')
-    phone_number = data.get('phone_number')
-    status = data.get('status')
-    
-    if status not in ['ok', 'inc', 'ban', 'maint', 'none']:
-        return {"success": False, "error": "Status inválido"}
-
-    try:
-        with engine.begin() as conn:
-            result = conn.execute(text("SELECT notes FROM colin.farm_contacts WHERE phone_number = :phone LIMIT 1"), {"phone": phone_number}).first()
-            if not result:
-                return {"success": False, "error": "Telefone não encontrado no banco"}
-            
-            current_notes = result[0] or ""
-            current_notes = re.sub(r'\[STATUS:.*?\]\s*', '', current_notes).strip()
-            
-            if status == 'ok':
-                new_notes = current_notes
-            else:
-                new_notes = f"[STATUS:{status}] {current_notes}".strip()
-                
-            conn.execute(text("UPDATE colin.farm_contacts SET notes = :notes WHERE phone_number = :phone"), {"notes": new_notes, "phone": phone_number})
-        return {"success": True, "message": "Status atualizado com sucesso"}
-    except Exception as e:
-        return {"success": False, "error": str(e)}
-
 @app.get("/api/contacts")
 def get_contacts(farm_key: str = Query(None)):
     try:

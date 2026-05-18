@@ -78,7 +78,7 @@ async function setStatus(farmKey, phone, status) {
   
   // Atualiza DB
   try {
-    const res = await fetch('/api_data/v1/farms/status', {
+    const res = await fetch('https://data.trisk-in.com.br/api_data/v1/farms/status', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
@@ -89,10 +89,10 @@ async function setStatus(farmKey, phone, status) {
     });
     const data = await res.json();
     if(!data.success) {
-      alert("Erro ao salvar no banco: " + data.error);
+      alert("Erro ao salvar no banco: " + (data.error || data.detail || "Resposta inválida (Possivelmente rota 404, reinicie o servidor)"));
     }
   } catch(e) {
-    alert("Erro de conexão com o banco local.");
+    alert("Erro de conexão com o servidor local. Verifique se o server.py está rodando.");
   }
 }
 
