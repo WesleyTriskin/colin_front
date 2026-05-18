@@ -32,7 +32,7 @@ body.light {
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 11px; overflow-y: scroll; }
+html { font-size: 14px; overflow-y: scroll; }
 
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
@@ -166,8 +166,8 @@ body.light .ticker-wrap { background: rgba(0,0,0,0.03); }
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: var(--r);
-  padding: 16px 18px;
-  display: flex; flex-direction: column; gap: 12px;
+  padding: 18px 22px;
+  display: flex; flex-direction: column; gap: 14px;
 }
 .card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
 .card-title { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1rem; color: var(--primary); }
@@ -238,10 +238,10 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   color: var(--primary); padding: 16px 0 10px;
   border-bottom: 1px solid var(--border);
 }
-.api-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.api-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
 .api-card {
   background: var(--panel); border: 1px solid var(--border);
-  border-radius: var(--r); padding: 14px 16px;
+  border-radius: var(--r); padding: 16px 18px;
   display: flex; justify-content: space-between; align-items: center;
   cursor: pointer; transition: all 0.2s;
 }

@@ -386,14 +386,14 @@ async function fetchLogs(){
       if (res.isAlert) {
         timeEl.style.border = "1px solid var(--red)";
         timeEl.style.color = "var(--red)";
-        timeEl.style.padding = "1px 5px";
-        timeEl.style.fontSize = "0.7rem";
-        timeEl.style.fontWeight = "normal";
+        timeEl.style.padding = "2px 6px";
+        timeEl.style.borderRadius = "4px";
+        timeEl.style.fontWeight = "600";
       } else {
         timeEl.style.border = "";
         timeEl.style.color = "";
         timeEl.style.padding = "";
-        timeEl.style.fontSize = "";
+        timeEl.style.borderRadius = "";
         timeEl.style.fontWeight = "";
       }
     };
