@@ -194,15 +194,12 @@ let farm = 'gjacana';
 let allLogs = [];
 
 const fmt = d => {
-  if (!d) return `<span style="border: 1.5px solid var(--red); color: var(--red); padding: 4px 10px; border-radius: 6px; display: inline-block; font-weight: 700; line-height: 1;">—</span>`;
+  if (!d) return { text: '—', isAlert: true };
   const dateObj = new Date(d);
   const formatted = dateObj.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
   const today = new Date();
   const isToday = dateObj.getDate() === today.getDate() && dateObj.getMonth() === today.getMonth() && dateObj.getFullYear() === today.getFullYear();
-  if (!isToday) {
-    return `<span style="border: 1.5px solid var(--red); color: var(--red); padding: 4px 10px; border-radius: 6px; display: inline-block; font-weight: 700; line-height: 1;" title="Alerta: Relatório não é de hoje!">${formatted}</span>`;
-  }
-  return formatted;
+  return { text: formatted, isAlert: !isToday };
 };
 // Parser de markdown WhatsApp → HTML premium
 function parseWhatsApp(text) {
@@ -377,7 +374,18 @@ async function fetchLogs(){
       document.getElementById('msg-'+key).innerHTML = log
         ? parseWhatsApp(log.message_content)
         : `<i style="color:var(--muted)">Nenhum envio encontrado nos logs.</i>`;
-      document.getElementById('time-'+key).innerHTML = fmt(log ? log.sent_at : null);
+      const timeEl = document.getElementById('time-'+key);
+      const res = fmt(log ? log.sent_at : null);
+      timeEl.innerText = res.text;
+      if (res.isAlert) {
+        timeEl.style.border = "1.5px solid var(--red)";
+        timeEl.style.color = "var(--red)";
+        timeEl.style.fontWeight = "700";
+      } else {
+        timeEl.style.border = "";
+        timeEl.style.color = "";
+        timeEl.style.fontWeight = "";
+      }
     };
 
     apply('d1',       d1txt);
@@ -474,7 +482,14 @@ async function loadContacts() {
       if (d.notes?.includes('[STATUS:maint]')) st = 'maint';
       
       const ul = allLogs.filter(l => l.phone_number === phone && l.message_type === 'text');
-      const ld = kw => { const l = ul.find(x => x.message_content.includes(kw)); return `<span class="date-cell" style="display:flex;align-items:center;height:100%;">${fmt(l ? l.sent_at : null)}</span>`; };
+      const ld = kw => { 
+        const l = ul.find(x => x.message_content.includes(kw)); 
+        const res = fmt(l ? l.sent_at : null);
+        if (res.isAlert) {
+          return `<span class="date-cell" style="border: 1.5px solid var(--red); color: var(--red); padding: 4px 10px; border-radius: 6px; display: inline-block; font-weight: 700; line-height: 1;" title="Alerta: Relatório não é de hoje!">${res.text}</span>`;
+        }
+        return `<span class="date-cell">${res.text}</span>`;
+      };
       
       tbody.innerHTML += `<tr>
         <td><div class="phone">${phone}</div><div class="cname">${d.name || 'Sem nome'}</div></td>
