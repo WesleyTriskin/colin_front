@@ -65,10 +65,12 @@ body {
   border-radius: 18px;
   backdrop-filter: blur(12px);
 }
-.brand { display: flex; align-items: center; gap: 14px; }
-.logo { width: 44px; height: 44px; border-radius: 10px; object-fit: contain; }
-.brand-name { font-family: 'Outfit', sans-serif; font-size: 1.8rem; font-weight: 900; letter-spacing: -0.5px; }
-.brand-tag { font-size: 0.8rem; color: var(--muted); font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; }
+.brand { display: flex; align-items: center; }
+.logo-horiz { height: 40px; object-fit: contain; }
+.logo-dark-mode { display: block; }
+.logo-light-mode { display: none; }
+body.light .logo-dark-mode { display: none; }
+body.light .logo-light-mode { display: block; }
 
 .theme-btn {
   background: var(--sub); border: 1px solid var(--border);
