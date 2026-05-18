@@ -371,9 +371,15 @@ async function fetchLogs(){
     const ecotxt   = find('Economia & Política') || find('Economia &amp; Política');
 
     const apply = (key, log) => {
-      document.getElementById('msg-'+key).innerHTML = log
+      const msgEl = document.getElementById('msg-'+key);
+      msgEl.style.opacity = '0';
+      msgEl.innerHTML = log
         ? parseWhatsApp(log.message_content)
         : `<i style="color:var(--muted)">Nenhum envio encontrado nos logs.</i>`;
+      requestAnimationFrame(() => {
+        msgEl.style.transition = 'opacity 0.35s ease';
+        msgEl.style.opacity = '1';
+      });
       const timeEl = document.getElementById('time-'+key);
       const res = fmt(log ? log.sent_at : null);
       timeEl.innerText = res.text;

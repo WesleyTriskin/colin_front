@@ -119,7 +119,7 @@ body.light .ticker-wrap { background: rgba(0,0,0,0.03); }
   min-width: 100%;
   display: flex;
   justify-content: flex-start;
-  animation: ticker 30s linear infinite;
+  animation: ticker 20s linear infinite;
   font-weight: 800; font-size: 1.15rem; font-family: 'Plus Jakarta Sans', sans-serif;
 }
 @keyframes ticker {
@@ -255,8 +255,21 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 .lat { font-size: 0.85rem; font-weight: 600; color: var(--muted); }
 
 /* TABS ENGINE */
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 .tabcontent { display: none; flex-direction: column; gap: 18px; }
-.tabcontent.active { display: flex; }
+.tabcontent.active { display: flex; animation: fadeSlideIn 0.25s ease; }
+
+/* Fade ao trocar fazenda */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.card, .tbl-wrap, .farm-info-bar, .status-panel {
+  animation: fadeIn 0.3s ease;
+}
 
 /* COLIN AVATAR */
 .colin-avatar-wrap {
