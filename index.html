@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel DataAgrin</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <header class="topbar">
+    <div class="brand">
+      <img class="logo" src="images/logo.png" onerror="this.src='https://via.placeholder.com/44/8B5CF6/fff?text=DA'" alt="DA">
+      <div>
+        <div class="brand-name">DATA AGRIN</div>
+        <div class="brand-tag">Management • Intelligence • Provider</div>
+      </div>
+    </div>
+    <nav class="tabs">
+      <button class="tab active" onclick="switchTab('dashboard')">Painel Mensageria</button>
+      <button class="tab" onclick="switchTab('api')">Endpoints API</button>
+    </nav>
+    <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️ Modo Claro</button>
+  </header>
+
+  <!-- ABA 1: DASHBOARD -->
+  <div id="tab-dashboard" class="tabcontent active">
+
+    <div class="farm-bar">
+      <button class="fbtn active" id="btn-gjacana"    onclick="selectFarm('gjacana','Fazenda Jaçanã','6084')">
+        <div class="fbtn-top"><span class="farm-dot none" id="dot-gjacana"></span>Fazenda Jaçanã</div>
+        <div class="fbtn-wallet">Carteira 6084</div>
+      </button>
+      <button class="fbtn"        id="btn-fazenda_ws" onclick="selectFarm('fazenda_ws','Fazenda WS','6084')">
+        <div class="fbtn-top"><span class="farm-dot none" id="dot-fazenda_ws"></span>Fazenda WS</div>
+        <div class="fbtn-wallet">Carteira 6084</div>
+      </button>
+      <button class="fbtn"        id="btn-apoloni"    onclick="selectFarm('apoloni','Apoloni','6084')">
+        <div class="fbtn-top"><span class="farm-dot none" id="dot-apoloni"></span>Apoloni</div>
+        <div class="fbtn-wallet">Carteira 6084</div>
+      </button>
+      <button class="fbtn"        id="btn-piccini"    onclick="selectFarm('piccini','Piccini','6055')">
+        <div class="fbtn-top"><span class="farm-dot none" id="dot-piccini"></span>Piccini</div>
+        <div class="fbtn-wallet">Carteira 6055</div>
+      </button>
+    </div>
+
+    <!-- Painel de status do número principal da fazenda ativa -->
+    <div class="status-panel">
+      <div class="status-panel-left">
+        <div class="status-panel-label">Número principal da fazenda</div>
+        <div class="status-panel-phone" id="status-phone">—</div>
+      </div>
+      <div class="status-panel-right">
+        <button class="sbtn ok"    id="sstatus-ok"    onclick="setFarmStatus('ok')">🟢 OK</button>
+        <button class="sbtn inc"   id="sstatus-inc"   onclick="setFarmStatus('inc')">🟡 Instável</button>
+        <button class="sbtn ban"   id="sstatus-ban"   onclick="setFarmStatus('ban')">🔴 Banido</button>
+        <button class="sbtn maint" id="sstatus-maint" onclick="setFarmStatus('maint')">⚫ Sem número</button>
+      </div>
+    </div>
+
+    <div class="grid2">
+
+      <!-- 1. D-1 -->
+      <div class="card fw">
+        <div class="card-header">
+          <span class="card-title">1. Mapa de Máquinas — D-1 (Fechamento Ontem)</span>
+          <span class="badge" id="time-d1">—</span>
+        </div>
+        <div class="card-body">
+          <div class="imgbox"><img id="img-d1" src="" alt="D-1" onerror="this.src='https://via.placeholder.com/600x420?text=Sem+Imagem'"></div>
+          <div class="msgbox" id="msg-d1">Carregando...</div>
+        </div>
+      </div>
+
+      <!-- 2. Daily -->
+      <div class="card fw">
+        <div class="card-header">
+          <span class="card-title">2. Fechamento Diário</span>
+          <span class="badge" id="time-daily">—</span>
+        </div>
+        <div class="card-body">
+          <div class="imgbox"><img id="img-daily" src="" alt="Daily" onerror="this.src='https://via.placeholder.com/600x420?text=Sem+Imagem'"></div>
+          <div class="msgbox" id="msg-daily">Carregando...</div>
+        </div>
+      </div>
+
+      <!-- 3. Hour -->
+      <div class="card fw">
+        <div class="card-header">
+          <span class="card-title">3. Relatório Horário / Alertas (Hour)</span>
+          <span class="badge" id="time-hour">—</span>
+        </div>
+        <div class="card-body">
+          <div class="imgbox"><img id="img-hour" src="" alt="Hour" onerror="this.src='https://via.placeholder.com/600x420?text=Sem+Imagem'"></div>
+          <div class="msgbox" id="msg-hour">Carregando...</div>
+        </div>
+      </div>
+
+      <!-- 4. Hídrico -->
+      <div class="card fw">
+        <div class="card-header">
+          <span class="card-title">4. Balanço Hídrico / Irrigação</span>
+          <span class="badge" id="time-hidrico">—</span>
+        </div>
+        <div class="card-body">
+          <div class="imgbox"><img id="img-hidrico" src="" alt="Hídrico" onerror="this.src='https://via.placeholder.com/600x420?text=Sem+Imagem'"></div>
+          <div class="msgbox" id="msg-hidrico">Carregando...</div>
+        </div>
+      </div>
+
+      <!-- 5. Market (grid3 dentro do grid2) -->
+      <div class="grid3">
+        <div class="card">
+          <div class="card-header"><span class="card-title">5.1 Cotações do Dia</span><span class="badge" id="time-cotacoes">—</span></div>
+          <div class="msgbox" id="msg-cotacoes">Carregando...</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">5.2 Síntese / Notícias</span><span class="badge" id="time-noticias">—</span></div>
+          <div class="msgbox" id="msg-noticias">Carregando...</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">5.3 Economia & Política</span><span class="badge" id="time-economia">—</span></div>
+          <div class="msgbox" id="msg-economia">Carregando...</div>
+        </div>
+      </div>
+
+    </div><!-- /grid2 -->
+
+    <!-- Tabela de Contatos -->
+    <div class="tbl-wrap">
+      <div class="section-title">Auditoria de Envios por Destinatário</div>
+      <div class="tbl-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Telefone / Nome</th>
+              <th style="min-width:240px">Status</th>
+              <th>D-1</th>
+              <th>Daily</th>
+              <th>Hour</th>
+              <th>Hídrico</th>
+              <th>Market</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px">Buscando contatos no banco de dados...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /tab-dashboard -->
+
+  <!-- ABA 2: ENDPOINTS -->
+  <div id="tab-api" class="tabcontent">
+    <div class="api-grid" id="api-grid"></div>
+  </div>
+
+</div><!-- /wrap -->
+
+<!-- Modal Payload -->
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <h3 id="modal-title">Payload</h3>
+    <pre id="modal-body">...</pre>
+    <button class="closebtn" onclick="closeModal()">✕ Fechar</button>
+  </div>
+</div>
+
+<script>
+const TOKENS = {
+  'gjacana':    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmYXJtbmFtZSI6ImdqYWNhbmEiLCJkYm5hbWUiOiJ3YXJpbiIsInNjaGVtYW5hbWUiOiJnamFjYW5hIiwidGFibGVuYW1lIjoiaGlzdG9yaWNfbWFjaGluZV9zdW1tYXJ5X3ZpZXcifQ.roXyPCfZqINIr5kr__hw6HofFvEVlvviJOz1M-Q9ZLU',
+  'fazenda_ws': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmYXJtbmFtZSI6ImZhemVuZGFfd3MiLCJkYm5hbWUiOiJ3YXJpbiIsInNjaGVtYW5hbWUiOiJmYXplbmRhX3dzIiwidGFibGVuYW1lIjoiaGlzdG9yaWNfbWFjaGluZV9zdW1tYXJ5X3ZpZXcifQ.Z6VdmyY2po001zDKItCO81aTDMH8Udk1nMrh7GW0kVs',
+  'apoloni': null,
+  'piccini':  null,
+};
+const BASE = 'https://prx.triskin.tech/api_data/v1';
+let farm = 'gjacana';
+let allLogs = [];
+
+const fmt = d => d ? new Date(d).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '--';
+// Parser de markdown WhatsApp → HTML premium
+function parseWhatsApp(text) {
+  if (!text) return '';
+  return text
+    // Escapa HTML perigoso
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    // *negrito*
+    .replace(/\*([^*\n]+)\*/g, '<strong>$1</strong>')
+    // _itálico_
+    .replace(/_([^_\n]+)_/g, '<em>$1</em>')
+    // ~tachado~
+    .replace(/~([^~\n]+)~/g, '<s>$1</s>')
+    // Links clicáveis
+    .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank">$1</a>')
+    // Quebras de linha
+    .replace(/\n/g, '<br>');
+}
+
+function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+document.getElementById('modal').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
+
+function switchTab(id){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tabcontent').forEach(c=>c.classList.remove('active'));
+  if(id==='dashboard'){
+    document.querySelectorAll('.tab')[0].classList.add('active');
+    document.getElementById('tab-dashboard').classList.add('active');
+  } else {
+    document.querySelectorAll('.tab')[1].classList.add('active');
+    document.getElementById('tab-api').classList.add('active');
+    if(!document.getElementById('api-grid').children.length) buildEndpoints();
+  }
+}
+
+let isDark = true;
+let farmPhone = ''; // numero principal da fazenda ativa
+
+function toggleTheme(){
+  isDark = !isDark;
+  document.body.classList.toggle('light', !isDark);
+  document.getElementById('theme-btn').innerText = isDark ? '☀️ Modo Claro' : '🌙 Modo Escuro';
+}
+
+// Atualiza a bolinha de status no botão de cada fazenda
+function setFarmDot(farmKey, status) {
+  const dot = document.getElementById('dot-' + farmKey);
+  if (!dot) return;
+  dot.className = 'farm-dot ' + (status || 'none');
+}
+
+// Atualiza os botões de status no painel (destaca o ativo)
+function highlightStatusPanel(status) {
+  ['ok','inc','ban','maint'].forEach(s => {
+    const btn = document.getElementById('sstatus-' + s);
+    if (btn) btn.classList.toggle('on', s === status);
+  });
+}
+
+// Salva o status da fazenda em localStorage (sem depender de VPN/banco)
+function getFarmStatus(farmKey) {
+  return localStorage.getItem('farm_status_' + farmKey) || 'ok';
+}
+
+// Atualização local imediata + Chamada para API DataAgrin (Opção 2)
+async function setFarmStatus(status) {
+  if (!farmPhone) {
+    alert('Número da fazenda ainda não carregado. Aguarde os logs carregarem.');
+    return;
+  }
+
+  // 1. Atualização otimista na tela e localStorage
+  localStorage.setItem('farm_status_' + farm, status);
+  setFarmDot(farm, status);
+  highlightStatusPanel(status);
+
+  // 2. Envia para o novo endpoint na API DataAgrin que você vai criar amanhã
+  try {
+    const token = TOKENS[farm] || TOKENS['gjacana'];
+    const res = await fetch(`${BASE}/farms/status`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Encrypted-Token': token
+      },
+      body: JSON.stringify({
+        farm_key: farm,
+        phone_number: farmPhone,
+        status: status
+      })
+    });
+    // Não damos alert de erro aqui para não atrapalhar o uso hoje, 
+    // já que o endpoint só será criado amanhã.
+  } catch(e) {
+    console.warn('Endpoint da API DataAgrin ainda indisponível:', e);
+  }
+}
+
+// Carrega os dots de todas as fazendas do localStorage
+function loadAllFarmDots() {
+  ['gjacana','fazenda_ws','apoloni','piccini'].forEach(fk => {
+    setFarmDot(fk, getFarmStatus(fk));
+  });
+}
+
+function selectFarm(key, name, wallet){
+  farm = key;
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('btn-'+key).classList.add('active');
+  // Carrega status do localStorage ao trocar de fazenda
+  highlightStatusPanel(getFarmStatus(key));
+  fetchLogs();
+}
+
+function findNearestImage(logs, textLog){
+  const idx = logs.indexOf(textLog);
+  for(let i=idx+1; i<Math.min(idx+8,logs.length); i++){
+    if(logs[i].message_type==='image') return logs[i].message_content;
+  }
+  return null;
+}
+
+function setImg(id, src){
+  const el = document.getElementById(id);
+  el.src = src || 'https://via.placeholder.com/600x420?text=Sem+Imagem';
+}
+
+async function fetchLogs(){
+  const token = TOKENS[farm];
+  // Limpa textos
+  ['d1','daily','hour','hidrico','cotacoes','noticias','economia'].forEach(k=>{
+    document.getElementById('msg-'+k).innerText = 'Carregando...';
+    document.getElementById('time-'+k).innerText = '—';
+  });
+
+  if(!token){
+    ['d1','daily','hour','hidrico','cotacoes','noticias','economia'].forEach(k=>{
+      document.getElementById('msg-'+k).innerHTML = '<i style="color:var(--yellow)">Token JWT não cadastrado para esta fazenda.</i>';
+    });
+    loadContacts();
+    return;
+  }
+
+  try {
+    const r = await fetch(`${BASE}/chat/logs?limit=200`, {headers:{'X-Encrypted-Token':token}});
+    if(!r.ok) throw new Error('API retornou '+r.status);
+    allLogs = await r.json();
+
+    // Filtra pela fazenda atual
+    const fl = allLogs.filter(l => l.farm_key === farm);
+
+    // Filtros EXATOS baseados nos dados reais do banco
+    const find = kw => fl.find(l => l.message_type==='text' && l.message_content.includes(kw));
+
+    const d1txt    = find('RELATÓRIO OPERACIONAL');
+    const dailytxt = find('FECHAMENTO DIÁRIO');
+    const hourtxt  = find('RELATÓRIO HORÁRIO');
+    const hidrtxt  = find('balanço hídrico') || find('Balanço Hídrico') || find('AOOO PARCEIRO');
+    const cotqtxt  = find('COTAÇÕES DO DIA');
+    const notixtxt = find('Síntese Geral');
+    const ecotxt   = find('Economia & Política') || find('Economia &amp; Política');
+
+    const apply = (key, log) => {
+      document.getElementById('msg-'+key).innerHTML = log
+        ? parseWhatsApp(log.message_content)
+        : `<i style="color:var(--muted)">Nenhum envio encontrado nos logs.</i>`;
+      document.getElementById('time-'+key).innerText = log ? fmt(log.sent_at) : '--';
+    };
+
+    apply('d1',       d1txt);
+    apply('daily',    dailytxt);
+    apply('hour',     hourtxt);
+    apply('hidrico',  hidrtxt);
+    apply('cotacoes', cotqtxt);
+    apply('noticias', notixtxt);
+    apply('economia', ecotxt);
+
+    // Imagens base64 (já vêm com prefixo data:image/jpeg;base64,)
+    setImg('img-d1',     d1txt    ? findNearestImage(fl, d1txt)    : null);
+    setImg('img-daily',  dailytxt ? findNearestImage(fl, dailytxt) : null);
+    setImg('img-hour',   hourtxt  ? findNearestImage(fl, hourtxt)  : null);
+    setImg('img-hidrico',hidrtxt  ? findNearestImage(fl, hidrtxt)  : null);
+
+    // Extrai o numero principal direto dos logs (não depende do banco local)
+    const logWithPhone = fl.find(l => l.phone_number && l.phone_number.length > 5);
+    if (logWithPhone) {
+      farmPhone = logWithPhone.phone_number;
+      document.getElementById('status-phone').innerText = farmPhone;
+    }
+
+  } catch(e){
+    console.error(e);
+    ['d1','daily','hour','hidrico','cotacoes','noticias','economia'].forEach(k=>{
+      document.getElementById('msg-'+k).innerHTML = `<span style="color:var(--red)">Erro: ${e.message}</span>`;
+    });
+  }
+  loadContacts();
+}
+
+async function loadContacts(){
+  const tbody = document.getElementById('tbody');
+  try {
+    // Carrega TODOS os contatos para poder pintar os dots de todas as fazendas
+    const r = await fetch(`/api/contacts`);
+    const raw = await r.json();
+    const contacts = Array.isArray(raw) ? raw : (raw.contacts || []);
+
+    // Agrupa por fazenda para pegar o status principal de cada uma
+    const byFarm = {};
+    contacts.forEach(c => {
+      if (!byFarm[c.farm_key]) byFarm[c.farm_key] = [];
+      byFarm[c.farm_key].push(c);
+    });
+
+    // Atualiza dots de todas as fazendas
+    for (const fk in byFarm) {
+      const first = byFarm[fk][0];
+      const notes = first?.notes || '';
+      let st = 'ok';
+      if (notes.includes('[STATUS:inc]'))   st = 'inc';
+      if (notes.includes('[STATUS:ban]'))   st = 'ban';
+      if (notes.includes('[STATUS:maint]')) st = 'maint';
+      setFarmDot(fk, st);
+    }
+
+    // Filtra os contatos da fazenda ativa para a tabela
+    const farmContacts = contacts.filter(c => c.farm_key === farm);
+
+    // Atualiza painel de status da fazenda ativa
+    if (farmContacts.length > 0) {
+      farmPhone = farmContacts[0].phone_number;
+      document.getElementById('status-phone').innerText = farmPhone;
+      const notes = farmContacts[0].notes || '';
+      let st = 'ok';
+      if (notes.includes('[STATUS:inc]'))   st = 'inc';
+      if (notes.includes('[STATUS:ban]'))   st = 'ban';
+      if (notes.includes('[STATUS:maint]')) st = 'maint';
+      highlightStatusPanel(st);
+    } else {
+      farmPhone = '';
+      document.getElementById('status-phone').innerText = 'Sem número cadastrado';
+      highlightStatusPanel('none');
+    }
+
+    // Renderiza tabela
+    if (!farmContacts.length) {
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Nenhum contato para ${farm}.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = '';
+    const grouped = {};
+    farmContacts.forEach(c => {
+      if (!grouped[c.phone_number]) grouped[c.phone_number] = {name: c.contact_name, notes: c.notes};
+    });
+    for (const phone in grouped) {
+      const d = grouped[phone];
+      let st = 'ok';
+      if (d.notes?.includes('[STATUS:inc]'))   st = 'inc';
+      if (d.notes?.includes('[STATUS:ban]'))   st = 'ban';
+      if (d.notes?.includes('[STATUS:maint]')) st = 'maint';
+      const ul = allLogs.filter(l => l.phone_number === phone && l.message_type === 'text');
+      const ld = kw => { const l = ul.find(x => x.message_content.includes(kw)); return l ? `<span class="date-cell">${fmt(l.sent_at)}</span>` : '<span class="date-cell">—</span>'; };
+      tbody.innerHTML += `<tr>
+        <td><div class="phone">${phone}</div><div class="cname">${d.name || 'Sem nome'}</div></td>
+        <td>
+          <button class="sbtn ok  ${st==='ok'?'on':''}"    onclick="setStatus('${phone}','ok')">✅ OK</button>
+          <button class="sbtn inc ${st==='inc'?'on':''}"   onclick="setStatus('${phone}','inc')">⚠️ Inc</button>
+          <button class="sbtn ban ${st==='ban'?'on':''}"   onclick="setStatus('${phone}','ban')">🚫 Ban</button>
+          <button class="sbtn maint ${st==='maint'?'on':''}" onclick="setStatus('${phone}','maint')">🔵 Maint</button>
+        </td>
+        <td>${ld('RELATÓRIO OPERACIONAL')}</td>
+        <td>${ld('FECHAMENTO DIÁRIO')}</td>
+        <td>${ld('RELATÓRIO HORÁRIO')}</td>
+        <td>${ld('balanço hídrico')}</td>
+        <td>${ld('COTAÇÕES DO DIA')}</td>
+      </tr>`;
+    }
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="7" style="color:var(--red);text-align:center;padding:20px">Erro ao carregar contatos: ${e.message}<br><small style="color:var(--muted)">Verifique se o servidor local está rodando e a VPN está ativa.</small></td></tr>`;
+  }
+}
+
+async function setStatus(phone, st){
+  try {
+    await fetch('/api/update_status',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({phone, status:st})
+    });
+    loadContacts();
+  } catch(e){ console.error(e); }
+}
+
+// ── ENDPOINTS ──────────────────────────────────────────────
+const ENDPOINTS = [
+  {section:'Sistema'},
+  {name:'Root / Status',          path:'/'},
+  {name:'Auth – Users Me',        path:'/auth/users/me'},
+  {section:'Chat'},
+  {name:'Chat Logs',              path:'/chat/logs'},
+  {name:'Chat Contacts',          path:'/chat/contacts'},
+  {section:'Commodities & Mercado'},
+  {name:'Commodities Overview',   path:'/commodities/overview'},
+  {name:'Commodities Quotes',     path:'/commodities/quotes'},
+  {name:'Market News',            path:'/commodities/news'},
+  {name:'Price Snapshot',         path:'/commodities/prices'},
+  {section:'Clima'},
+  {name:'Weather Forecast',       path:'/weather/forecast'},
+  {name:'Weather History',        path:'/weather/history'},
+  {name:'Farm Forecast',          path:'/weather/farm-forecast'},
+  {section:'Irrigação'},
+  {name:'Valley History',         path:'/valley/history'},
+  {section:'Máquinas'},
+  {name:'Machine Alerts',         path:'/machines/alerts'},
+  {name:'Alerts History',         path:'/machines/alerts_history'},
+  {name:'Mechanization',          path:'/machines/mechanization'},
+  {name:'Machine Summary',        path:'/machines/summary'},
+  {name:'Summary History',        path:'/machines/summary_history'},
+  {section:'Produção'},
+  {name:'Profitability',          path:'/production/profitability'},
+  {name:'Costs',                  path:'/production/costs'},
+  {name:'Sales',                  path:'/production/sales'},
+  {name:'Harvest',                path:'/production/harvest'},
+  {name:'Profit View',            path:'/production/profit/view'},
+  {name:'Rentabilidade Dashboard',path:'/production/rentabilidade-dash'},
+];
+
+async function showPayload(path){
+  document.getElementById('modal-title').innerText = 'GET '+path;
+  document.getElementById('modal-body').innerText = 'Carregando payload...';
+  document.getElementById('modal').classList.add('open');
+  try {
+    const token = TOKENS[farm] || TOKENS['gjacana'];
+    const r = await fetch(`${BASE}${path}?limit=2`,{headers:{'X-Encrypted-Token':token}});
+    const d = await r.json();
+    document.getElementById('modal-body').innerText = JSON.stringify(d,null,2);
+  } catch(e){
+    document.getElementById('modal-body').innerText = 'Erro: '+e.message;
+  }
+}
+
+function buildEndpoints(){
+  const grid = document.getElementById('api-grid');
+  let html = '';
+  ENDPOINTS.forEach((ep, i) => {
+    if(ep.section){
+      html += `<div class="api-section-label">${ep.section}</div>`;
+    } else {
+      html += `<div class="api-card" id="acard-${i}" onclick="showPayload('${ep.path}')">
+        <div>
+          <span class="api-name">${ep.name}</span>
+          <span class="api-path">GET ${ep.path}</span>
+        </div>
+        <div class="api-right">
+          <span class="led checking" id="led-${i}"></span>
+          <span class="lat" id="lat-${i}">...</span>
+        </div>
+      </div>`;
+    }
+  });
+  grid.innerHTML = html;
+
+  // Health check em paralelo
+  ENDPOINTS.forEach((ep, i) => {
+    if(!ep.path) return;
+    const token = TOKENS[farm] || TOKENS['gjacana'];
+    const t0 = performance.now();
+    fetch(`${BASE}${ep.path}?limit=1`,{headers:{'X-Encrypted-Token':token}})
+      .then(r => {
+        const ms = Math.round(performance.now()-t0);
+        const led = document.getElementById('led-'+i);
+        const lat = document.getElementById('lat-'+i);
+        if(led){ led.className = r.ok ? 'led' : 'led down'; }
+        if(lat) lat.innerText = ms+'ms';
+      })
+      .catch(() => {
+        const led = document.getElementById('led-'+i);
+        if(led) led.className = 'led down';
+        const lat = document.getElementById('lat-'+i);
+        if(lat) lat.innerText = 'err';
+      });
+  });
+}
+
+// Boot
+loadAllFarmDots();
+highlightStatusPanel(getFarmStatus(farm));
+fetchLogs();
+</script>
+</body>
+</html>
