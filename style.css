@@ -338,8 +338,9 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   .brand { order: 1; display: flex; align-items: center; }
   .logo-horiz { width: 230px; height: 110px; margin-top: -36px; margin-bottom: -36px; margin-left: -20px; object-fit: contain; }
 
-  /* Botão de tema menor ao lado do logo */
-  .theme-btn { order: 2; padding: 8px 14px; font-size: 0.85rem; width: auto; margin-left: auto; }
+  /* Ações do Topbar ao lado do logo */
+  .topbar-actions { order: 2; display: flex; gap: 6px; align-items: center; margin-left: auto; }
+  .topbar-actions .theme-btn { padding: 6px 10px; font-size: 0.78rem; width: auto; }
 
   /* Legend no mobile */
   .status-legend { order: 4; width: 100%; flex-wrap: wrap; gap: 8px; justify-content: center; }

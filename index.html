@@ -25,7 +25,10 @@
         <div class="leg-item"><span class="status-dot red"></span> Banido</div>
         <div class="leg-item"><span class="status-dot none"></span> Sem Número</div>
       </div>
-      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">🌙 Modo Escuro</button>
+      <div class="topbar-actions" style="display: flex; gap: 8px;">
+        <button class="theme-btn" id="btn-test-api" onclick="forceCheckEndpoints()" style="display: none; align-items: center; gap: 8px; font-family:'Outfit',sans-serif;">🔄 Testar Endpoints</button>
+        <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">🌙 Modo Escuro</button>
+      </div>
     </header>
 
     <!-- Ticker de Alertas (Global) -->
@@ -152,12 +155,6 @@
 
   <!-- ABA 2: ENDPOINTS -->
   <div id="tab-api" class="tabcontent">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
-      <h2 style="font-family:'Outfit',sans-serif; font-size:1.4rem; color:var(--text); font-weight:800; margin:0;">Status dos Endpoints API</h2>
-      <button class="theme-btn" id="btn-test-api" onclick="forceCheckEndpoints()" style="display:flex; align-items:center; gap:8px; padding: 10px 16px; font-size:0.9rem; font-family:'Outfit',sans-serif;">
-        🔄 Testar Todos Agora
-      </button>
-    </div>
     <div class="api-grid" id="api-grid"></div>
   </div>
 
@@ -238,6 +235,14 @@ document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal();
 function switchTab(id){
   document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.tabcontent').forEach(c=>c.classList.remove('active'));
+  
+  const testBtn = document.getElementById('btn-test-api');
+  if(id==='api'){
+    if(testBtn) testBtn.style.display = 'flex';
+  } else {
+    if(testBtn) testBtn.style.display = 'none';
+  }
+
   if(id==='dashboard'){
     document.querySelectorAll('.tab')[0].classList.add('active');
     document.getElementById('tab-dashboard').classList.add('active');
