@@ -32,7 +32,7 @@ body.light {
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 13px; overflow-y: scroll; }
+html { font-size: 11px; overflow-y: scroll; }
 
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
