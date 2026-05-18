@@ -33,6 +33,8 @@ body.light {
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+html { overflow-y: scroll; }
+
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
   background: var(--bg);
@@ -195,25 +197,25 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 /* API TAB */
 .api-section-label {
   grid-column: 1/-1;
-  font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.85rem;
-  color: var(--primary); padding: 10px 0 8px;
+  font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.15rem;
+  color: var(--primary); padding: 16px 0 10px;
   border-bottom: 1px solid var(--border);
 }
-.api-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 12px; }
+.api-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
 .api-card {
   background: var(--panel); border: 1px solid var(--border);
-  border-radius: var(--r); padding: 14px 18px;
+  border-radius: var(--r); padding: 22px 24px;
   display: flex; justify-content: space-between; align-items: center;
   cursor: pointer; transition: all 0.2s;
 }
 .api-card:hover { border-color: var(--primary); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(139,92,246,0.12); }
-.api-name { font-weight: 800; font-size: 1.05rem; display: block; margin-bottom: 6px; }
-.api-path { font-family: monospace; font-size: 0.85rem; color: var(--muted); }
-.api-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
-.led { width: 10px; height: 10px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); }
+.api-name { font-weight: 800; font-size: 1.25rem; display: block; margin-bottom: 8px; }
+.api-path { font-family: monospace; font-size: 0.95rem; color: var(--muted); }
+.api-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.led { width: 12px; height: 12px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); }
 .led.checking { background: var(--yellow); box-shadow: 0 0 8px var(--yellow); }
 .led.down { background: var(--red); box-shadow: 0 0 8px var(--red); }
-.lat { font-size: 0.68rem; color: var(--muted); }
+.lat { font-size: 0.85rem; font-weight: 600; color: var(--muted); }
 
 /* TABS ENGINE */
 .tabcontent { display: none; flex-direction: column; gap: 18px; }

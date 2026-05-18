@@ -19,6 +19,7 @@
     <nav class="tabs">
       <button class="tab active" onclick="switchTab('dashboard')">Painel Mensageria</button>
       <button class="tab" onclick="switchTab('api')">Endpoints API</button>
+      <button class="tab" onclick="switchTab('colin')">Colin Interativo</button>
     </nav>
     <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️ Modo Claro</button>
   </header>
@@ -157,6 +158,15 @@
     <div class="api-grid" id="api-grid"></div>
   </div>
 
+  <!-- ABA 3: COLIN INTERATIVO -->
+  <div id="tab-colin" class="tabcontent">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;color:var(--muted);text-align:center;gap:16px;">
+      <div style="font-size:4.5rem;">🚧</div>
+      <h2 style="font-family:'Outfit',sans-serif;font-size:2.2rem;color:var(--text);font-weight:900;letter-spacing:-0.5px;">Colin Interativo</h2>
+      <p style="font-size:1.15rem;max-width:520px;line-height:1.6;">Este módulo está em construção. Em breve você poderá disparar mensagens e interagir com o agente AI diretamente por aqui.</p>
+    </div>
+  </div>
+
 </div><!-- /wrap -->
 
 <!-- Modal Payload -->
@@ -208,10 +218,13 @@ function switchTab(id){
   if(id==='dashboard'){
     document.querySelectorAll('.tab')[0].classList.add('active');
     document.getElementById('tab-dashboard').classList.add('active');
-  } else {
+  } else if(id==='api') {
     document.querySelectorAll('.tab')[1].classList.add('active');
     document.getElementById('tab-api').classList.add('active');
     if(!document.getElementById('api-grid').children.length) buildEndpoints();
+  } else if(id==='colin') {
+    document.querySelectorAll('.tab')[2].classList.add('active');
+    document.getElementById('tab-colin').classList.add('active');
   }
 }
 
