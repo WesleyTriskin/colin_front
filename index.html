@@ -200,6 +200,7 @@ function parseWhatsApp(text) {
 
 function closeModal(){ document.getElementById('modal').classList.remove('open'); }
 document.getElementById('modal').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal(); });
 
 function switchTab(id){
   document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
