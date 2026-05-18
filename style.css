@@ -65,10 +65,10 @@ body {
   border: 1px solid var(--border);
   border-radius: 18px;
   backdrop-filter: blur(12px);
-  height: 70px;
+  height: 56px;
 }
-.brand { display: flex; align-items: center; height: 100%; }
-.logo-horiz { height: 44px; width: auto; object-fit: contain; }
+.brand { display: flex; align-items: center; height: 100%; overflow: visible; }
+.logo-horiz { height: 95px; width: 220px; object-fit: contain; margin-top: -28px; margin-bottom: -28px; margin-left: -15px; }
 .logo-dark-mode { display: block; }
 .logo-light-mode { display: none; }
 body.light .logo-dark-mode { display: none; }
@@ -336,7 +336,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
     align-items: center;
   }
   .brand { order: 1; display: flex; align-items: center; }
-  .logo-horiz { width: 170px; height: auto; }
+  .logo-horiz { width: 230px; height: 110px; margin-top: -36px; margin-bottom: -36px; margin-left: -20px; object-fit: contain; }
 
   /* Botão de tema menor ao lado do logo */
   .theme-btn { order: 2; padding: 8px 14px; font-size: 0.85rem; width: auto; margin-left: auto; }
