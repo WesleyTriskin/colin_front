@@ -186,8 +186,8 @@ const FARMS_DATA = [
 const TOKENS = {
   'gjacana':    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmYXJtbmFtZSI6ImdqYWNhbmEiLCJkYm5hbWUiOiJ3YXJpbiIsInNjaGVtYW5hbWUiOiJnamFjYW5hIiwidGFibGVuYW1lIjoiaGlzdG9yaWNfbWFjaGluZV9zdW1tYXJ5X3ZpZXcifQ.roXyPCfZqINIr5kr__hw6HofFvEVlvviJOz1M-Q9ZLU',
   'fazenda_ws': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmYXJtbmFtZSI6ImZhemVuZGFfd3MiLCJkYm5hbWUiOiJ3YXJpbiIsInNjaGVtYW5hbWUiOiJmYXplbmRhX3dzIiwidGFibGVuYW1lIjoiaGlzdG9yaWNfbWFjaGluZV9zdW1tYXJ5X3ZpZXcifQ.Z6VdmyY2po001zDKItCO81aTDMH8Udk1nMrh7GW0kVs',
-  'apoloni': null,
-  'piccini':  null,
+  'apoloni': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmYXJtbmFtZSI6IkJvYSBzb3J0ZSIsImRibmFtZSI6ImFncm9fc3RhZ2luZyIsInNjaGVtYW5hbWUiOiJhcG9sb25pIiwidGFibGVuYW1lIjoiaGlzdG9yaWNfbWFjaGluZV9zdW1tYXJ5X3ZpZXcifQ.i4PhmVsHP8yTLJK9N06TuLixUNN6p_clqFdJN9BMxTU',
+  'piccini':  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmYXJtbmFtZSI6IlBpY2NpbmkiLCJkYm5hbWUiOiJhZ3JvX3N0YWdpbmciLCJzY2hlbWFuYW1lIjoicGljY2luaSIsInRhYmxlbmFtZSI6Imhpc3RvcmljX21hY2hpbmVfc3VtbWFyeV92aWV3In0.MTDfwyO9btEzOrxSaZPdHsa4fWT5VTbtjlOJqb3d4-o',
 };
 const BASE = 'https://prx.triskin.tech/api_data/v1';
 let farm = 'gjacana';
@@ -270,10 +270,7 @@ function updateTicker() {
   const ticker = document.getElementById('ticker-content');
   let msgs = [];
   
-  if (!TOKENS['apoloni'] || !TOKENS['piccini']) {
-    msgs.push(`<span class="ticker-item warning">⚠️ Atenção: Necessário gerar e conectar os tokens da Apoloni e Piccini.</span>`);
-  }
-  
+  // O warning de tokens vazios não é mais necessário
   if (getFarmStatus('fazenda_ws') === 'ban') {
     msgs.push(`<span class="ticker-item danger">🚫 O número principal da Fazenda WS está BANIDO.</span>`);
   }
