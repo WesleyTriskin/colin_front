@@ -288,7 +288,14 @@ function getFarmStatus(farmKey) {
   return localStorage.getItem('farm_status_' + farmKey) || 'ok';
 }
 
+const SVG_PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='420' viewBox='0 0 600 420'><rect width='100%' height='100%' fill='%231a2238'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Outfit, sans-serif' font-size='22' font-weight='800' fill='%234b5563'>SEM IMAGEM DISPONÍVEL</text></svg>";
+const SVG_NO_ACCESS = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='420' viewBox='0 0 600 420'><rect width='100%' height='100%' fill='%231a2238'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Outfit, sans-serif' font-size='22' font-weight='800' fill='%23ef4444'>SEM ACESSO AO TOKEN JWT</text></svg>";
+
 let slowEndpoints = [];
+try {
+  const cachedSlow = localStorage.getItem('slow_endpoints');
+  if(cachedSlow) slowEndpoints = JSON.parse(cachedSlow);
+} catch(e){}
 
 function updateTicker() {
   const ticker = document.getElementById('ticker-content');
@@ -313,6 +320,10 @@ function updateTicker() {
   const textContent = msgs.join(' ').replace(/<[^>]*>?/gm, '');
   const duration = Math.max(30, textContent.length * 0.35);
   document.querySelectorAll('.ticker').forEach(t => t.style.animationDuration = duration + 's');
+  
+  try {
+    localStorage.setItem('slow_endpoints', JSON.stringify(slowEndpoints));
+  } catch(e){}
 }
 
 
@@ -346,7 +357,7 @@ function findNearestImage(logs, textLog){
 
 function setImg(id, src){
   const el = document.getElementById(id);
-  el.src = src || 'https://via.placeholder.com/600x420?text=Sem+Imagem';
+  el.src = src || SVG_PLACEHOLDER;
 }
 
 async function fetchLogs(){
@@ -362,7 +373,7 @@ async function fetchLogs(){
       document.getElementById('msg-'+k).innerHTML = '<i style="color:var(--yellow)">Token JWT não cadastrado para esta fazenda.</i>';
       document.getElementById('time-'+k).innerHTML = '—';
       const imgEl = document.getElementById('img-'+k);
-      if(imgEl) imgEl.src = 'https://via.placeholder.com/600x420?text=Sem+Acesso';
+      if(imgEl) imgEl.src = SVG_NO_ACCESS;
     });
     loadContacts();
     return;
@@ -665,10 +676,21 @@ function buildEndpoints(force = false){
           if(ms > 3000) lat.style.color = 'var(--yellow)';
         }
 
-        // Registra lentidão extrema no Ticker
-        if(ms > 3000 && !slowEndpoints.find(s => s.name === ep.name)) {
-          slowEndpoints.push({name: ep.name, ms});
+        // Registra lentidão extrema no Ticker, ou remove se o endpoint voltou a responder rápido
+        if(ms > 3000) {
+          const existing = slowEndpoints.find(s => s.name === ep.name);
+          if(!existing) {
+            slowEndpoints.push({name: ep.name, ms});
+          } else {
+            existing.ms = ms;
+          }
           updateTicker();
+        } else {
+          const idx = slowEndpoints.findIndex(s => s.name === ep.name);
+          if(idx !== -1) {
+            slowEndpoints.splice(idx, 1);
+            updateTicker();
+          }
         }
 
         cacheResults.push({ index: i, status: statusClass, latency: latText });
@@ -708,19 +730,37 @@ function backgroundHealthCheck() {
     fetch(`${BASE}${ep.path}${sep}limit=1`, {headers:{'X-Encrypted-Token':token}})
       .then(r => {
         const ms = Math.round(performance.now()-t0);
-        if(ms > 3000 && !slowEndpoints.find(s => s.name === ep.name)) {
-          slowEndpoints.push({name: ep.name, ms});
+        if(ms > 3000) {
+          const existing = slowEndpoints.find(s => s.name === ep.name);
+          if(!existing) {
+            slowEndpoints.push({name: ep.name, ms});
+          } else {
+            existing.ms = ms;
+          }
           updateTicker();
+        } else {
+          const idx = slowEndpoints.findIndex(s => s.name === ep.name);
+          if(idx !== -1) {
+            slowEndpoints.splice(idx, 1);
+            updateTicker();
+          }
         }
       }).catch(()=>{});
   });
 }
 
 // Boot
+const savedTab = localStorage.getItem('active_tab') || 'dashboard';
 selectFarm('gjacana','Fazenda Jaçanã','5683','5511963065709');
+switchTab(savedTab);
 loadAllFarmDots();
-backgroundHealthCheck();
-setInterval(backgroundHealthCheck, 15 * 60 * 1000); // Roda a cada 15 min
+
+// Atrasa a primeira verificação de background por 4 segundos após carregar
+// Isso faz o spinner de loading da aba do navegador sumir imediatamente e deixa o site instantâneo!
+setTimeout(() => {
+  backgroundHealthCheck();
+  setInterval(backgroundHealthCheck, 15 * 60 * 1000); // Roda a cada 15 min
+}, 4000);
 </script>
 </body>
 </html>
