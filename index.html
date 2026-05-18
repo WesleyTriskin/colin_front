@@ -152,6 +152,12 @@
 
   <!-- ABA 2: ENDPOINTS -->
   <div id="tab-api" class="tabcontent">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+      <h2 style="font-family:'Outfit',sans-serif; font-size:1.4rem; color:var(--text); font-weight:800; margin:0;">Status dos Endpoints API</h2>
+      <button class="theme-btn" id="btn-test-api" onclick="forceCheckEndpoints()" style="display:flex; align-items:center; gap:8px; padding: 10px 16px; font-size:0.9rem; font-family:'Outfit',sans-serif;">
+        🔄 Testar Todos Agora
+      </button>
+    </div>
     <div class="api-grid" id="api-grid"></div>
   </div>
 
@@ -238,7 +244,7 @@ function switchTab(id){
   } else if(id==='api') {
     document.querySelectorAll('.tab')[1].classList.add('active');
     document.getElementById('tab-api').classList.add('active');
-    if(!document.getElementById('api-grid').children.length) buildEndpoints();
+    buildEndpoints(false);
   } else if(id==='colin') {
     document.querySelectorAll('.tab')[2].classList.add('active');
     document.getElementById('tab-colin').classList.add('active');
@@ -561,26 +567,74 @@ async function showPayload(path){
   }
 }
 
-function buildEndpoints(){
+let isTestingEndpoints = false;
+
+function buildEndpoints(force = false){
   const grid = document.getElementById('api-grid');
-  let html = '';
+  
+  if(!grid.children.length){
+    let html = '';
+    ENDPOINTS.forEach((ep, i) => {
+      if(ep.section){
+        html += `<div class="api-section-label">${ep.section}</div>`;
+      } else {
+        html += `<div class="api-card" id="acard-${i}" onclick="showPayload('${ep.path}')">
+          <div>
+            <span class="api-name">${ep.name}</span>
+            <span class="api-path">GET ${ep.path}</span>
+          </div>
+          <div class="api-right">
+            <span class="led checking" id="led-${i}"></span>
+            <span class="lat" id="lat-${i}">...</span>
+          </div>
+        </div>`;
+      }
+    });
+    grid.innerHTML = html;
+  }
+
+  // Caching de 30 minutos das requisições para poupar a API de sobrecarga
+  const cacheKey = 'api_health_cache';
+  const cacheTimeKey = 'api_health_cache_time';
+  const cacheData = localStorage.getItem(cacheKey);
+  const cacheTime = localStorage.getItem(cacheTimeKey);
+  const isCacheValid = cacheData && cacheTime && (Date.now() - parseInt(cacheTime) < 30 * 60 * 1000);
+
+  if(isCacheValid && !force) {
+    const results = JSON.parse(cacheData);
+    results.forEach(res => {
+      const led = document.getElementById('led-'+res.index);
+      const lat = document.getElementById('lat-'+res.index);
+      if(led) led.className = 'led ' + res.status;
+      if(lat) {
+        lat.innerText = res.latency;
+        lat.style.color = res.latency.includes('ms') && parseInt(res.latency) > 3000 ? 'var(--yellow)' : '';
+      }
+    });
+    return;
+  }
+
+  if (isTestingEndpoints) return;
+  isTestingEndpoints = true;
+
+  const btn = document.getElementById('btn-test-api');
+  if(btn) {
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Testando Endpoints...';
+  }
+
+  // Prepara todos os leds como piscando (loading)
   ENDPOINTS.forEach((ep, i) => {
-    if(ep.section){
-      html += `<div class="api-section-label">${ep.section}</div>`;
-    } else {
-      html += `<div class="api-card" id="acard-${i}" onclick="showPayload('${ep.path}')">
-        <div>
-          <span class="api-name">${ep.name}</span>
-          <span class="api-path">GET ${ep.path}</span>
-        </div>
-        <div class="api-right">
-          <span class="led checking" id="led-${i}"></span>
-          <span class="lat" id="lat-${i}">...</span>
-        </div>
-      </div>`;
-    }
+    if(ep.section) return;
+    const led = document.getElementById('led-'+i);
+    const lat = document.getElementById('lat-'+i);
+    if(led) led.className = 'led checking';
+    if(lat) lat.innerText = '...';
   });
-  grid.innerHTML = html;
+
+  const cacheResults = [];
+  let completed = 0;
+  const targetEndpoints = ENDPOINTS.filter(e => e.path);
 
   // Health check em paralelo
   ENDPOINTS.forEach((ep, i) => {
@@ -593,30 +647,51 @@ function buildEndpoints(){
         const ms = Math.round(performance.now()-t0);
         const led = document.getElementById('led-'+i);
         const lat = document.getElementById('lat-'+i);
-        if(led){ 
-          if(r.ok) {
-            led.className = ms > 3000 ? 'led checking' : 'led'; // Amarelo se > 3s
-          } else {
-            led.className = 'led down';
-          }
+        let statusClass = 'down';
+        let latText = ms+'ms';
+
+        if(r.ok) {
+          statusClass = ms > 3000 ? 'checking' : ''; // checking (amarelo) ou normal (verde)
         }
+        
+        if(led) led.className = 'led ' + statusClass;
         if(lat) {
-          lat.innerText = ms+'ms';
+          lat.innerText = latText;
           if(ms > 3000) lat.style.color = 'var(--yellow)';
         }
+
         // Registra lentidão extrema no Ticker
         if(ms > 3000 && !slowEndpoints.find(s => s.name === ep.name)) {
           slowEndpoints.push({name: ep.name, ms});
           updateTicker();
         }
+
+        cacheResults.push({ index: i, status: statusClass, latency: latText });
       })
       .catch(() => {
         const led = document.getElementById('led-'+i);
         if(led) led.className = 'led down';
         const lat = document.getElementById('lat-'+i);
         if(lat) lat.innerText = 'err';
+        cacheResults.push({ index: i, status: 'down', latency: 'err' });
+      })
+      .finally(() => {
+        completed++;
+        if(completed === targetEndpoints.length) {
+          isTestingEndpoints = false;
+          if(btn) {
+            btn.disabled = false;
+            btn.innerHTML = '🔄 Testar Todos Agora';
+          }
+          localStorage.setItem(cacheKey, JSON.stringify(cacheResults));
+          localStorage.setItem(cacheTimeKey, Date.now().toString());
+        }
       });
   });
+}
+
+function forceCheckEndpoints() {
+  buildEndpoints(true);
 }
 
 function backgroundHealthCheck() {
