@@ -308,3 +308,77 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 .modal-box h3 { font-family: 'Outfit', sans-serif; font-weight: 800; color: var(--primary); font-size: 1.3rem; }
 .modal-box pre { background: var(--code); color: var(--text); padding: 18px; border-radius: 10px; font-size: 0.95rem; overflow: auto; max-height: 520px; border: 1px solid var(--border); }
 .closebtn { align-self: flex-end; padding: 9px 22px; background: var(--primary); border: none; color: #fff; border-radius: 9px; cursor: pointer; font-weight: 700; font-size: 0.85rem; }
+
+/* ===================== MOBILE ===================== */
+@media (max-width: 768px) {
+  html { font-size: 13px; }
+
+  .wrap { padding: 10px 12px; gap: 10px; }
+
+  /* Topbar empilha logo + nav */
+  .topbar {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 10px 14px;
+    gap: 10px;
+    border-radius: 14px;
+  }
+  .logo-horiz { width: 130px; }
+
+  /* Tabs em linha com scroll horizontal */
+  .tabs { 
+    width: 100%; 
+    overflow-x: auto; 
+    gap: 3px;
+    padding: 4px;
+  }
+  .tab { padding: 7px 13px; font-size: 0.82rem; white-space: nowrap; }
+
+  /* Botão de tema menor */
+  .theme-btn { padding: 8px 12px; font-size: 0.82rem; }
+
+  /* Farm bar em 2 colunas */
+  .farm-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .fbtn { padding: 10px 8px; font-size: 0.85rem; }
+  .fbtn-wallet { font-size: 0.72rem; }
+
+  /* Cards full width */
+  .grid2, .grid3 { grid-template-columns: 1fr !important; }
+  .fw { grid-column: 1; }
+
+  /* Card body empilha imagem + texto */
+  .card-body { flex-direction: column; }
+  .imgbox { width: 100%; min-height: 180px; }
+
+  /* Tabela com scroll */
+  .tbl-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { min-width: 600px; }
+
+  /* Farm info bar empilha */
+  .farm-info-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .farm-meta { flex-wrap: wrap; gap: 8px; }
+
+  /* Status panel empilha */
+  .status-panel { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .status-panel-right { flex-wrap: wrap; }
+
+  /* API grid 1 coluna */
+  .api-grid { grid-template-columns: 1fr; }
+
+  /* Colin section */
+  .colin-avatar-wrap { width: 80px; height: 80px; }
+
+  /* Modal */
+  .modal-box { padding: 16px; }
+  .modal-box pre { font-size: 0.8rem; max-height: 300px; }
+
+  /* Section title menor */
+  .section-title { font-size: 0.95rem; flex-direction: column; align-items: flex-start; gap: 4px; }
+  #farm-wallet-info { border-left: none; padding-left: 0; margin-left: 0; font-size: 0.78rem; }
+
+  /* Ticker menor */
+  .ticker { font-size: 0.85rem; }
+
+  /* Sbtn menores no admin */
+  .sbtn { padding: 8px 12px; font-size: 0.82rem; margin-right: 4px; }
+}
