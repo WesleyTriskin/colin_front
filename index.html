@@ -18,7 +18,6 @@
         <button class="tab active" onclick="switchTab('dashboard')">Painel Mensageria</button>
         <button class="tab" onclick="switchTab('api')">Endpoints API</button>
         <button class="tab" onclick="switchTab('colin')">Colin Interativo</button>
-        <button class="tab" id="admin-tab-btn" style="display:none;" onclick="switchTab('admin')">Admin Status</button>
       </nav>
       <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️ Modo Claro</button>
     </header>
@@ -165,15 +164,6 @@
     </div>
   </div>
 
-  <div id="tab-admin" class="tabcontent">
-    <div style="max-width: 800px; margin: 0 auto;">
-      <h2 style="color:var(--text); margin-bottom: 24px; font-family:'Outfit';">Painel de Controle de Status (Admin)</h2>
-      <div id="admin-farms-list" style="display: flex; flex-direction: column; gap: 16px;">
-        <!-- Renderizado via JS -->
-      </div>
-    </div>
-  </div>
-
 </div><!-- /wrap -->
 
 <!-- Modal Payload -->
@@ -304,47 +294,7 @@ function updateTicker() {
   document.querySelectorAll('.ticker').forEach(t => t.style.animationDuration = duration + 's');
 }
 
-// Renderiza e gerencia a aba Admin
-function renderAdminPanel() {
-  const html = FARMS_DATA.map(f => {
-    const st = getFarmStatus(f.key);
-    return `
-      <div style="background:var(--panel); padding: 16px; border-radius: 12px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-        <div>
-          <div style="font-weight: 800; font-size: 1.1rem; color:var(--text)">${f.name}</div>
-          <div style="color:var(--muted); font-size: 0.9rem; margin-top: 4px;">Carteira ${f.wallet} • ${formatPhone(f.phone)}</div>
-        </div>
-        <div style="display: flex; gap: 8px;">
-          <button class="sbtn ok ${st==='ok'?'on':''}" onclick="setFarmStatusAdmin('${f.key}', '${f.phone}', 'ok')">🟢 OK</button>
-          <button class="sbtn inc ${st==='inc'?'on':''}" onclick="setFarmStatusAdmin('${f.key}', '${f.phone}', 'inc')">🟡 Instável</button>
-          <button class="sbtn ban ${st==='ban'?'on':''}" onclick="setFarmStatusAdmin('${f.key}', '${f.phone}', 'ban')">🔴 Banido</button>
-          <button class="sbtn none ${st==='none'?'on':''}" onclick="setFarmStatusAdmin('${f.key}', '${f.phone}', 'none')">⚪ Sem Número</button>
-        </div>
-      </div>
-    `;
-  }).join('');
-  document.getElementById('admin-farms-list').innerHTML = html;
-}
 
-async function setFarmStatusAdmin(farmKey, phone, status) {
-  // Atualiza UI Admin
-  localStorage.setItem('farm_status_' + farmKey, status);
-  setFarmDot(farmKey, status);
-  renderAdminPanel();
-  
-  // Atualiza DB
-  try {
-    fetch('/api_data/v1/farms/status', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        farm_key: farmKey,
-        phone_number: phone,
-        status: status
-      })
-    });
-  } catch(e) {}
-}
 
 // Carrega os dots de todas as fazendas do localStorage
 function loadAllFarmDots() {
@@ -662,10 +612,6 @@ function backgroundHealthCheck() {
 }
 
 // Boot
-if(window.location.search.includes('admin=1')) {
-  document.getElementById('admin-tab-btn').style.display = 'inline-block';
-  renderAdminPanel();
-}
 selectFarm('gjacana','Fazenda Jaçanã','5683','5511963065709');
 loadAllFarmDots();
 backgroundHealthCheck();

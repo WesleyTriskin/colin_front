@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Status - DataAgrin</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  body { padding: 40px; background: var(--bg); display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
+  .admin-wrap { width: 100%; max-width: 800px; background: var(--panel); border: 1px solid var(--border); border-radius: 18px; padding: 32px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+  .farm-card { background: var(--bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 16px; }
+  .farm-name { font-weight: 800; font-size: 1.2rem; color: var(--text); font-family: 'Outfit', sans-serif; }
+  .farm-info { color: var(--muted); font-size: 0.95rem; margin-top: 6px; }
+</style>
+</head>
+<body class="dark">
+
+<div class="admin-wrap">
+  <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+    <h1 style="font-family:'Outfit',sans-serif; color:var(--text); font-size:2rem; margin:0;">Painel de Status</h1>
+    <button class="theme-btn" onclick="document.body.classList.toggle('light')">☀️ Tema</button>
+  </div>
+  
+  <div id="admin-list">Carregando...</div>
+</div>
+
+<script>
+const FARMS_DATA = [
+  { key: 'gjacana', name: 'Fazenda Jaçanã', wallet: '5683', phone: '5511963065709' },
+  { key: 'fazenda_ws', name: 'Fazenda WS', wallet: '5702', phone: '5511962678385' },
+  { key: 'apoloni', name: 'Apoloni', wallet: '6153', phone: '554431011106' },
+  { key: 'piccini', name: 'Piccini', wallet: '6084', phone: '556631840130' }
+];
+
+function formatPhone(phone) {
+  if (!phone) return 'Sem número';
+  let p = phone.toString().replace(/\D/g, '');
+  if (p.startsWith('55') && p.length > 11) p = p.substring(2);
+  if (p.length === 11) return `(${p.substring(0,2)}) ${p.substring(2,7)}-${p.substring(7)}`;
+  if (p.length === 10) return `(${p.substring(0,2)}) ${p.substring(2,6)}-${p.substring(6)}`;
+  return phone;
+}
+
+function getFarmStatus(key) {
+  return localStorage.getItem('farm_status_' + key) || 'ok';
+}
+
+function renderAdminPanel() {
+  const html = FARMS_DATA.map(f => {
+    const st = getFarmStatus(f.key);
+    return `
+      <div class="farm-card">
+        <div>
+          <div class="farm-name">${f.name}</div>
+          <div class="farm-info">Carteira ${f.wallet} • ${formatPhone(f.phone)}</div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="sbtn ok ${st==='ok'?'on':''}" onclick="setStatus('${f.key}', '${f.phone}', 'ok')">🟢 OK</button>
+          <button class="sbtn inc ${st==='inc'?'on':''}" onclick="setStatus('${f.key}', '${f.phone}', 'inc')">🟡 Instável</button>
+          <button class="sbtn ban ${st==='ban'?'on':''}" onclick="setStatus('${f.key}', '${f.phone}', 'ban')">🔴 Banido</button>
+          <button class="sbtn none ${st==='none'?'on':''}" onclick="setStatus('${f.key}', '${f.phone}', 'none')">⚪ Sem Número</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+  document.getElementById('admin-list').innerHTML = html;
+}
+
+async function setStatus(farmKey, phone, status) {
+  // Atualiza UI
+  localStorage.setItem('farm_status_' + farmKey, status);
+  renderAdminPanel();
+  
+  // Atualiza DB
+  try {
+    const res = await fetch('/api_data/v1/farms/status', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        farm_key: farmKey,
+        phone_number: phone,
+        status: status
+      })
+    });
+    const data = await res.json();
+    if(!data.success) {
+      alert("Erro ao salvar no banco: " + data.error);
+    }
+  } catch(e) {
+    alert("Erro de conexão com o banco local.");
+  }
+}
+
+// Render initial
+renderAdminPanel();
+</script>
+
+</body>
+</html>
