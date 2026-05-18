@@ -396,46 +396,51 @@ async function fetchLogs(){
 
 async function loadContacts(){
   const tbody = document.getElementById('tbody');
-  try {
-    // Carrega TODOS os contatos para poder pintar os dots de todas as fazendas
-    const r = await fetch(`/api/contacts`);
-    const raw = await r.json();
-    const contacts = Array.isArray(raw) ? raw : (raw.contacts || []);
-
-    // Agrupa por fazenda para pegar o status principal de cada uma
-    const byFarm = {};
-    contacts.forEach(c => {
-      if (!byFarm[c.farm_key]) byFarm[c.farm_key] = [];
-      byFarm[c.farm_key].push(c);
-    });
-
-    // Atualiza dots de todas as fazendas
-    for (const fk in byFarm) {
-      const first = byFarm[fk][0];
-      const notes = first?.notes || '';
-      let st = 'ok';
-      if (notes.includes('[STATUS:inc]'))   st = 'inc';
-      if (notes.includes('[STATUS:ban]'))   st = 'ban';
-      if (notes.includes('[STATUS:maint]')) st = 'maint';
-      setFarmDot(fk, st);
+    let contacts = [];
+    try {
+      // Tenta buscar da API Oficial (que o backend vai criar)
+      const r = await fetch('https://data.trisk-in.com.br/api_data/v1/farms/contacts');
+      if (r.ok) {
+        const raw = await r.json();
+        contacts = Array.isArray(raw) ? raw : (raw.contacts || []);
+      }
+    } catch(e) {
+      console.warn("API de contatos oficial indisponível ainda.");
     }
 
-    // Sincroniza status do BD para o LocalStorage
-    FARMS_DATA.forEach(f => {
-      const contact = contacts.find(c => c.phone_number === f.phone);
-      if(contact && contact.notes) {
-        let st = 'ok';
-        if (contact.notes.includes('[STATUS:inc]')) st = 'inc';
-        if (contact.notes.includes('[STATUS:ban]')) st = 'ban';
-        if (contact.notes.includes('[STATUS:none]')) st = 'none';
-        
-        const lsKey = 'farm_status_' + f.key;
-        if(localStorage.getItem(lsKey) !== st) {
-           localStorage.setItem(lsKey, st);
-           setFarmDot(f.key, st);
+    // Fallback: Se a API estiver offline ou vazia, extraímos os números direto do histórico de logs!
+    if (contacts.length === 0 && allLogs && allLogs.length > 0) {
+      const uniquePhones = [...new Set(allLogs.map(l => l.phone_number).filter(Boolean))];
+      contacts = uniquePhones.map(p => {
+        // Encontra o último log desse telefone para tentar deduzir a fazenda
+        const log = allLogs.find(l => l.phone_number === p);
+        return {
+          farm_key: log ? log.farm_key : farm,
+          phone_number: p,
+          contact_name: 'Usuário do Histórico',
+          notes: ''
+        };
+      });
+    }
+
+    // Sincroniza status do BD para o LocalStorage se vieram do banco
+    if (contacts.length > 0) {
+      FARMS_DATA.forEach(f => {
+        const contact = contacts.find(c => c.phone_number === f.phone);
+        if(contact && contact.notes) {
+          let st = 'ok';
+          if (contact.notes.includes('[STATUS:inc]')) st = 'inc';
+          if (contact.notes.includes('[STATUS:ban]')) st = 'ban';
+          if (contact.notes.includes('[STATUS:none]')) st = 'none';
+          
+          const lsKey = 'farm_status_' + f.key;
+          if(localStorage.getItem(lsKey) !== st) {
+             localStorage.setItem(lsKey, st);
+             setFarmDot(f.key, st);
+          }
         }
-      }
-    });
+      });
+    }
 
     // Filtra os contatos da fazenda ativa para a tabela
     const farmContacts = contacts.filter(c => c.farm_key === farm);
@@ -461,10 +466,14 @@ async function loadContacts(){
       tbody.innerHTML += `<tr>
         <td><div class="phone">${phone}</div><div class="cname">${d.name || 'Sem nome'}</div></td>
         <td>
-          <button class="sbtn ok  ${st==='ok'?'on':''}"    onclick="setStatus('${phone}','ok')">✅ OK</button>
-          <button class="sbtn inc ${st==='inc'?'on':''}"   onclick="setStatus('${phone}','inc')">⚠️ Inc</button>
-          <button class="sbtn ban ${st==='ban'?'on':''}"   onclick="setStatus('${phone}','ban')">🚫 Ban</button>
-          <button class="sbtn maint ${st==='maint'?'on':''}" onclick="setStatus('${phone}','maint')">🔵 Maint</button>
+          <span style="display:inline-block; padding: 4px 8px; border-radius: 6px; font-size:0.85rem; font-weight:700; ${
+            st==='ok' ? 'background:rgba(16,185,129,0.15); color:var(--green);' :
+            st==='inc' ? 'background:rgba(245,158,11,0.15); color:var(--yellow);' :
+            st==='ban' ? 'background:rgba(239,68,68,0.15); color:var(--red);' :
+            'background:rgba(150,150,150,0.15); color:#aaa;'
+          }">
+            ${st==='ok' ? '🟢 OK' : st==='inc' ? '🟡 Instável' : st==='ban' ? '🔴 Banido' : '⚪ Sem Número'}
+          </span>
         </td>
         <td>${ld('RELATÓRIO OPERACIONAL')}</td>
         <td>${ld('FECHAMENTO DIÁRIO')}</td>
@@ -478,16 +487,6 @@ async function loadContacts(){
   }
 }
 
-async function setStatus(phone, st){
-  try {
-    await fetch('/api/update_status',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({phone, status:st})
-    });
-    loadContacts();
-  } catch(e){ console.error(e); }
-}
 
 // ── ENDPOINTS ──────────────────────────────────────────────
 const ENDPOINTS = [
