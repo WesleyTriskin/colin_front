@@ -86,6 +86,10 @@ body.light .logo-light-mode { display: block; }
 .tab:hover { color: var(--text); }
 .tab.active { background: var(--primary); color: #fff; box-shadow: 0 0 14px rgba(139,92,246,0.3); }
 
+/* STATUS LEGEND */
+.status-legend { display: flex; gap: 14px; align-items: center; background: var(--sub); padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border); }
+.leg-item { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: 700; color: var(--muted); }
+
 /* FARM BAR */
 .farm-bar { display: flex; gap: 12px; }
 .fbtn { flex: 1; padding: 12px 12px; background: var(--panel); border: 1px solid var(--border); border-radius: var(--r); color: var(--muted); font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 4px; }
@@ -336,6 +340,10 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 
   /* Botão de tema menor */
   .theme-btn { padding: 8px 12px; font-size: 0.82rem; }
+
+  /* Legend no mobile */
+  .status-legend { width: 100%; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .leg-item { font-size: 0.75rem; }
 
   /* Farm bar em 2 colunas */
   .farm-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
