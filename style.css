@@ -67,7 +67,7 @@ body {
   backdrop-filter: blur(12px);
   height: 56px;
 }
-.brand { display: flex; align-items: center; height: 100%; overflow: visible; }
+.brand { flex: 0 0 220px; display: flex; align-items: center; height: 100%; overflow: visible; }
 .logo-horiz { height: 95px; width: 220px; object-fit: contain; margin-top: -28px; margin-bottom: -28px; margin-left: -15px; }
 .logo-dark-mode { display: block; }
 .logo-light-mode { display: none; }
@@ -81,19 +81,22 @@ body.light .logo-light-mode { display: block; }
 }
 .theme-btn:hover { border-color: var(--primary); color: var(--primary); }
 
-.tabs { display: flex; gap: 4px; background: var(--sub); padding: 5px; border-radius: 12px; border: 1px solid var(--border); }
+.tabs { flex: 0 0 400px; display: flex; gap: 4px; background: var(--sub); padding: 5px; border-radius: 12px; border: 1px solid var(--border); justify-content: center; }
 .tab { background: none; border: none; color: var(--muted); padding: 8px 18px; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 0.95rem; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
 .tab:hover { color: var(--text); }
 .tab.active { background: var(--primary); color: #fff; box-shadow: 0 0 14px rgba(139,92,246,0.3); }
 
 /* STATUS LEGEND */
-.status-legend { display: flex; gap: 14px; align-items: center; background: var(--sub); padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border); }
+.status-legend { flex: 0 0 350px; display: flex; gap: 14px; align-items: center; background: var(--sub); padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border); justify-content: center; }
 .leg-item { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: 700; color: var(--muted); }
 .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
 .status-dot.green { background: var(--green); box-shadow: 0 0 8px var(--green); }
 .status-dot.yellow { background: var(--yellow); box-shadow: 0 0 8px var(--yellow); }
 .status-dot.red { background: var(--red); box-shadow: 0 0 8px var(--red); }
 .status-dot.none { background: #8aa4c0; }
+
+/* ACTIONS */
+.topbar-actions { flex: 0 0 350px; display: flex; gap: 8px; justify-content: flex-end; align-items: center; }
 
 /* FARM BAR */
 .farm-bar { display: flex; gap: 12px; }
@@ -335,15 +338,15 @@ tr:hover td { background: rgba(255,255,255,0.02); }
     justify-content: space-between;
     align-items: center;
   }
-  .brand { order: 1; display: flex; align-items: center; }
+  .brand { order: 1; display: flex; align-items: center; flex: none; width: auto; }
   .logo-horiz { width: 230px; height: 110px; margin-top: -36px; margin-bottom: -36px; margin-left: -20px; object-fit: contain; }
 
   /* Ações do Topbar ao lado do logo */
-  .topbar-actions { order: 2; display: flex; gap: 6px; align-items: center; margin-left: auto; }
+  .topbar-actions { order: 2; display: flex; gap: 6px; align-items: center; margin-left: auto; flex: none; width: auto; }
   .topbar-actions .theme-btn { padding: 6px 10px; font-size: 0.78rem; width: auto; }
 
   /* Legend no mobile */
-  .status-legend { order: 4; width: 100%; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .status-legend { order: 4; width: 100%; flex-wrap: wrap; gap: 8px; justify-content: center; flex: none; }
   .leg-item { font-size: 0.75rem; }
 
   .tabs { 
@@ -353,6 +356,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
     width: 100%; 
     gap: 4px;
     padding: 4px;
+    flex: none;
   }
   .tab { padding: 8px 4px; font-size: 0.82rem; text-align: center; white-space: nowrap; }
 
