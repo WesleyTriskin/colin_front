@@ -121,7 +121,7 @@
 
     <!-- Tabela de Contatos -->
     <div class="tbl-wrap">
-      <div class="section-title">Auditoria de Envios por Destinatário</div>
+      <div class="section-title" style="display: flex; align-items: center; flex-wrap: wrap;">Auditoria de Envios por Destinatário <span id="farm-wallet-info" style="font-size: 0.85rem; font-weight: 500; color: var(--muted); margin-left: 12px; padding-left:12px; border-left:1px solid var(--border);"></span></div>
       <div class="tbl-scroll">
         <table>
           <thead>
@@ -193,7 +193,17 @@ const BASE = 'https://prx.triskin.tech/api_data/v1';
 let farm = 'gjacana';
 let allLogs = [];
 
-const fmt = d => d ? new Date(d).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '--';
+const fmt = d => {
+  if (!d) return `<span style="border: 1px solid var(--red); color: var(--red); padding: 2px 5px; border-radius: 4px; display: inline-block; font-size:0.85em; line-height: 1;">—</span>`;
+  const dateObj = new Date(d);
+  const formatted = dateObj.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+  const today = new Date();
+  const isToday = dateObj.getDate() === today.getDate() && dateObj.getMonth() === today.getMonth() && dateObj.getFullYear() === today.getFullYear();
+  if (!isToday) {
+    return `<span style="border: 1px solid var(--red); color: var(--red); padding: 2px 5px; border-radius: 4px; display: inline-block; font-size:0.85em; line-height: 1;" title="Alerta: Relatório não é de hoje!">${formatted}</span>`;
+  }
+  return formatted;
+};
 // Parser de markdown WhatsApp → HTML premium
 function parseWhatsApp(text) {
   if (!text) return '';
@@ -306,6 +316,8 @@ function selectFarm(key, name, wallet, phone){
   document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
   document.getElementById('btn-'+key).classList.add('active');
   
+  document.getElementById('farm-wallet-info').innerHTML = `Fazenda: <b style="color:var(--text)">${name}</b> &nbsp;&nbsp;|&nbsp;&nbsp; Carteira: <b style="color:var(--text)">${wallet}</b> &nbsp;&nbsp;|&nbsp;&nbsp; Disparo: <b style="color:var(--text)">${formatPhone(phone)}</b>`;
+  
   farmPhone = phone;
   fetchLogs();
 }
@@ -328,13 +340,13 @@ async function fetchLogs(){
   // Limpa textos
   ['d1','daily','hour','hidrico','cotacoes','noticias','economia'].forEach(k=>{
     document.getElementById('msg-'+k).innerText = 'Carregando...';
-    document.getElementById('time-'+k).innerText = '—';
+    document.getElementById('time-'+k).innerHTML = '—';
   });
 
   if(!token){
     ['d1','daily','hour','hidrico','cotacoes','noticias','economia'].forEach(k=>{
       document.getElementById('msg-'+k).innerHTML = '<i style="color:var(--yellow)">Token JWT não cadastrado para esta fazenda.</i>';
-      document.getElementById('time-'+k).innerText = '—';
+      document.getElementById('time-'+k).innerHTML = '—';
       const imgEl = document.getElementById('img-'+k);
       if(imgEl) imgEl.src = 'https://via.placeholder.com/600x420?text=Sem+Acesso';
     });
@@ -365,7 +377,7 @@ async function fetchLogs(){
       document.getElementById('msg-'+key).innerHTML = log
         ? parseWhatsApp(log.message_content)
         : `<i style="color:var(--muted)">Nenhum envio encontrado nos logs.</i>`;
-      document.getElementById('time-'+key).innerText = log ? fmt(log.sent_at) : '--';
+      document.getElementById('time-'+key).innerHTML = fmt(log ? log.sent_at : null);
     };
 
     apply('d1',       d1txt);
@@ -462,7 +474,7 @@ async function loadContacts() {
       if (d.notes?.includes('[STATUS:maint]')) st = 'maint';
       
       const ul = allLogs.filter(l => l.phone_number === phone && l.message_type === 'text');
-      const ld = kw => { const l = ul.find(x => x.message_content.includes(kw)); return l ? `<span class="date-cell">${fmt(l.sent_at)}</span>` : '<span class="date-cell">—</span>'; };
+      const ld = kw => { const l = ul.find(x => x.message_content.includes(kw)); return `<span class="date-cell" style="display:flex;align-items:center;height:100%;">${fmt(l ? l.sent_at : null)}</span>`; };
       
       tbody.innerHTML += `<tr>
         <td><div class="phone">${phone}</div><div class="cname">${d.name || 'Sem nome'}</div></td>
