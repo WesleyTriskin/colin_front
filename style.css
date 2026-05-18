@@ -2,20 +2,20 @@
 
 :root {
   color-scheme: dark;
-  --bg: #0f1623;
-  --panel: rgba(22,30,50,0.97);
-  --sub: #182032;
-  --border: rgba(255,255,255,0.10);
+  --bg: #1a2238;
+  --panel: rgba(30,42,66,0.98);
+  --sub: #243050;
+  --border: rgba(255,255,255,0.13);
   --border-hover: rgba(139,92,246,0.5);
-  --text: #e8eef6;
-  --muted: #7b92b2;
+  --text: #dce8f5;
+  --muted: #8aa4c0;
   --primary: #9b6ff7;
   --primary-dim: rgba(155,111,247,0.14);
   --green: #22d3a0;
   --yellow: #fbbf24;
   --red: #f87171;
   --blue: #60a5fa;
-  --code: rgba(0,0,0,0.35);
+  --code: rgba(0,0,0,0.25);
   --r: 14px;
 }
 
@@ -34,7 +34,7 @@ body.light {
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 14px; overflow-y: scroll; }
+html { font-size: 12.5px; overflow-y: scroll; }
 
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
@@ -65,7 +65,7 @@ body {
   border: 1px solid var(--border);
   border-radius: 18px;
   backdrop-filter: blur(12px);
-  height: 56px;
+  height: 60px;
 }
 .brand { display: flex; align-items: center; height: 100%; }
 .logo-horiz { height: 100%; width: 220px; object-fit: contain; transform: scale(1.6); transform-origin: left center; }
@@ -81,10 +81,10 @@ body.light .logo-light-mode { display: block; }
 }
 .theme-btn:hover { border-color: var(--primary); color: var(--primary); }
 
-.tabs { display: flex; gap: 4px; background: rgba(0,0,0,0.25); padding: 6px; border-radius: 12px; border: 1px solid var(--border); }
-.tab { background: none; border: none; color: var(--muted); padding: 12px 24px; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 1rem; border-radius: 9px; cursor: pointer; transition: all 0.2s; }
+.tabs { display: flex; gap: 4px; background: var(--sub); padding: 5px; border-radius: 12px; border: 1px solid var(--border); }
+.tab { background: none; border: none; color: var(--muted); padding: 8px 18px; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 0.95rem; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
 .tab:hover { color: var(--text); }
-.tab.active { background: var(--primary); color: #fff; box-shadow: 0 0 18px rgba(139,92,246,0.35); }
+.tab.active { background: var(--primary); color: #fff; box-shadow: 0 0 14px rgba(139,92,246,0.3); }
 
 /* FARM BAR */
 .farm-bar { display: flex; gap: 12px; }
