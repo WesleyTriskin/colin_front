@@ -24,6 +24,13 @@
     <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️ Modo Claro</button>
   </header>
 
+  <!-- Ticker de Alertas (Global) -->
+  <div class="ticker-wrap">
+    <div class="ticker" id="ticker-content">
+      <span class="ticker-item info">Verificando status dos sistemas...</span>
+    </div>
+  </div>
+
   <!-- ABA 1: DASHBOARD -->
   <div id="tab-dashboard" class="tabcontent active">
 
@@ -257,6 +264,29 @@ function getFarmStatus(farmKey) {
   return localStorage.getItem('farm_status_' + farmKey) || 'ok';
 }
 
+let slowEndpoints = [];
+
+function updateTicker() {
+  const ticker = document.getElementById('ticker-content');
+  let msgs = [];
+  
+  if (!TOKENS['apoloni'] || !TOKENS['piccini']) {
+    msgs.push(`<span class="ticker-item warning">⚠️ Atenção: Necessário gerar e conectar os tokens da Apoloni e Piccini.</span>`);
+  }
+  
+  if (getFarmStatus('fazenda_ws') === 'ban') {
+    msgs.push(`<span class="ticker-item danger">🚫 O número principal da Fazenda WS está BANIDO.</span>`);
+  }
+
+  slowEndpoints.forEach(ep => {
+    msgs.push(`<span class="ticker-item danger">🐢 Endpoint ${ep.name} demorando (${ep.ms}ms)</span>`);
+  });
+
+  if (msgs.length === 0) msgs.push(`<span class="ticker-item info">✅ Todos os sistemas e endpoints operacionais.</span>`);
+  
+  ticker.innerHTML = msgs.join('<span style="color:var(--muted); margin: 0 20px;"> • </span>');
+}
+
 // Atualização local imediata + Chamada para API DataAgrin (Opção 2)
 async function setFarmStatus(status) {
   if (!farmPhone) {
@@ -296,6 +326,7 @@ function loadAllFarmDots() {
   ['gjacana','fazenda_ws','apoloni','piccini'].forEach(fk => {
     setFarmDot(fk, getFarmStatus(fk));
   });
+  updateTicker();
 }
 
 function selectFarm(key, name, wallet){
@@ -578,6 +609,11 @@ function buildEndpoints(){
           lat.innerText = ms+'ms';
           if(ms > 3000) lat.style.color = 'var(--yellow)';
         }
+        // Registra lentidão extrema no Ticker
+        if(ms > 5000 && !slowEndpoints.find(s => s.name === ep.name)) {
+          slowEndpoints.push({name: ep.name, ms});
+          updateTicker();
+        }
       })
       .catch(() => {
         const led = document.getElementById('led-'+i);
@@ -588,10 +624,29 @@ function buildEndpoints(){
   });
 }
 
+function backgroundHealthCheck() {
+  ENDPOINTS.forEach(ep => {
+    if(!ep.path) return;
+    const token = TOKENS['gjacana'];
+    const t0 = performance.now();
+    const sep = ep.path.includes('?') ? '&' : '?';
+    fetch(`${BASE}${ep.path}${sep}limit=1`, {headers:{'X-Encrypted-Token':token}})
+      .then(r => {
+        const ms = Math.round(performance.now()-t0);
+        if(ms > 5000 && !slowEndpoints.find(s => s.name === ep.name)) {
+          slowEndpoints.push({name: ep.name, ms});
+          updateTicker();
+        }
+      }).catch(()=>{});
+  });
+}
+
 // Boot
 loadAllFarmDots();
 highlightStatusPanel(getFarmStatus(farm));
 fetchLogs();
+backgroundHealthCheck();
+setInterval(backgroundHealthCheck, 15 * 60 * 1000); // Roda a cada 15 min
 </script>
 </body>
 </html>

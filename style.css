@@ -96,6 +96,27 @@ body {
 .farm-dot.ban   { background: var(--red); box-shadow: 0 0 8px var(--red); }
 .farm-dot.none  { background: var(--muted); }
 
+/* TICKER */
+.ticker-wrap {
+  width: 100%; overflow: hidden; background: rgba(0,0,0,0.2); 
+  border: 1px solid var(--border); border-radius: var(--r);
+  padding: 14px 0; display: flex; align-items: center;
+}
+body.light .ticker-wrap { background: rgba(0,0,0,0.03); }
+.ticker {
+  white-space: nowrap; animation: ticker 25s linear infinite;
+  display: flex; gap: 40px; font-weight: 700; font-size: 0.95rem; font-family: 'Plus Jakarta Sans', sans-serif;
+}
+@keyframes ticker {
+  0% { transform: translateX(100vw); }
+  100% { transform: translateX(-100%); }
+}
+.ticker:hover { animation-play-state: paused; }
+.ticker-item { display: inline-block; }
+.ticker-item.danger { color: var(--red); }
+.ticker-item.warning { color: var(--yellow); }
+.ticker-item.info { color: var(--primary); }
+
 /* Painel de controle de status da fazenda ativa */
 .status-panel {
   display: flex; align-items: center; justify-content: space-between;
