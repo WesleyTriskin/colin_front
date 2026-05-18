@@ -380,10 +380,14 @@ async function fetchLogs(){
       if (res.isAlert) {
         timeEl.style.border = "1px solid var(--red)";
         timeEl.style.color = "var(--red)";
-        timeEl.style.fontWeight = "600";
+        timeEl.style.padding = "1px 5px";
+        timeEl.style.fontSize = "0.7rem";
+        timeEl.style.fontWeight = "normal";
       } else {
         timeEl.style.border = "";
         timeEl.style.color = "";
+        timeEl.style.padding = "";
+        timeEl.style.fontSize = "";
         timeEl.style.fontWeight = "";
       }
     };
@@ -486,7 +490,7 @@ async function loadContacts() {
         const l = ul.find(x => x.message_content.includes(kw)); 
         const res = fmt(l ? l.sent_at : null);
         if (res.isAlert) {
-          return `<span class="date-cell" style="border: 1px solid var(--red); color: var(--red); padding: 2px 5px; border-radius: 4px; display: inline-block; font-weight: 600; line-height: 1;" title="Alerta: Relatório não é de hoje!">${res.text}</span>`;
+          return `<span class="date-cell" style="border: 1px solid var(--red); color: var(--red); padding: 1px 4px; border-radius: 4px; display: inline-block; font-size: 0.7rem; font-weight: normal; line-height: 1;" title="Alerta: Relatório não é de hoje!">${res.text}</span>`;
         }
         return `<span class="date-cell">${res.text}</span>`;
       };
