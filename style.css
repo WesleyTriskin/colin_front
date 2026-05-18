@@ -242,6 +242,33 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 .tabcontent { display: none; flex-direction: column; gap: 18px; }
 .tabcontent.active { display: flex; }
 
+/* COLIN AVATAR */
+.colin-avatar-wrap {
+  position: relative;
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--panel); border: 2px solid var(--primary);
+  box-shadow: 0 0 30px rgba(139,92,246,0.3);
+}
+.colin-avatar {
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  z-index: 2;
+}
+.colin-pulse {
+  position: absolute; inset: -10px;
+  border-radius: 50%;
+  border: 2px solid var(--primary);
+  animation: colinPulse 2s infinite ease-out;
+  z-index: 1;
+}
+@keyframes colinPulse {
+  0% { transform: scale(0.9); opacity: 1; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
 /* MODAL */
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 999; padding: 20px; }
 .modal.open { display: flex; }
