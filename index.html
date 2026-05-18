@@ -470,22 +470,6 @@ async function loadContacts(){
     // Filtra os contatos da fazenda ativa para a tabela
     const farmContacts = contacts.filter(c => c.farm_key === farm);
 
-    // Atualiza painel de status da fazenda ativa
-    if (farmContacts.length > 0) {
-      farmPhone = farmContacts[0].phone_number;
-      document.getElementById('status-phone').innerText = farmPhone;
-      const notes = farmContacts[0].notes || '';
-      let st = 'ok';
-      if (notes.includes('[STATUS:inc]'))   st = 'inc';
-      if (notes.includes('[STATUS:ban]'))   st = 'ban';
-      if (notes.includes('[STATUS:maint]')) st = 'maint';
-      highlightStatusPanel(st);
-    } else {
-      farmPhone = '';
-      document.getElementById('status-phone').innerText = 'Sem número cadastrado';
-      highlightStatusPanel('none');
-    }
-
     // Renderiza tabela
     if (!farmContacts.length) {
       tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Nenhum contato para ${farm}.</td></tr>`;
@@ -626,7 +610,7 @@ function buildEndpoints(){
           if(ms > 3000) lat.style.color = 'var(--yellow)';
         }
         // Registra lentidão extrema no Ticker
-        if(ms > 5000 && !slowEndpoints.find(s => s.name === ep.name)) {
+        if(ms > 3000 && !slowEndpoints.find(s => s.name === ep.name)) {
           slowEndpoints.push({name: ep.name, ms});
           updateTicker();
         }
@@ -649,7 +633,7 @@ function backgroundHealthCheck() {
     fetch(`${BASE}${ep.path}${sep}limit=1`, {headers:{'X-Encrypted-Token':token}})
       .then(r => {
         const ms = Math.round(performance.now()-t0);
-        if(ms > 5000 && !slowEndpoints.find(s => s.name === ep.name)) {
+        if(ms > 3000 && !slowEndpoints.find(s => s.name === ep.name)) {
           slowEndpoints.push({name: ep.name, ms});
           updateTicker();
         }
