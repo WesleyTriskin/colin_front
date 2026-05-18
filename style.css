@@ -66,7 +66,7 @@ body {
   backdrop-filter: blur(12px);
 }
 .brand { display: flex; align-items: center; }
-.logo-horiz { height: 68px; max-width: 280px; object-fit: contain; }
+.logo-horiz { width: 220px; height: auto; object-fit: contain; }
 .logo-dark-mode { display: block; }
 .logo-light-mode { display: none; }
 body.light .logo-dark-mode { display: none; }
