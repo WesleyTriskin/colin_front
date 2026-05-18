@@ -194,13 +194,13 @@ let farm = 'gjacana';
 let allLogs = [];
 
 const fmt = d => {
-  if (!d) return `<span style="border: 1px solid var(--red); color: var(--red); padding: 2px 5px; border-radius: 4px; display: inline-block; font-size:0.85em; line-height: 1;">—</span>`;
+  if (!d) return `<span style="border: 1.5px solid var(--red); color: var(--red); padding: 4px 10px; border-radius: 6px; display: inline-block; font-weight: 700; line-height: 1;">—</span>`;
   const dateObj = new Date(d);
   const formatted = dateObj.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
   const today = new Date();
   const isToday = dateObj.getDate() === today.getDate() && dateObj.getMonth() === today.getMonth() && dateObj.getFullYear() === today.getFullYear();
   if (!isToday) {
-    return `<span style="border: 1px solid var(--red); color: var(--red); padding: 2px 5px; border-radius: 4px; display: inline-block; font-size:0.85em; line-height: 1;" title="Alerta: Relatório não é de hoje!">${formatted}</span>`;
+    return `<span style="border: 1.5px solid var(--red); color: var(--red); padding: 4px 10px; border-radius: 6px; display: inline-block; font-weight: 700; line-height: 1;" title="Alerta: Relatório não é de hoje!">${formatted}</span>`;
   }
   return formatted;
 };
