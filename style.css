@@ -230,6 +230,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 .sbtn.inc.on { background: rgba(245,158,11,0.15); color: var(--yellow); border-color: var(--yellow); box-shadow: 0 0 12px rgba(245,158,11,0.15); }
 .sbtn.ban.on { background: rgba(239,68,68,0.15);  color: var(--red);    border-color: var(--red); box-shadow: 0 0 12px rgba(239,68,68,0.15); }
 .sbtn.maint.on { background: rgba(59,130,246,0.15); color: var(--blue); border-color: var(--blue); box-shadow: 0 0 12px rgba(59,130,246,0.15); }
+.sbtn.none.on { background: rgba(150,150,150,0.15); color: #aaa; border-color: #aaa; box-shadow: 0 0 12px rgba(150,150,150,0.15); }
 
 /* API TAB */
 .api-section-label {

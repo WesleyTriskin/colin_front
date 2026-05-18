@@ -18,6 +18,7 @@
         <button class="tab active" onclick="switchTab('dashboard')">Painel Mensageria</button>
         <button class="tab" onclick="switchTab('api')">Endpoints API</button>
         <button class="tab" onclick="switchTab('colin')">Colin Interativo</button>
+        <button class="tab" id="admin-tab-btn" style="display:none;" onclick="switchTab('admin')">Admin Status</button>
       </nav>
       <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️ Modo Claro</button>
     </header>
@@ -35,37 +36,20 @@
     <div class="farm-bar">
       <button class="fbtn active" id="btn-gjacana"    onclick="selectFarm('gjacana','Fazenda Jaçanã','5683','5511963065709')">
         <div class="fbtn-top"><span class="farm-dot none" id="dot-gjacana"></span>Fazenda Jaçanã</div>
-        <div class="fbtn-wallet">Carteira 5683</div>
+        <div class="fbtn-wallet">Carteira 5683 • (11) 96306-5709</div>
       </button>
       <button class="fbtn"        id="btn-fazenda_ws" onclick="selectFarm('fazenda_ws','Fazenda WS','5702','5511962678385')">
         <div class="fbtn-top"><span class="farm-dot none" id="dot-fazenda_ws"></span>Fazenda WS</div>
-        <div class="fbtn-wallet">Carteira 5702</div>
+        <div class="fbtn-wallet">Carteira 5702 • (11) 96267-8385</div>
       </button>
       <button class="fbtn"        id="btn-apoloni"    onclick="selectFarm('apoloni','Apoloni','6153','554431011106')">
         <div class="fbtn-top"><span class="farm-dot none" id="dot-apoloni"></span>Apoloni</div>
-        <div class="fbtn-wallet">Carteira 6153</div>
+        <div class="fbtn-wallet">Carteira 6153 • (44) 3101-1106</div>
       </button>
       <button class="fbtn"        id="btn-piccini"    onclick="selectFarm('piccini','Piccini','6084','556631840130')">
         <div class="fbtn-top"><span class="farm-dot none" id="dot-piccini"></span>Piccini</div>
-        <div class="fbtn-wallet">Carteira 6084</div>
+        <div class="fbtn-wallet">Carteira 6084 • (66) 3184-0130</div>
       </button>
-    </div>
-
-    <!-- Painel de status do número principal da fazenda ativa -->
-    <div class="status-panel">
-      <div class="status-panel-left" style="flex-direction: row; align-items: center; gap: 18px;">
-        <img src="images/colin_avatar.png" alt="Colin" style="width:56px; height:56px; border-radius:50%; object-fit:cover; object-position:top; border:2px solid var(--primary); box-shadow: 0 4px 12px rgba(139,92,246,0.2);">
-        <div style="display: flex; flex-direction: column; gap: 4px;">
-          <div class="status-panel-label">Número principal (Agente Ativo)</div>
-          <div class="status-panel-phone" id="status-phone">—</div>
-        </div>
-      </div>
-      <div class="status-panel-right">
-        <button class="sbtn ok"    id="sstatus-ok"    onclick="setFarmStatus('ok')">🟢 OK</button>
-        <button class="sbtn inc"   id="sstatus-inc"   onclick="setFarmStatus('inc')">🟡 Instável</button>
-        <button class="sbtn ban"   id="sstatus-ban"   onclick="setFarmStatus('ban')">🔴 Banido</button>
-        <button class="sbtn maint" id="sstatus-maint" onclick="setFarmStatus('maint')">⚫ Sem número</button>
-      </div>
     </div>
 
     <div class="grid2">
@@ -181,6 +165,15 @@
     </div>
   </div>
 
+  <div id="tab-admin" class="tabcontent">
+    <div style="max-width: 800px; margin: 0 auto;">
+      <h2 style="color:var(--text); margin-bottom: 24px; font-family:'Outfit';">Painel de Controle de Status (Admin)</h2>
+      <div id="admin-farms-list" style="display: flex; flex-direction: column; gap: 16px;">
+        <!-- Renderizado via JS -->
+      </div>
+    </div>
+  </div>
+
 </div><!-- /wrap -->
 
 <!-- Modal Payload -->
@@ -193,6 +186,13 @@
 </div>
 
 <script>
+const FARMS_DATA = [
+  { key: 'gjacana', name: 'Fazenda Jaçanã', wallet: '5683', phone: '5511963065709' },
+  { key: 'fazenda_ws', name: 'Fazenda WS', wallet: '5702', phone: '5511962678385' },
+  { key: 'apoloni', name: 'Apoloni', wallet: '6153', phone: '554431011106' },
+  { key: 'piccini', name: 'Piccini', wallet: '6084', phone: '556631840130' }
+];
+
 const TOKENS = {
   'gjacana':    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmYXJtbmFtZSI6ImdqYWNhbmEiLCJkYm5hbWUiOiJ3YXJpbiIsInNjaGVtYW5hbWUiOiJnamFjYW5hIiwidGFibGVuYW1lIjoiaGlzdG9yaWNfbWFjaGluZV9zdW1tYXJ5X3ZpZXcifQ.roXyPCfZqINIr5kr__hw6HofFvEVlvviJOz1M-Q9ZLU',
   'fazenda_ws': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmYXJtbmFtZSI6ImZhemVuZGFfd3MiLCJkYm5hbWUiOiJ3YXJpbiIsInNjaGVtYW5hbWUiOiJmYXplbmRhX3dzIiwidGFibGVuYW1lIjoiaGlzdG9yaWNfbWFjaGluZV9zdW1tYXJ5X3ZpZXcifQ.Z6VdmyY2po001zDKItCO81aTDMH8Udk1nMrh7GW0kVs',
@@ -267,13 +267,7 @@ function setFarmDot(farmKey, status) {
   dot.className = 'farm-dot ' + (status || 'none');
 }
 
-// Atualiza os botões de status no painel (destaca o ativo)
-function highlightStatusPanel(status) {
-  ['ok','inc','ban','maint'].forEach(s => {
-    const btn = document.getElementById('sstatus-' + s);
-    if (btn) btn.classList.toggle('on', s === status);
-  });
-}
+
 
 // Salva o status da fazenda em localStorage (sem depender de VPN/banco)
 function getFarmStatus(farmKey) {
@@ -310,29 +304,45 @@ function updateTicker() {
   document.querySelectorAll('.ticker').forEach(t => t.style.animationDuration = duration + 's');
 }
 
-// Atualização local imediata + Chamada para API DataAgrin (Opção 2)
-async function setFarmStatus(status) {
-  if (!farmPhone) {
-    alert('Número da fazenda ainda não carregado. Aguarde os logs carregarem.');
-    return;
-  }
+// Renderiza e gerencia a aba Admin
+function renderAdminPanel() {
+  const html = FARMS_DATA.map(f => {
+    const st = getFarmStatus(f.key);
+    return `
+      <div style="background:var(--panel); padding: 16px; border-radius: 12px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <div>
+          <div style="font-weight: 800; font-size: 1.1rem; color:var(--text)">${f.name}</div>
+          <div style="color:var(--muted); font-size: 0.9rem; margin-top: 4px;">Carteira ${f.wallet} • ${formatPhone(f.phone)}</div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="sbtn ok ${st==='ok'?'on':''}" onclick="setFarmStatusAdmin('${f.key}', '${f.phone}', 'ok')">🟢 OK</button>
+          <button class="sbtn inc ${st==='inc'?'on':''}" onclick="setFarmStatusAdmin('${f.key}', '${f.phone}', 'inc')">🟡 Instável</button>
+          <button class="sbtn ban ${st==='ban'?'on':''}" onclick="setFarmStatusAdmin('${f.key}', '${f.phone}', 'ban')">🔴 Banido</button>
+          <button class="sbtn none ${st==='none'?'on':''}" onclick="setFarmStatusAdmin('${f.key}', '${f.phone}', 'none')">⚪ Sem Número</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+  document.getElementById('admin-farms-list').innerHTML = html;
+}
 
-  // 1. Atualização otimista na tela e localStorage
-  localStorage.setItem('farm_status_' + farm, status);
-  setFarmDot(farm, status);
-  highlightStatusPanel(status);
-
-  // POST Assíncrono para o Backend
+async function setFarmStatusAdmin(farmKey, phone, status) {
+  // Atualiza UI Admin
+  localStorage.setItem('farm_status_' + farmKey, status);
+  setFarmDot(farmKey, status);
+  renderAdminPanel();
+  
+  // Atualiza DB
   try {
     fetch('/api_data/v1/farms/status', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
-        farm_key: farm,
-        phone_number: farmPhone,
+        farm_key: farmKey,
+        phone_number: phone,
         status: status
       })
-    }).catch(e => console.log('Backend offline ou erro:', e));
+    });
   } catch(e) {}
 }
 
@@ -350,10 +360,6 @@ function selectFarm(key, name, wallet, phone){
   document.getElementById('btn-'+key).classList.add('active');
   
   farmPhone = phone;
-  document.getElementById('status-phone').innerText = formatPhone(phone);
-  
-  // Carrega status do localStorage ao trocar de fazenda
-  highlightStatusPanel(getFarmStatus(key));
   fetchLogs();
 }
 
@@ -463,6 +469,23 @@ async function loadContacts(){
       if (notes.includes('[STATUS:maint]')) st = 'maint';
       setFarmDot(fk, st);
     }
+
+    // Sincroniza status do BD para o LocalStorage
+    FARMS_DATA.forEach(f => {
+      const contact = contacts.find(c => c.phone_number === f.phone);
+      if(contact && contact.notes) {
+        let st = 'ok';
+        if (contact.notes.includes('[STATUS:inc]')) st = 'inc';
+        if (contact.notes.includes('[STATUS:ban]')) st = 'ban';
+        if (contact.notes.includes('[STATUS:none]')) st = 'none';
+        
+        const lsKey = 'farm_status_' + f.key;
+        if(localStorage.getItem(lsKey) !== st) {
+           localStorage.setItem(lsKey, st);
+           setFarmDot(f.key, st);
+        }
+      }
+    });
 
     // Filtra os contatos da fazenda ativa para a tabela
     const farmContacts = contacts.filter(c => c.farm_key === farm);
@@ -639,6 +662,10 @@ function backgroundHealthCheck() {
 }
 
 // Boot
+if(window.location.search.includes('admin=1')) {
+  document.getElementById('admin-tab-btn').style.display = 'inline-block';
+  renderAdminPanel();
+}
 selectFarm('gjacana','Fazenda Jaçanã','5683','5511963065709');
 loadAllFarmDots();
 backgroundHealthCheck();
