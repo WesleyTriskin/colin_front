@@ -65,10 +65,10 @@ body {
   border: 1px solid var(--border);
   border-radius: 18px;
   backdrop-filter: blur(12px);
-  height: 60px;
+  height: 70px;
 }
 .brand { display: flex; align-items: center; height: 100%; }
-.logo-horiz { height: 32px; width: auto; object-fit: contain; }
+.logo-horiz { height: 44px; width: auto; object-fit: contain; }
 .logo-dark-mode { display: block; }
 .logo-light-mode { display: none; }
 body.light .logo-dark-mode { display: none; }
@@ -326,16 +326,27 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 
   /* Topbar empilha logo + nav */
   .topbar {
+    display: flex;
     flex-wrap: wrap;
     height: auto;
-    padding: 10px 14px;
-    gap: 10px;
+    padding: 12px 14px;
+    gap: 12px;
     border-radius: 14px;
+    justify-content: space-between;
+    align-items: center;
   }
-  .logo-horiz { width: 130px; }
+  .brand { order: 1; display: flex; align-items: center; }
+  .logo-horiz { width: 170px; height: auto; }
 
-  /* Tabs em grade sem scroll no mobile */
+  /* Botão de tema menor ao lado do logo */
+  .theme-btn { order: 2; padding: 8px 14px; font-size: 0.85rem; width: auto; margin-left: auto; }
+
+  /* Legend no mobile */
+  .status-legend { order: 4; width: 100%; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .leg-item { font-size: 0.75rem; }
+
   .tabs { 
+    order: 3;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     width: 100%; 
@@ -343,13 +354,6 @@ tr:hover td { background: rgba(255,255,255,0.02); }
     padding: 4px;
   }
   .tab { padding: 8px 4px; font-size: 0.82rem; text-align: center; white-space: nowrap; }
-
-  /* Botão de tema menor */
-  .theme-btn { padding: 8px 12px; font-size: 0.82rem; }
-
-  /* Legend no mobile */
-  .status-legend { width: 100%; flex-wrap: wrap; gap: 8px; justify-content: center; }
-  .leg-item { font-size: 0.75rem; }
 
   /* Farm bar em 2 colunas */
   .farm-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
