@@ -487,7 +487,7 @@ const ENDPOINTS = [
   {name:'Market News',            path:'/commodities/news'},
   {name:'Price Snapshot',         path:'/commodities/prices'},
   {section:'Clima'},
-  {name:'Weather Forecast',       path:'/weather/forecast'},
+  {name:'Weather Forecast',       path:'/weather/forecast?city=sao_paulo'},
   {name:'Weather History',        path:'/weather/history'},
   {name:'Farm Forecast',          path:'/weather/farm-forecast'},
   {section:'Irrigação'},
@@ -513,7 +513,8 @@ async function showPayload(path){
   document.getElementById('modal').classList.add('open');
   try {
     const token = TOKENS[farm] || TOKENS['gjacana'];
-    const r = await fetch(`${BASE}${path}?limit=2`,{headers:{'X-Encrypted-Token':token}});
+    const sep = path.includes('?') ? '&' : '?';
+    const r = await fetch(`${BASE}${path}${sep}limit=2`,{headers:{'X-Encrypted-Token':token}});
     const d = await r.json();
     document.getElementById('modal-body').innerText = JSON.stringify(d,null,2);
   } catch(e){
@@ -547,13 +548,23 @@ function buildEndpoints(){
     if(!ep.path) return;
     const token = TOKENS[farm] || TOKENS['gjacana'];
     const t0 = performance.now();
-    fetch(`${BASE}${ep.path}?limit=1`,{headers:{'X-Encrypted-Token':token}})
+    const sep = ep.path.includes('?') ? '&' : '?';
+    fetch(`${BASE}${ep.path}${sep}limit=1`,{headers:{'X-Encrypted-Token':token}})
       .then(r => {
         const ms = Math.round(performance.now()-t0);
         const led = document.getElementById('led-'+i);
         const lat = document.getElementById('lat-'+i);
-        if(led){ led.className = r.ok ? 'led' : 'led down'; }
-        if(lat) lat.innerText = ms+'ms';
+        if(led){ 
+          if(r.ok) {
+            led.className = ms > 3000 ? 'led checking' : 'led'; // Amarelo se > 3s
+          } else {
+            led.className = 'led down';
+          }
+        }
+        if(lat) {
+          lat.innerText = ms+'ms';
+          if(ms > 3000) lat.style.color = 'var(--yellow)';
+        }
       })
       .catch(() => {
         const led = document.getElementById('led-'+i);
