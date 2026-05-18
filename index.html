@@ -322,26 +322,18 @@ async function setFarmStatus(status) {
   setFarmDot(farm, status);
   highlightStatusPanel(status);
 
-  // 2. Envia para o novo endpoint na API DataAgrin que você vai criar amanhã
+  // POST Assíncrono para o Backend
   try {
-    const token = TOKENS[farm] || TOKENS['gjacana'];
-    const res = await fetch(`${BASE}/farms/status`, {
+    fetch('/api_data/v1/farms/status', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Encrypted-Token': token
-      },
+      headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
         farm_key: farm,
         phone_number: farmPhone,
         status: status
       })
-    });
-    // Não damos alert de erro aqui para não atrapalhar o uso hoje, 
-    // já que o endpoint só será criado amanhã.
-  } catch(e) {
-    console.warn('Endpoint da API DataAgrin ainda indisponível:', e);
-  }
+    }).catch(e => console.log('Backend offline ou erro:', e));
+  } catch(e) {}
 }
 
 // Carrega os dots de todas as fazendas do localStorage
