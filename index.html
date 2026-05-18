@@ -303,6 +303,11 @@ function updateTicker() {
   const content = msgs.join('<span style="color:var(--muted); margin: 0 40px;"> • </span>') + '<span style="color:var(--muted); margin: 0 40px;"> • </span>';
   document.getElementById('ticker-content').innerHTML = content;
   document.getElementById('ticker-content-clone').innerHTML = content;
+
+  // Ajusta a velocidade da barra dinamicamente para não correr
+  const textContent = msgs.join(' ').replace(/<[^>]*>?/gm, '');
+  const duration = Math.max(30, textContent.length * 0.35);
+  document.querySelectorAll('.ticker').forEach(t => t.style.animationDuration = duration + 's');
 }
 
 // Atualização local imediata + Chamada para API DataAgrin (Opção 2)
