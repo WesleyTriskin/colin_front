@@ -27,9 +27,8 @@
 
     <!-- Ticker de Alertas (Global) -->
     <div class="ticker-wrap">
-      <div class="ticker" id="ticker-content">
-        <span class="ticker-item info">Verificando status dos sistemas...</span>
-      </div>
+      <div class="ticker" id="ticker-content"></div>
+      <div class="ticker" id="ticker-content-clone" aria-hidden="true"></div>
     </div>
   </div>
 
@@ -37,28 +36,28 @@
   <div id="tab-dashboard" class="tabcontent active">
 
     <div class="farm-bar">
-      <button class="fbtn active" id="btn-gjacana"    onclick="selectFarm('gjacana','Fazenda Jaçanã','6084')">
+      <button class="fbtn active" id="btn-gjacana"    onclick="selectFarm('gjacana','Fazenda Jaçanã','5683','5511963065709')">
         <div class="fbtn-top"><span class="farm-dot none" id="dot-gjacana"></span>Fazenda Jaçanã</div>
-        <div class="fbtn-wallet">Carteira 6084</div>
+        <div class="fbtn-wallet">Carteira 5683</div>
       </button>
-      <button class="fbtn"        id="btn-fazenda_ws" onclick="selectFarm('fazenda_ws','Fazenda WS','6084')">
+      <button class="fbtn"        id="btn-fazenda_ws" onclick="selectFarm('fazenda_ws','Fazenda WS','5702','5511963065709')">
         <div class="fbtn-top"><span class="farm-dot none" id="dot-fazenda_ws"></span>Fazenda WS</div>
-        <div class="fbtn-wallet">Carteira 6084</div>
+        <div class="fbtn-wallet">Carteira 5702</div>
       </button>
-      <button class="fbtn"        id="btn-apoloni"    onclick="selectFarm('apoloni','Apoloni','6084')">
+      <button class="fbtn"        id="btn-apoloni"    onclick="selectFarm('apoloni','Apoloni','6153','554431011106')">
         <div class="fbtn-top"><span class="farm-dot none" id="dot-apoloni"></span>Apoloni</div>
-        <div class="fbtn-wallet">Carteira 6084</div>
+        <div class="fbtn-wallet">Carteira 6153</div>
       </button>
-      <button class="fbtn"        id="btn-piccini"    onclick="selectFarm('piccini','Piccini','6055')">
+      <button class="fbtn"        id="btn-piccini"    onclick="selectFarm('piccini','Piccini','6084','556631840130')">
         <div class="fbtn-top"><span class="farm-dot none" id="dot-piccini"></span>Piccini</div>
-        <div class="fbtn-wallet">Carteira 6055</div>
+        <div class="fbtn-wallet">Carteira 6084</div>
       </button>
     </div>
 
     <!-- Painel de status do número principal da fazenda ativa -->
     <div class="status-panel">
       <div class="status-panel-left" style="flex-direction: row; align-items: center; gap: 18px;">
-        <img src="images/colin_avatar.png" alt="Colin" style="width:56px; height:56px; border-radius:50%; object-fit:cover; object-position:center 15%; border:2px solid var(--primary); box-shadow: 0 4px 12px rgba(139,92,246,0.2);">
+        <img src="images/colin_avatar.png" alt="Colin" style="width:56px; height:56px; border-radius:50%; object-fit:cover; object-position:top; border:2px solid var(--primary); box-shadow: 0 4px 12px rgba(139,92,246,0.2);">
         <div style="display: flex; flex-direction: column; gap: 4px;">
           <div class="status-panel-label">Número principal (Agente Ativo)</div>
           <div class="status-panel-phone" id="status-phone">—</div>
@@ -295,7 +294,9 @@ function updateTicker() {
 
   if (msgs.length === 0) msgs.push(`<span class="ticker-item info">✅ Todos os sistemas e endpoints operacionais.</span>`);
   
-  ticker.innerHTML = msgs.join('<span style="color:var(--muted); margin: 0 40px;"> • </span>');
+  const html = msgs.join('<span style="color:var(--muted); margin: 0 40px;"> • </span>') + '<span style="color:var(--muted); margin: 0 40px;"> • </span>';
+  document.getElementById('ticker-content').innerHTML = html;
+  document.getElementById('ticker-content-clone').innerHTML = html;
 }
 
 // Atualização local imediata + Chamada para API DataAgrin (Opção 2)
@@ -340,10 +341,14 @@ function loadAllFarmDots() {
   updateTicker();
 }
 
-function selectFarm(key, name, wallet){
+function selectFarm(key, name, wallet, phone){
   farm = key;
   document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
   document.getElementById('btn-'+key).classList.add('active');
+  
+  farmPhone = phone;
+  document.getElementById('status-phone').innerText = phone || 'Sem número';
+  
   // Carrega status do localStorage ao trocar de fazenda
   highlightStatusPanel(getFarmStatus(key));
   fetchLogs();
@@ -373,6 +378,9 @@ async function fetchLogs(){
   if(!token){
     ['d1','daily','hour','hidrico','cotacoes','noticias','economia'].forEach(k=>{
       document.getElementById('msg-'+k).innerHTML = '<i style="color:var(--yellow)">Token JWT não cadastrado para esta fazenda.</i>';
+      document.getElementById('time-'+k).innerText = '—';
+      const imgEl = document.getElementById('img-'+k);
+      if(imgEl) imgEl.src = 'https://via.placeholder.com/600x420?text=Sem+Acesso';
     });
     loadContacts();
     return;
@@ -530,10 +538,9 @@ async function setStatus(phone, st){
 
 // ── ENDPOINTS ──────────────────────────────────────────────
 const ENDPOINTS = [
-  {section:'Sistema'},
+  {section:'Sistema & Chat'},
   {name:'Root / Status',          path:'/'},
   {name:'Auth – Users Me',        path:'/auth/users/me'},
-  {section:'Chat'},
   {name:'Chat Logs',              path:'/chat/logs'},
   {name:'Chat Contacts',          path:'/chat/contacts'},
   {section:'Commodities & Mercado'},
@@ -541,11 +548,10 @@ const ENDPOINTS = [
   {name:'Commodities Quotes',     path:'/commodities/quotes'},
   {name:'Market News',            path:'/commodities/news'},
   {name:'Price Snapshot',         path:'/commodities/prices'},
-  {section:'Clima'},
+  {section:'Clima & Irrigação'},
   {name:'Weather Forecast',       path:'/weather/forecast?city=sao_paulo&state=SP'},
   {name:'Weather History',        path:'/weather/history'},
   {name:'Farm Forecast',          path:'/weather/farm-forecast'},
-  {section:'Irrigação'},
   {name:'Valley History',         path:'/valley/history'},
   {section:'Máquinas'},
   {name:'Machine Alerts',         path:'/machines/alerts'},
@@ -653,9 +659,8 @@ function backgroundHealthCheck() {
 }
 
 // Boot
+selectFarm('gjacana','Fazenda Jaçanã','5683','5511963065709');
 loadAllFarmDots();
-highlightStatusPanel(getFarmStatus(farm));
-fetchLogs();
 backgroundHealthCheck();
 setInterval(backgroundHealthCheck, 15 * 60 * 1000); // Roda a cada 15 min
 </script>
