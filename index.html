@@ -26,18 +26,9 @@
         <div class="leg-item"><span class="status-dot red"></span> Banido</div>
         <div class="leg-item"><span class="status-dot none"></span> Sem Número</div>
       </div>
-      <div class="topbar-actions" style="display: flex; align-items: center; gap: 12px;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="font-size: 0.72rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px;">Período:</span>
-          <select id="overview-date-filter" onchange="updateOverviewDashboard()" style="background: var(--panel); color: var(--text); border: 1px solid var(--border); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; outline: none; font-family: inherit; transition: all 0.2s ease;">
-            <option value="today">Hoje</option>
-            <option value="7days">Últimos 7 dias</option>
-            <option value="30days">Últimos 30 dias</option>
-            <option value="all" selected>Todo o período</option>
-          </select>
-        </div>
+      <div class="topbar-actions" style="display: flex; gap: 8px;">
         <button class="theme-btn" id="btn-test-api" onclick="forceCheckEndpoints()" style="display: none; align-items: center; gap: 8px; font-family:'Outfit',sans-serif;">🔄 Testar Endpoints</button>
-        <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" style="padding: 6px 12px; font-size: 0.8rem;">🌙 Modo Escuro</button>
+        <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">🌙 Modo Escuro</button>
       </div>
     </header>
 
@@ -50,6 +41,19 @@
 
   <!-- ABA 0: VISÃO GERAL -->
   <div id="tab-overview" class="tabcontent active">
+    
+    <!-- Seletor de Período Compacto -->
+    <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 12px; padding: 0 4px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 0.72rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px;">Período:</span>
+        <select id="overview-date-filter" onchange="updateOverviewDashboard()" style="background: var(--panel); color: var(--text); border: 1px solid var(--border); padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; outline: none; font-family: inherit;">
+          <option value="today">Hoje</option>
+          <option value="7days">Últimos 7 dias</option>
+          <option value="30days">Últimos 30 dias</option>
+          <option value="all" selected>Todo o período</option>
+        </select>
+      </div>
+    </div>
 
     <div class="overview-grid">
       
@@ -168,80 +172,87 @@
 
     </div>
 
-    <!-- Row 2: Desempenho de Disparos Line Chart -->
-    <div class="overview-card chart-card" style="padding: 16px 20px; margin-top: 16px; display: flex; flex-direction: column; justify-content: space-between; min-height: 200px; height: auto;">
-      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 10px;">
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <div class="small-card-icon purple-bg" style="width: 32px; height: 32px; font-size: 1.1rem; border-radius: 8px;">📈</div>
-          <div class="small-card-label" style="font-size: 0.85rem; font-weight: 800;">Desempenho de Disparos</div>
-        </div>
-        <div class="chart-legend" style="display: flex; gap: 12px; font-size: 0.75rem; font-weight: 700;">
-          <div style="display: flex; align-items: center; gap: 6px;"><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--yellow);"></span> Jaçanã</div>
-          <div style="display: flex; align-items: center; gap: 6px;"><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--primary);"></span> Apoloni</div>
-          <div style="display: flex; align-items: center; gap: 6px;"><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--green);"></span> Piccini</div>
-          <div style="display: flex; align-items: center; gap: 6px;"><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--blue);"></span> Fazenda WS</div>
-        </div>
-      </div>
-      <div id="overview-chart-container" style="width: 100%; margin-top: 10px;">
-        <!-- SVG chart will be injected here -->
-      </div>
-    </div>
-
-    <!-- Row 3: Canais Ativos and Small Metrics Cards -->
-    <div class="overview-bottom-row" style="margin-top: 16px;">
+    <!-- Row 2: Desempenho de Disparos Line Chart & Small Metrics Cards -->
+    <div style="display: grid; grid-template-columns: 2.2fr 1.8fr; gap: 16px; margin-top: 16px; height: 180px;">
       
-      <!-- Canais Ativos -->
-      <div class="small-overview-card" style="padding: 12px 16px; display: flex; align-items: center; gap: 16px; justify-content: space-between; width: 100%; box-sizing: border-box;">
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <div class="small-card-icon blue-bg" style="width: 32px; height: 32px; font-size: 1rem; border-radius: 8px; margin: 0;">📞</div>
-          <div class="small-card-label" style="font-size: 0.85rem; font-weight: 800; margin: 0;">Canais</div>
+      <!-- Left: Line Chart Card -->
+      <div class="overview-card chart-card" style="padding: 12px 16px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box;">
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div class="small-card-icon purple-bg" style="width: 24px; height: 24px; font-size: 0.9rem; border-radius: 6px;">📈</div>
+            <div class="small-card-label" style="font-size: 0.8rem; font-weight: 800;">Desempenho de Disparos</div>
+          </div>
+          <div class="chart-legend" style="display: flex; gap: 8px; font-size: 0.7rem; font-weight: 700;">
+            <div style="display: flex; align-items: center; gap: 4px;"><span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--yellow);"></span> JAC</div>
+            <div style="display: flex; align-items: center; gap: 4px;"><span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--primary);"></span> APO</div>
+            <div style="display: flex; align-items: center; gap: 4px;"><span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--green);"></span> PIC</div>
+            <div style="display: flex; align-items: center; gap: 4px;"><span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--blue);"></span> FWS</div>
+          </div>
         </div>
-        <div class="channels-status-list" style="display: flex; gap: 10px; margin: 0; align-items: center; flex-grow: 1; justify-content: flex-end;">
-          <div class="channel-status-item" style="margin: 0; display: flex; align-items: center; gap: 4px;">
-            <span class="status-dot-mini success" id="status-mini-gjacana" style="width: 6px; height: 6px; margin: 0;"></span>
-            <span class="channel-name-mini" style="font-size: 0.75rem; font-weight: 700; margin: 0;">JAC</span>
-          </div>
-          <div class="channel-status-item" style="margin: 0; display: flex; align-items: center; gap: 4px;">
-            <span class="status-dot-mini success" id="status-mini-apoloni" style="width: 6px; height: 6px; margin: 0;"></span>
-            <span class="channel-name-mini" style="font-size: 0.75rem; font-weight: 700; margin: 0;">APO</span>
-          </div>
-          <div class="channel-status-item" style="margin: 0; display: flex; align-items: center; gap: 4px;">
-            <span class="status-dot-mini success" id="status-mini-piccini" style="width: 6px; height: 6px; margin: 0;"></span>
-            <span class="channel-name-mini" style="font-size: 0.75rem; font-weight: 700; margin: 0;">PIC</span>
-          </div>
-          <div class="channel-status-item" style="margin: 0; display: flex; align-items: center; gap: 4px;">
-            <span class="status-dot-mini success" id="status-mini-fazenda_ws" style="width: 6px; height: 6px; margin: 0;"></span>
-            <span class="channel-name-mini" style="font-size: 0.75rem; font-weight: 700; margin: 0;">FWS</span>
-          </div>
+        <div id="overview-chart-container" style="width: 100%; margin-top: 4px; height: 130px;">
+          <!-- SVG chart will be injected here -->
         </div>
       </div>
 
-      <!-- Tipos de Relatório -->
-      <div class="small-overview-card" style="padding: 12px 16px;">
-        <div class="small-card-icon purple-bg" style="width: 32px; height: 32px; font-size: 1rem; border-radius: 8px;">📋</div>
-        <div class="small-card-content">
-          <div class="small-card-label" style="font-size: 0.8rem; font-weight: 700;">Relatórios</div>
-          <div class="small-card-value" style="font-size: 1.1rem; font-weight: 900; line-height: 1.1;">5 Formatos</div>
+      <!-- Right: 2x2 Grid of Small Metrics Cards -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 12px; height: 100%;">
+        
+        <!-- Canais Ativos -->
+        <div class="small-overview-card" style="padding: 8px 12px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div class="small-card-icon blue-bg" style="width: 24px; height: 24px; font-size: 0.85rem; border-radius: 6px; margin: 0;">📞</div>
+            <div class="small-card-label" style="font-size: 0.75rem; font-weight: 800; margin: 0;">Canais</div>
+          </div>
+          <div class="channels-status-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 4px; width: 100%;">
+            <div class="channel-status-item" style="margin: 0; display: flex; align-items: center; gap: 4px;">
+              <span class="status-dot-mini success" id="status-mini-gjacana" style="width: 5px; height: 5px; margin: 0;"></span>
+              <span class="channel-name-mini" style="font-size: 0.65rem; font-weight: 700; margin: 0;">JAC</span>
+            </div>
+            <div class="channel-status-item" style="margin: 0; display: flex; align-items: center; gap: 4px;">
+              <span class="status-dot-mini success" id="status-mini-apoloni" style="width: 5px; height: 5px; margin: 0;"></span>
+              <span class="channel-name-mini" style="font-size: 0.65rem; font-weight: 700; margin: 0;">APO</span>
+            </div>
+            <div class="channel-status-item" style="margin: 0; display: flex; align-items: center; gap: 4px;">
+              <span class="status-dot-mini success" id="status-mini-piccini" style="width: 5px; height: 5px; margin: 0;"></span>
+              <span class="channel-name-mini" style="font-size: 0.65rem; font-weight: 700; margin: 0;">PIC</span>
+            </div>
+            <div class="channel-status-item" style="margin: 0; display: flex; align-items: center; gap: 4px;">
+              <span class="status-dot-mini success" id="status-mini-fazenda_ws" style="width: 5px; height: 5px; margin: 0;"></span>
+              <span class="channel-name-mini" style="font-size: 0.65rem; font-weight: 700; margin: 0;">FWS</span>
+            </div>
+          </div>
         </div>
+
+        <!-- Tipos de Relatório -->
+        <div class="small-overview-card" style="padding: 8px 12px; display: flex; align-items: center; gap: 8px; height: 100%; box-sizing: border-box;">
+          <div class="small-card-icon purple-bg" style="width: 24px; height: 24px; font-size: 0.85rem; border-radius: 6px; margin: 0;">📋</div>
+          <div class="small-card-content">
+            <div class="small-card-label" style="font-size: 0.75rem; font-weight: 700;">Relatórios</div>
+            <div class="small-card-value" style="font-size: 0.95rem; font-weight: 900; line-height: 1.1;">5 Formatos</div>
+          </div>
+        </div>
+
+        <!-- Taxa de Opt-out -->
+        <div class="small-overview-card" style="padding: 8px 12px; display: flex; align-items: center; gap: 8px; height: 100%; box-sizing: border-box;">
+          <div class="small-card-icon green-bg" style="width: 24px; height: 24px; font-size: 0.85rem; border-radius: 6px; margin: 0;">📉</div>
+          <div class="small-card-content">
+            <div class="small-card-label" style="font-size: 0.75rem; font-weight: 700;">Opt-out</div>
+            <div class="small-card-value" style="font-size: 0.95rem; font-weight: 900; line-height: 1.1;">0,00%</div>
+          </div>
+        </div>
+
+        <!-- Uptime APIs -->
+        <div class="small-overview-card" style="padding: 8px 12px; display: flex; align-items: center; gap: 8px; height: 100%; box-sizing: border-box;">
+          <div class="small-card-icon orange-bg" style="width: 24px; height: 24px; font-size: 0.85rem; border-radius: 6px; margin: 0;">⚡</div>
+          <div class="small-card-content">
+            <div class="small-card-label" style="font-size: 0.75rem; font-weight: 700;">Uptime</div>
+            <div class="small-card-value" style="font-size: 0.95rem; font-weight: 900; line-height: 1.1;">99.8%</div>
+          </div>
+        </div>
+
       </div>
 
-      <!-- Taxa de Opt-out -->
-      <div class="small-overview-card" style="padding: 12px 16px;">
-        <div class="small-card-icon green-bg" style="width: 32px; height: 32px; font-size: 1rem; border-radius: 8px;">📉</div>
-        <div class="small-card-content">
-          <div class="small-card-label" style="font-size: 0.8rem; font-weight: 700;">Opt-out</div>
-          <div class="small-card-value" style="font-size: 1.1rem; font-weight: 900; line-height: 1.1;">0,00%</div>
-        </div>
-      </div>
-
-      <!-- Uptime APIs -->
-      <div class="small-overview-card" style="padding: 12px 16px;">
-        <div class="small-card-icon orange-bg" style="width: 32px; height: 32px; font-size: 1rem; border-radius: 8px;">⚡</div>
-        <div class="small-card-content">
-          <div class="small-card-label" style="font-size: 0.8rem; font-weight: 700;">Uptime</div>
-          <div class="small-card-value" style="font-size: 1.1rem; font-weight: 900; line-height: 1.1;">99.8%</div>
-        </div>
-      </div>
+    </div>
   </div>
 
   <!-- ABA 1: DASHBOARD -->
@@ -1668,8 +1679,8 @@ function drawOverviewLineChart(logs, dateFilter) {
   });
 
   const width = 600;
-  const height = 140;
-  const padding = { top: 15, right: 20, bottom: 25, left: 35 };
+  const height = 110;
+  const padding = { top: 12, right: 15, bottom: 20, left: 30 };
 
   const chartWidth = width - padding.left - padding.right;
   const chartHeight = height - padding.top - padding.bottom;
@@ -1684,14 +1695,14 @@ function drawOverviewLineChart(logs, dateFilter) {
     const yPos = padding.top + chartHeight - (i / yTicks) * chartHeight;
     gridHtml += `
       <line x1="${padding.left}" y1="${yPos}" x2="${width - padding.right}" y2="${yPos}" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,3" />
-      <text x="${padding.left - 8}" y="${yPos + 3}" fill="var(--muted)" font-size="9" font-weight="700" text-anchor="end">${yVal}</text>
+      <text x="${padding.left - 8}" y="${yPos + 3}" fill="var(--muted)" font-size="8" font-weight="700" text-anchor="end">${yVal}</text>
     `;
   }
 
   timeUnits.forEach((tu, idx) => {
     const xPos = padding.left + (idx / (numPoints - 1)) * chartWidth;
     gridHtml += `
-      <text x="${xPos}" y="${height - 6}" fill="var(--muted)" font-size="9" font-weight="700" text-anchor="middle">${tu.label}</text>
+      <text x="${xPos}" y="${height - 6}" fill="var(--muted)" font-size="8" font-weight="700" text-anchor="middle">${tu.label}</text>
     `;
   });
 
@@ -1714,7 +1725,7 @@ function drawOverviewLineChart(logs, dateFilter) {
 
     const pathD = points.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
     linesHtml += `
-      <path d="${pathD}" fill="none" stroke="${colors[farmKey]}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: all 0.3s ease;" />
+      <path d="${pathD}" fill="none" stroke="${colors[farmKey]}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition: all 0.3s ease;" />
     `;
 
     points.forEach(p => {
@@ -1724,7 +1735,7 @@ function drawOverviewLineChart(logs, dateFilter) {
         `;
       }
       dotsHtml += `
-        <circle cx="${p.x}" cy="${p.y}" r="3.5" fill="var(--panel)" stroke="${colors[farmKey]}" stroke-width="2" style="transition: all 0.3s ease; cursor: pointer;" />
+        <circle cx="${p.x}" cy="${p.y}" r="3" fill="var(--panel)" stroke="${colors[farmKey]}" stroke-width="1.5" style="transition: all 0.3s ease; cursor: pointer;" />
         <title>${FARMS_DATA.find(f => f.key === farmKey).name}: ${p.val} disparos</title>
       `;
     });
