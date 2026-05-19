@@ -142,22 +142,22 @@
       </div>
 
       <!-- Card 3: Colin IA - Interativo -->
-      <div class="overview-card purple-theme">
-        <div class="card-header">
-          <span class="card-title">3. Colin IA - Interativo</span>
-          <span class="badge-construction">Em Construção</span>
-        </div>
-        <div class="construction-container">
-          <div class="construction-image-wrapper">
+      <div class="overview-card purple-theme" style="padding: 0; overflow: hidden; display: flex; flex-direction: column; height: 100%;">
+        <div class="construction-container" style="flex-grow: 1; height: 100%;">
+          <div class="construction-image-wrapper" style="width: 100%; height: 100%; border-radius: 0; border: none; position: relative;">
             <img src="images/colin_avatar.png" alt="Colin IA" class="construction-img">
-            <div class="construction-overlay">
-              <span class="construction-icon">🛠️</span>
-              <span class="construction-text">Nova Aba Interativa</span>
-              <span class="construction-sub">Acompanhe a evolução do Colin nas próximas atualizações.</span>
+            <div class="construction-overlay" style="background: rgba(26, 34, 56, 0.45);">
+              <div class="card-header" style="position: absolute; top: 20px; left: 24px; right: 24px; border: none; display: flex; justify-content: space-between; align-items: center; width: calc(100% - 48px); padding: 0;">
+                <span class="card-title" style="color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.4);">3. Colin IA - Interativo</span>
+                <span class="badge-construction" style="background: rgba(139, 92, 246, 0.4); color: #fff; border-color: rgba(255,255,255,0.25);">Em Construção</span>
+              </div>
+              <span class="construction-icon" style="font-size: 2.5rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">🛠️</span>
+              <span class="construction-text" style="font-size: 1.4rem; color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,0.6); margin-top: 10px;">Nova Aba Interativa</span>
+              <span class="construction-sub" style="font-size: 0.85rem; color: #e2e8f0; text-shadow: 0 1px 3px rgba(0,0,0,0.6); max-width: 260px; margin: 0 auto;">Acompanhe a evolução do Colin nas próximas atualizações.</span>
+              <a href="#" class="view-all-link" onclick="switchTab('colin'); return false;" style="position: absolute; bottom: 20px; left: 24px; right: 24px; margin: 0; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.4); display: flex; justify-content: flex-end; align-items: center; text-decoration: none; width: calc(100% - 48px);">Acessar protótipo da IA <span style="margin-left: 6px;">➔</span></a>
             </div>
           </div>
         </div>
-        <a href="#" class="view-all-link" onclick="switchTab('colin'); return false;">Acessar protótipo da IA <span>➔</span></a>
       </div>
 
     </div>
@@ -1409,18 +1409,7 @@ function updateOverviewDashboard() {
     }
   });
 
-  // Slow endpoints alerts
-  if (slowEndpoints.length > 0) {
-    alertsCount += slowEndpoints.length;
-    slowEndpoints.forEach(ep => {
-      recentAlertsHtml += `<div class="recent-alert-item" style="border-color: var(--yellow); color: var(--yellow);">
-        <span class="circle-icon" style="background: var(--yellow); color: #000;">!</span>
-        Endpoint <strong>${ep.name}</strong> com resposta lenta (${ep.ms}ms).
-      </div>`;
-    });
-  }
-
-  // Count machine alerts per farm
+  // Count machine alerts per farm (completely apart from API endpoints alerts)
   FARMS_DATA.forEach(f => {
     const count = farmAlertsCache[f.key] || 0;
     if (count > 0) {
@@ -1463,7 +1452,7 @@ function updateOverviewDashboard() {
       alertStatusBox.innerHTML = `<span class="circle-icon" style="background: var(--red); color: #fff;">!</span> Atenção: ${alertsCount} pendências operacionais encontradas.`;
     }
     if (alertRecentBox) {
-      alertRecentBox.parentElement.innerHTML = `<div class="recent-title">Alertas recentes</div>` + recentAlertsHtml;
+      alertRecentBox.parentElement.innerHTML = `<div class="recent-title">Alertas por Fazenda</div>` + recentAlertsHtml;
     }
   } else {
     if (alertCard) alertCard.style.borderTopColor = 'var(--green)';
@@ -1476,9 +1465,9 @@ function updateOverviewDashboard() {
       alertStatusBox.innerHTML = `<span class="circle-icon">✓</span> Tudo perfeito! Nenhum alerta no momento.`;
     }
     if (alertRecentBox) {
-      alertRecentBox.parentElement.innerHTML = `<div class="recent-title">Alertas recentes</div>
+      alertRecentBox.parentElement.innerHTML = `<div class="recent-title">Alertas por Fazenda</div>
         <div class="recent-alert-item" id="overview-recent-alert">
-          <span class="circle-icon">✓</span> Nenhum alerta encontrado. Tudo funcionando dentro do esperado.
+          <span class="circle-icon">✓</span> Nenhum alerta operacional ativo. Tudo funcionando dentro do esperado.
         </div>`;
     }
   }
@@ -1495,13 +1484,35 @@ function updateOverviewDashboard() {
 
   const targetLogs = usingFallback ? allLogs : todayLogs;
 
-  // Update Card 2: Volume de Disparos
+  // Group target logs into submission blocks (reports)
+  const sortedLogs = [...targetLogs].sort((a, b) => new Date(a.sent_at) - new Date(b.sent_at));
+  const blocks = [];
+  sortedLogs.forEach(log => {
+    const logTime = new Date(log.sent_at).getTime();
+    const matchingBlockIndex = blocks.findIndex(b => {
+      return b.farm_key === log.farm_key &&
+             b.phone_number === log.phone_number &&
+             Math.abs(b.time - logTime) < 60 * 1000;
+    });
+    
+    if (matchingBlockIndex === -1) {
+      blocks.push({
+        farm_key: log.farm_key,
+        phone_number: log.phone_number,
+        time: logTime
+      });
+    }
+  });
+
+  const totalDispatchesBlocks = blocks.length;
+
+  // Update Card 2: Volume de Disparos (using grouped blocks)
   const dispatchesCountEl = document.getElementById('overview-dispatches-count');
-  if (dispatchesCountEl) dispatchesCountEl.innerText = totalDispatches.toLocaleString();
+  if (dispatchesCountEl) dispatchesCountEl.innerText = totalDispatchesBlocks.toLocaleString();
 
   const totalTexts = targetLogs.filter(l => l.message_type === 'text').length;
   const totalImages = targetLogs.filter(l => l.message_type === 'image').length;
-  const avgChannel = Math.round(totalDispatches / 4);
+  const avgChannel = Math.round(totalDispatchesBlocks / 4);
 
   const textsCountEl = document.getElementById('overview-texts-count');
   const imagesCountEl = document.getElementById('overview-images-count');

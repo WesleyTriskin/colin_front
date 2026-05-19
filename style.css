@@ -823,7 +823,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 .construction-image-wrapper {
   position: relative;
   width: 100%;
-  height: 220px;
+  height: 100%;
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid var(--border);
@@ -833,7 +833,8 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: blur(1px) brightness(0.6);
+  object-position: top center;
+  filter: blur(1.5px) brightness(0.55);
 }
 
 .construction-overlay {
