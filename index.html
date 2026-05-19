@@ -41,6 +41,20 @@
 
   <!-- ABA 0: VISÃO GERAL -->
   <div id="tab-overview" class="tabcontent active">
+    
+    <div class="overview-header-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 4px;">
+      <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.4rem; font-weight: 900; margin: 0; color: var(--text);">Dashboard Executivo</h2>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 0.82rem; font-weight: 700; color: var(--muted); text-transform: uppercase;">Período:</span>
+        <select id="overview-date-filter" onchange="updateOverviewDashboard()" style="background: var(--panel); color: var(--text); border: 1px solid var(--border); padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer; outline: none; font-family: inherit; transition: all 0.2s ease;">
+          <option value="today">Hoje</option>
+          <option value="7days">Últimos 7 dias</option>
+          <option value="30days">Últimos 30 dias</option>
+          <option value="all" selected>Todo o período</option>
+        </select>
+      </div>
+    </div>
+
     <div class="overview-grid">
       
       <!-- Card 1: Alertas Operacionais -->
@@ -148,7 +162,7 @@
           <div class="construction-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(26, 34, 56, 0.45); padding: 24px; box-sizing: border-box; text-align: center;">
             <div class="card-header" style="position: absolute; top: 20px; left: 24px; right: 24px; border: none; display: flex; justify-content: space-between; align-items: center; width: calc(100% - 48px); padding: 0;">
               <span class="card-title" style="color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-weight: 800;">3. Colin IA - Interativo</span>
-              <span class="badge-construction" style="background: rgba(139, 92, 246, 0.4); color: #fff; border-color: rgba(255,255,255,0.25);">Em Construção</span>
+              <span class="badge-construction" style="background: rgba(255, 255, 255, 0.15); color: #fff; border: 1px solid rgba(255, 255, 255, 0.25); text-shadow: none; font-size: 0.7rem; letter-spacing: 0.5px; font-weight: 800; padding: 4px 8px; border-radius: 6px;">EM CONSTRUÇÃO</span>
             </div>
             <span class="construction-icon" style="font-size: 2.5rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">🛠️</span>
             <span class="construction-text" style="font-size: 1.4rem; color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,0.6); margin-top: 10px; font-weight: 900; font-family: 'Outfit', sans-serif;">Nova Aba Interativa</span>
@@ -160,32 +174,57 @@
 
     </div>
 
-    <div class="overview-bottom-row">
-      <div class="small-overview-card channel-card">
-        <div class="small-card-icon blue-bg">📞</div>
-        <div class="small-card-content" style="width: 100%;">
-          <div class="small-card-label">Canais Ativos</div>
-          <div class="channels-status-list">
-            <div class="channel-status-item">
-              <span class="status-dot-mini success" id="status-mini-gjacana"></span>
-              <span class="channel-name-mini">Jaçanã</span>
-            </div>
-            <div class="channel-status-item">
-              <span class="status-dot-mini success" id="status-mini-apoloni"></span>
-              <span class="channel-name-mini">Apoloni</span>
-            </div>
-            <div class="channel-status-item">
-              <span class="status-dot-mini success" id="status-mini-piccini"></span>
-              <span class="channel-name-mini">Piccini</span>
-            </div>
-            <div class="channel-status-item">
-              <span class="status-dot-mini success" id="status-mini-fazenda_ws"></span>
-              <span class="channel-name-mini">Fazenda WS</span>
-            </div>
+    <div class="overview-bottom-row" style="margin-bottom: 16px;">
+      
+      <!-- Left: Canais Ativos -->
+      <div class="small-overview-card channel-card" style="height: auto; min-height: 220px; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; padding: 20px;">
+        <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
+          <div class="small-card-icon blue-bg">📞</div>
+          <div class="small-card-label" style="font-size: 0.85rem; font-weight: 800;">Canais Ativos</div>
+        </div>
+        <div class="channels-status-list" style="margin-top: 16px; width: 100%;">
+          <div class="channel-status-item">
+            <span class="status-dot-mini success" id="status-mini-gjacana"></span>
+            <span class="channel-name-mini">Jaçanã</span>
+          </div>
+          <div class="channel-status-item">
+            <span class="status-dot-mini success" id="status-mini-apoloni"></span>
+            <span class="channel-name-mini">Apoloni</span>
+          </div>
+          <div class="channel-status-item">
+            <span class="status-dot-mini success" id="status-mini-piccini"></span>
+            <span class="channel-name-mini">Piccini</span>
+          </div>
+          <div class="channel-status-item">
+            <span class="status-dot-mini success" id="status-mini-fazenda_ws"></span>
+            <span class="channel-name-mini">Fazenda WS</span>
           </div>
         </div>
       </div>
-      
+
+      <!-- Right: Line Chart -->
+      <div class="small-overview-card chart-card" style="height: auto; min-height: 220px; display: flex; flex-direction: column; justify-content: space-between; padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="small-card-icon purple-bg">📈</div>
+            <div class="small-card-label" style="font-size: 0.85rem; font-weight: 800;">Desempenho de Disparos</div>
+          </div>
+          <div class="chart-legend" style="display: flex; gap: 12px; font-size: 0.75rem; font-weight: 700;">
+            <div style="display: flex; align-items: center; gap: 6px;"><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--yellow);"></span> Jaçanã</div>
+            <div style="display: flex; align-items: center; gap: 6px;"><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--primary);"></span> Apoloni</div>
+            <div style="display: flex; align-items: center; gap: 6px;"><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--green);"></span> Piccini</div>
+            <div style="display: flex; align-items: center; gap: 6px;"><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--blue);"></span> Fazenda WS</div>
+          </div>
+        </div>
+        <div id="overview-chart-container" style="width: 100%; margin-top: 10px;">
+          <!-- SVG chart will be injected here -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Row 3: Small Metrics Cards -->
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px;">
       <div class="small-overview-card">
         <div class="small-card-icon purple-bg">📋</div>
         <div class="small-card-content">
@@ -1470,17 +1509,22 @@ function updateOverviewDashboard() {
     }
   }
 
-  const today = new Date().toDateString();
-  const todayLogs = allLogs.filter(l => new Date(l.sent_at).toDateString() === today);
-  let totalDispatches = todayLogs.length;
-  let usingFallback = false;
-  
-  if (totalDispatches === 0) {
-    totalDispatches = allLogs.length;
-    usingFallback = true;
-  }
+  const dateFilter = document.getElementById('overview-date-filter') ? document.getElementById('overview-date-filter').value : 'all';
+  let targetLogs = allLogs;
+  const now = new Date();
 
-  const targetLogs = usingFallback ? allLogs : todayLogs;
+  if (dateFilter === 'today') {
+    const todayStr = now.toDateString();
+    targetLogs = allLogs.filter(l => new Date(l.sent_at).toDateString() === todayStr);
+  } else if (dateFilter === '7days') {
+    const limitDate = new Date();
+    limitDate.setDate(now.getDate() - 7);
+    targetLogs = allLogs.filter(l => new Date(l.sent_at) >= limitDate);
+  } else if (dateFilter === '30days') {
+    const limitDate = new Date();
+    limitDate.setDate(now.getDate() - 30);
+    targetLogs = allLogs.filter(l => new Date(l.sent_at) >= limitDate);
+  }
 
   // Group target logs into submission blocks (reports)
   const sortedLogs = [...targetLogs].sort((a, b) => new Date(a.sent_at) - new Date(b.sent_at));
@@ -1545,6 +1589,162 @@ function updateOverviewDashboard() {
       if (fillEl) fillEl.style.width = pct + '%';
     }
   });
+
+  // Draw Line Chart
+  drawOverviewLineChart(allLogs, dateFilter);
+}
+
+function drawOverviewLineChart(logs, dateFilter) {
+  const now = new Date();
+  let timeUnits = [];
+  
+  if (dateFilter === 'today') {
+    // Show hours of today (last 12 hours, step of 2)
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setHours(d.getHours() - i * 2);
+      const hStr = d.getHours();
+      timeUnits.push({
+        key: hStr + 'h',
+        label: hStr + ':00',
+        matchFn: (logDate) => {
+          const diffMs = now - logDate;
+          const diffHours = diffMs / (1000 * 60 * 60);
+          return diffHours >= i * 2 && diffHours < (i * 2 + 2) && logDate.toDateString() === now.toDateString();
+        }
+      });
+    }
+  } else if (dateFilter === '30days') {
+    // Show last 30 days in 6 intervals of 5 days
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i * 5);
+      timeUnits.push({
+        key: d.toDateString(),
+        label: d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' }),
+        matchFn: (logDate) => {
+          const diffDays = Math.floor((now - logDate) / (1000 * 60 * 60 * 24));
+          return diffDays >= i * 5 && diffDays < (i * 5 + 5);
+        }
+      });
+    }
+  } else {
+    // last 7 days or all (default to last 7 days)
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      timeUnits.push({
+        key: d.toDateString(),
+        label: d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' }),
+        matchFn: (logDate) => logDate.toDateString() === d.toDateString()
+      });
+    }
+  }
+
+  const numPoints = timeUnits.length;
+
+  const counts = {
+    gjacana: Array(numPoints).fill(0),
+    fazenda_ws: Array(numPoints).fill(0),
+    apoloni: Array(numPoints).fill(0),
+    piccini: Array(numPoints).fill(0)
+  };
+
+  const sortedLogs = [...logs].sort((a, b) => new Date(a.sent_at) - new Date(b.sent_at));
+  const blocks = [];
+  sortedLogs.forEach(log => {
+    const logTime = new Date(log.sent_at).getTime();
+    const matchingBlockIndex = blocks.findIndex(b => {
+      return b.farm_key === log.farm_key &&
+             b.phone_number === log.phone_number &&
+             Math.abs(b.time - logTime) < 60 * 1000;
+    });
+    
+    if (matchingBlockIndex === -1) {
+      blocks.push({
+        farm_key: log.farm_key,
+        phone_number: log.phone_number,
+        time: logTime,
+        date: new Date(log.sent_at)
+      });
+    }
+  });
+
+  blocks.forEach(b => {
+    const idx = timeUnits.findIndex(tu => tu.matchFn(b.date));
+    if (idx !== -1 && counts[b.farm_key] !== undefined) {
+      counts[b.farm_key][idx]++;
+    }
+  });
+
+  const width = 600;
+  const height = 140;
+  const padding = { top: 15, right: 20, bottom: 25, left: 35 };
+
+  const chartWidth = width - padding.left - padding.right;
+  const chartHeight = height - padding.top - padding.bottom;
+
+  const allVals = Object.values(counts).flat();
+  const maxVal = Math.max(...allVals, 5);
+
+  let gridHtml = '';
+  const yTicks = 3;
+  for (let i = 0; i <= yTicks; i++) {
+    const yVal = Math.round((maxVal / yTicks) * i);
+    const yPos = padding.top + chartHeight - (i / yTicks) * chartHeight;
+    gridHtml += `
+      <line x1="${padding.left}" y1="${yPos}" x2="${width - padding.right}" y2="${yPos}" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,3" />
+      <text x="${padding.left - 8}" y="${yPos + 3}" fill="var(--muted)" font-size="9" font-weight="700" text-anchor="end">${yVal}</text>
+    `;
+  }
+
+  timeUnits.forEach((tu, idx) => {
+    const xPos = padding.left + (idx / (numPoints - 1)) * chartWidth;
+    gridHtml += `
+      <text x="${xPos}" y="${height - 6}" fill="var(--muted)" font-size="9" font-weight="700" text-anchor="middle">${tu.label}</text>
+    `;
+  });
+
+  const colors = {
+    gjacana: 'var(--yellow)',
+    fazenda_ws: 'var(--blue)',
+    apoloni: 'var(--primary)',
+    piccini: 'var(--green)'
+  };
+
+  let linesHtml = '';
+  let dotsHtml = '';
+
+  Object.keys(counts).forEach(farmKey => {
+    const points = counts[farmKey].map((val, idx) => {
+      const x = padding.left + (idx / (numPoints - 1)) * chartWidth;
+      const y = padding.top + chartHeight - (val / maxVal) * chartHeight;
+      return { x, y, val };
+    });
+
+    const pathD = points.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+    linesHtml += `
+      <path d="${pathD}" fill="none" stroke="${colors[farmKey]}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: all 0.3s ease;" />
+    `;
+
+    points.forEach(p => {
+      dotsHtml += `
+        <circle cx="${p.x}" cy="${p.y}" r="3.5" fill="var(--panel)" stroke="${colors[farmKey]}" stroke-width="2" style="transition: all 0.3s ease; cursor: pointer;" />
+        <title>${FARMS_DATA.find(f => f.key === farmKey).name}: ${p.val} disparos</title>
+      `;
+    });
+  });
+
+  const svgContainer = document.getElementById('overview-chart-container');
+  if (svgContainer) {
+    svgContainer.innerHTML = `
+      <svg viewBox="0 0 ${width} ${height}" style="width: 100%; height: auto; display: block; overflow: visible;">
+        ${gridHtml}
+        ${linesHtml}
+        ${dotsHtml}
+      </svg>
+    `;
+  }
 }
 
 async function preloadAllFarmsData() {
