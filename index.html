@@ -228,12 +228,29 @@ const BASE = 'https://prx.triskin.tech/api_data/v1';
 let farm = 'gjacana';
 let allLogs = [];
 
-const fmt = d => {
+const fmt = (d, key) => {
   if (!d) return { text: '—', isAlert: true };
   const dateObj = new Date(d);
   const formatted = dateObj.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
-  const today = new Date();
-  const isToday = dateObj.getDate() === today.getDate() && dateObj.getMonth() === today.getMonth() && dateObj.getFullYear() === today.getFullYear();
+  const now = new Date();
+  const isToday = dateObj.getDate() === now.getDate() && dateObj.getMonth() === now.getMonth() && dateObj.getFullYear() === now.getFullYear();
+
+  if (key === 'd1') {
+    // Regra para D-1: deve enviar até às 06:00 do dia atual.
+    // Se hoje ainda não passou de 06:00, está em dia (verde) se o último envio foi ontem ou hoje.
+    if (now.getHours() < 6) {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const isYesterday = dateObj.getDate() === yesterday.getDate() && dateObj.getMonth() === yesterday.getMonth() && dateObj.getFullYear() === yesterday.getFullYear();
+      const isSentYesterdayOrToday = isToday || isYesterday;
+      return { text: formatted, isAlert: !isSentYesterdayOrToday };
+    } else {
+      // Se já passou das 06:00, o envio tem que ter sido hoje
+      return { text: formatted, isAlert: !isToday };
+    }
+  }
+
+  // Regra padrão para os outros por enquanto: tem que ser de hoje
   return { text: formatted, isAlert: !isToday };
 };
 // Parser de markdown WhatsApp → HTML premium
@@ -440,20 +457,16 @@ async function fetchLogs(){
         msgEl.style.opacity = '1';
       });
       const timeEl = document.getElementById('time-'+key);
-      const res = fmt(log ? log.sent_at : null);
+      const res = fmt(log ? log.sent_at : null, key);
       timeEl.innerText = res.text;
       if (res.isAlert) {
-        timeEl.style.border = "1px solid var(--red)";
+        timeEl.style.borderColor = "var(--red)";
         timeEl.style.color = "var(--red)";
-        timeEl.style.padding = "2px 6px";
-        timeEl.style.borderRadius = "4px";
-        timeEl.style.fontWeight = "600";
+        timeEl.style.background = "rgba(248, 113, 113, 0.1)";
       } else {
-        timeEl.style.border = "";
-        timeEl.style.color = "";
-        timeEl.style.padding = "";
-        timeEl.style.borderRadius = "";
-        timeEl.style.fontWeight = "";
+        timeEl.style.borderColor = "var(--green)";
+        timeEl.style.color = "var(--green)";
+        timeEl.style.background = "rgba(34, 211, 160, 0.1)";
       }
     };
 
