@@ -229,11 +229,20 @@ let farm = 'gjacana';
 let allLogs = [];
 
 const fmt = (d, key) => {
-  if (!d) return { text: '—', isAlert: true };
+  const now = new Date();
+  if (!d) {
+    if (key === 'd1') return { text: '—', status: now.getHours() < 6 ? 'white' : 'red' };
+    if (key === 'daily') return { text: '—', status: now.getHours() < 18 ? 'white' : 'red' };
+    if (key === 'hour') return { text: '—', status: now.getHours() < 8 ? 'white' : 'red' };
+    if (key === 'cotacoes' || key === 'noticias' || key === 'economia') return { text: '—', status: now.getHours() < 8 ? 'white' : 'red' };
+    return { text: '—', status: 'red' };
+  }
+
   const dateObj = new Date(d);
   const formatted = dateObj.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
-  const now = new Date();
   const isToday = dateObj.getDate() === now.getDate() && dateObj.getMonth() === now.getMonth() && dateObj.getFullYear() === now.getFullYear();
+  const diffMs = now - dateObj;
+  const diffHours = diffMs / (1000 * 60 * 60);
 
   if (key === 'd1') {
     // Regra para D-1: deve enviar até às 06:00 do dia atual.
@@ -243,15 +252,54 @@ const fmt = (d, key) => {
       yesterday.setDate(yesterday.getDate() - 1);
       const isYesterday = dateObj.getDate() === yesterday.getDate() && dateObj.getMonth() === yesterday.getMonth() && dateObj.getFullYear() === yesterday.getFullYear();
       const isSentYesterdayOrToday = isToday || isYesterday;
-      return { text: formatted, isAlert: !isSentYesterdayOrToday };
+      return { text: formatted, status: isSentYesterdayOrToday ? 'green' : 'red' };
     } else {
       // Se já passou das 06:00, o envio tem que ter sido hoje
-      return { text: formatted, isAlert: !isToday };
+      return { text: formatted, status: isToday ? 'green' : 'red' };
     }
   }
 
-  // Regra padrão para os outros por enquanto: tem que ser de hoje
-  return { text: formatted, isAlert: !isToday };
+  if (key === 'daily') {
+    // Regra para Daily: deve enviar até às 18:00 do dia atual.
+    if (isToday) {
+      return { text: formatted, status: 'green' };
+    } else {
+      return { text: formatted, status: now.getHours() < 18 ? 'white' : 'red' };
+    }
+  }
+
+  if (key === 'hour') {
+    // Regra para Hour: a partir das 08:00, envios de 1 em 1 hora.
+    if (now.getHours() < 8) {
+      return { text: formatted, status: diffHours <= 1 ? 'green' : 'white' };
+    } else {
+      if (diffHours <= 1) {
+        return { text: formatted, status: 'green' };
+      } else if (diffHours <= 48) {
+        return { text: formatted, status: 'yellow' };
+      } else {
+        return { text: formatted, status: 'red' };
+      }
+    }
+  }
+
+  if (key === 'hidrico') {
+    // Regra para Hídrico: 1 envio a cada 15 dias.
+    const diffDays = diffHours / 24;
+    return { text: formatted, status: diffDays <= 15 ? 'green' : 'red' };
+  }
+
+  if (key === 'cotacoes' || key === 'noticias' || key === 'economia') {
+    // Regra para Cotações / Notícias / Economia: disparam a partir das 08:00.
+    if (isToday) {
+      return { text: formatted, status: 'green' };
+    } else {
+      return { text: formatted, status: now.getHours() < 8 ? 'white' : 'red' };
+    }
+  }
+
+  // Regra padrão
+  return { text: formatted, status: isToday ? 'green' : 'red' };
 };
 // Parser de markdown WhatsApp → HTML premium
 function parseWhatsApp(text) {
@@ -459,14 +507,24 @@ async function fetchLogs(){
       const timeEl = document.getElementById('time-'+key);
       const res = fmt(log ? log.sent_at : null, key);
       timeEl.innerText = res.text;
-      if (res.isAlert) {
+      
+      // Reseta estilos de borda e cor
+      timeEl.style.borderColor = "";
+      timeEl.style.color = "";
+      timeEl.style.background = "";
+      
+      if (res.status === 'red') {
         timeEl.style.borderColor = "var(--red)";
         timeEl.style.color = "var(--red)";
         timeEl.style.background = "rgba(248, 113, 113, 0.1)";
-      } else {
+      } else if (res.status === 'green') {
         timeEl.style.borderColor = "var(--green)";
         timeEl.style.color = "var(--green)";
         timeEl.style.background = "rgba(34, 211, 160, 0.1)";
+      } else if (res.status === 'yellow') {
+        timeEl.style.borderColor = "var(--yellow)";
+        timeEl.style.color = "var(--yellow)";
+        timeEl.style.background = "rgba(251, 191, 36, 0.1)";
       }
     };
 
