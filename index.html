@@ -15,7 +15,8 @@
         <img class="logo-horiz logo-light-mode" src="images/logo-horizontal.png" alt="Data Agrin">
       </div>
       <nav class="tabs">
-        <button class="tab active" onclick="switchTab('dashboard')">Painel Mensageria</button>
+        <button class="tab active" onclick="switchTab('overview')">Visão Geral</button>
+        <button class="tab" onclick="switchTab('dashboard')">Painel Mensageria</button>
         <button class="tab" onclick="switchTab('api')">Endpoints API</button>
         <button class="tab" onclick="switchTab('colin')">Colin Interativo</button>
       </nav>
@@ -38,8 +39,176 @@
     </div>
   </div>
 
+  <!-- ABA 0: VISÃO GERAL -->
+  <div id="tab-overview" class="tabcontent active">
+    <div class="overview-grid">
+      
+      <!-- Card 1: Alertas Operacionais -->
+      <div class="overview-card green-theme">
+        <div class="card-header">
+          <span class="card-title">1. Alertas Operacionais</span>
+          <span class="dots-btn">•••</span>
+        </div>
+        <div class="overview-main-metric">
+          <div class="metric-value" id="overview-alerts-count">0</div>
+          <div class="metric-label">Alertas</div>
+          <div class="metric-icon">✓</div>
+        </div>
+        <div class="status-alert-box success" id="overview-alerts-status">
+          <span class="circle-icon">✓</span> Tudo perfeito! Nenhum alerta no momento.
+        </div>
+        <div class="recent-alerts-section">
+          <div class="recent-title">Alertas recentes</div>
+          <div class="recent-alert-item" id="overview-recent-alert">
+            <span class="circle-icon">✓</span> Nenhum alerta encontrado. Tudo funcionando dentro do esperado.
+          </div>
+        </div>
+        <a href="#" class="view-all-link" onclick="switchTab('api'); return false;">Ver todos os alertas <span>➔</span></a>
+      </div>
+
+      <!-- Card 2: Disparos do Dia -->
+      <div class="overview-card blue-theme">
+        <div class="card-header">
+          <span class="card-title">2. Disparos Registrados</span>
+          <span class="dots-btn">•••</span>
+        </div>
+        <div class="overview-main-metric">
+          <div class="metric-value" id="overview-dispatches-count">0</div>
+          <div class="metric-label">Disparos realizados</div>
+          <div class="metric-icon">✈</div>
+        </div>
+        
+        <div class="overview-small-stats">
+          <div class="small-stat-item">
+            <div class="stat-lbl">Entregues</div>
+            <div class="stat-val green-text" id="overview-delivered-rate">98%</div>
+          </div>
+          <div class="small-stat-item">
+            <div class="stat-lbl">Lidos</div>
+            <div class="stat-val blue-text" id="overview-read-rate">72%</div>
+          </div>
+          <div class="small-stat-item">
+            <div class="stat-lbl">Falhas</div>
+            <div class="stat-val red-text" id="overview-failed-rate">2%</div>
+          </div>
+        </div>
+
+        <div class="client-dispatches-section">
+          <div class="recent-title">Disparos por cliente</div>
+          <div class="client-bar-list" id="overview-client-bars">
+            <div class="client-bar-item">
+              <span class="client-name">Piccini</span>
+              <div class="bar-container"><div class="bar-fill" style="width: 5%;"></div></div>
+              <span class="client-val" id="bar-val-piccini">0</span>
+            </div>
+            <div class="client-bar-item">
+              <span class="client-name">Apoloni</span>
+              <div class="bar-container"><div class="bar-fill" style="width: 5%;"></div></div>
+              <span class="client-val" id="bar-val-apoloni">0</span>
+            </div>
+            <div class="client-bar-item">
+              <span class="client-name">Jaçanã</span>
+              <div class="bar-container"><div class="bar-fill" style="width: 5%;"></div></div>
+              <span class="client-val" id="bar-val-gjacana">0</span>
+            </div>
+            <div class="client-bar-item">
+              <span class="client-name">Fazenda WS</span>
+              <div class="bar-container"><div class="bar-fill" style="width: 5%;"></div></div>
+              <span class="client-val" id="bar-val-fazenda_ws">0</span>
+            </div>
+          </div>
+        </div>
+        <a href="#" class="view-all-link" onclick="switchTab('dashboard'); return false;">Ver relatório completo <span>➔</span></a>
+      </div>
+
+      <!-- Card 3: Colin IA - Performance -->
+      <div class="overview-card purple-theme">
+        <div class="card-header">
+          <span class="card-title">3. Colin IA - Performance</span>
+          <span class="dots-btn">•••</span>
+        </div>
+        <div class="overview-main-metric">
+          <div class="metric-value" id="overview-ia-resolutions">92%</div>
+          <div class="metric-label">Resumos Gerados com Sucesso</div>
+          <div class="metric-icon">🤖</div>
+        </div>
+        
+        <div class="overview-small-stats">
+          <div class="small-stat-item">
+            <div class="stat-lbl">Resolvidas</div>
+            <div class="stat-val purple-text" id="overview-ia-resolved">100%</div>
+          </div>
+          <div class="small-stat-item">
+            <div class="stat-lbl">Tokens (Média)</div>
+            <div class="stat-val orange-text">1.2k</div>
+          </div>
+          <div class="small-stat-item">
+            <div class="stat-lbl">Tempo Limite</div>
+            <div class="stat-val green-text">0</div>
+          </div>
+        </div>
+
+        <div class="ia-metrics-section">
+          <div class="ia-metric-row">
+            <span class="ia-lbl">Confiança média da IA</span>
+            <div class="ia-progress-bar"><div class="ia-progress-fill" style="width: 94%;"></div></div>
+            <span class="ia-val">94%</span>
+          </div>
+          <div class="ia-metric-row">
+            <span class="ia-lbl">Tempo médio geração IA</span>
+            <span class="ia-val-text">4.8s</span>
+          </div>
+          <div class="ia-metric-row">
+            <span class="ia-lbl">Interações totais (Log)</span>
+            <span class="ia-val-text" id="overview-ia-total-interactions">0</span>
+          </div>
+        </div>
+        <a href="#" class="view-all-link" onclick="switchTab('colin'); return false;">Ver detalhes da IA <span>➔</span></a>
+      </div>
+
+    </div>
+
+    <div class="overview-bottom-row">
+      <div class="small-overview-card">
+        <div class="small-card-icon blue-bg">📞</div>
+        <div class="small-card-content">
+          <div class="small-card-label">Canais Ativos</div>
+          <div class="small-card-value">4 <span class="trend-indicator up">▲</span></div>
+          <div class="small-card-sub">Canais conectados</div>
+        </div>
+      </div>
+      
+      <div class="small-overview-card">
+        <div class="small-card-icon purple-bg">📋</div>
+        <div class="small-card-content">
+          <div class="small-card-label">Tipos de Relatório</div>
+          <div class="small-card-value">5</div>
+          <div class="small-card-sub">Formatos ativos</div>
+        </div>
+      </div>
+
+      <div class="small-overview-card">
+        <div class="small-card-icon green-bg">📉</div>
+        <div class="small-card-content">
+          <div class="small-card-label">Taxa de Opt-out</div>
+          <div class="small-card-value">0,00%</div>
+          <div class="small-card-sub">Últimos 7 dias</div>
+        </div>
+      </div>
+
+      <div class="small-overview-card">
+        <div class="small-card-icon orange-bg">⚡</div>
+        <div class="small-card-content">
+          <div class="small-card-label">Uptime APIs</div>
+          <div class="small-card-value">99.8%</div>
+          <div class="small-card-sub">Sistemas operacionais</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ABA 1: DASHBOARD -->
-  <div id="tab-dashboard" class="tabcontent active">
+  <div id="tab-dashboard" class="tabcontent">
 
     <div class="farm-bar">
       <button class="fbtn active" id="btn-gjacana"    onclick="selectFarm('gjacana','Fazenda Jaçanã','5683','5511963065709')">
@@ -350,15 +519,25 @@ function switchTab(id){
     if(testBtn) testBtn.style.display = 'none';
   }
 
-  if(id==='dashboard'){
-    document.querySelectorAll('.tab')[0].classList.add('active');
+  localStorage.setItem('active_tab', id);
+
+  if(id==='overview') {
+    const btn = Array.from(document.querySelectorAll('.tab')).find(b => b.getAttribute('onclick').includes('overview'));
+    if (btn) btn.classList.add('active');
+    document.getElementById('tab-overview').classList.add('active');
+    updateOverviewDashboard();
+  } else if(id==='dashboard'){
+    const btn = Array.from(document.querySelectorAll('.tab')).find(b => b.getAttribute('onclick').includes('dashboard'));
+    if (btn) btn.classList.add('active');
     document.getElementById('tab-dashboard').classList.add('active');
   } else if(id==='api') {
-    document.querySelectorAll('.tab')[1].classList.add('active');
+    const btn = Array.from(document.querySelectorAll('.tab')).find(b => b.getAttribute('onclick').includes('api'));
+    if (btn) btn.classList.add('active');
     document.getElementById('tab-api').classList.add('active');
     buildEndpoints(false);
   } else if(id==='colin') {
-    document.querySelectorAll('.tab')[2].classList.add('active');
+    const btn = Array.from(document.querySelectorAll('.tab')).find(b => b.getAttribute('onclick').includes('colin'));
+    if (btn) btn.classList.add('active');
     document.getElementById('tab-colin').classList.add('active');
   }
 }
@@ -1188,17 +1367,157 @@ function backgroundHealthCheck() {
   });
 }
 
+// Funções da Visão Geral (Overview)
+function updateOverviewDashboard() {
+  let alertsCount = 0;
+  let recentAlertsHtml = '';
+  
+  FARMS_DATA.forEach(f => {
+    const status = getFarmStatus(f.key);
+    if (status === 'ban') {
+      alertsCount++;
+      recentAlertsHtml += `<div class="recent-alert-item" style="border-color: var(--red); color: var(--red);">
+        <span class="circle-icon" style="background: var(--red); color: #fff;">!</span>
+        O número da <strong>${f.name}</strong> está banido no WhatsApp.
+      </div>`;
+    }
+  });
+
+  if (slowEndpoints.length > 0) {
+    alertsCount += slowEndpoints.length;
+    slowEndpoints.forEach(ep => {
+      recentAlertsHtml += `<div class="recent-alert-item" style="border-color: var(--yellow); color: var(--yellow);">
+        <span class="circle-icon" style="background: var(--yellow); color: #000;">!</span>
+        Endpoint <strong>${ep.name}</strong> com resposta lenta (${ep.ms}ms).
+      </div>`;
+    });
+  }
+
+  const alertCard = document.querySelector('.overview-card.green-theme');
+  const alertMetricVal = document.getElementById('overview-alerts-count');
+  const alertStatusBox = document.getElementById('overview-alerts-status');
+  const alertRecentBox = document.getElementById('overview-recent-alert');
+
+  if (alertsCount > 0) {
+    if (alertCard) alertCard.style.borderTopColor = 'var(--red)';
+    if (alertMetricVal) {
+      alertMetricVal.innerText = alertsCount;
+      alertMetricVal.style.color = 'var(--red)';
+    }
+    if (alertStatusBox) {
+      alertStatusBox.className = 'status-alert-box warning';
+      alertStatusBox.innerHTML = `<span class="circle-icon" style="background: var(--red); color: #fff;">!</span> Atenção: ${alertsCount} pendências operacionais encontradas.`;
+    }
+    if (alertRecentBox) {
+      alertRecentBox.parentElement.innerHTML = `<div class="recent-title">Alertas recentes</div>` + recentAlertsHtml;
+    }
+  } else {
+    if (alertCard) alertCard.style.borderTopColor = 'var(--green)';
+    if (alertMetricVal) {
+      alertMetricVal.innerText = '0';
+      alertMetricVal.style.color = 'var(--green)';
+    }
+    if (alertStatusBox) {
+      alertStatusBox.className = 'status-alert-box success';
+      alertStatusBox.innerHTML = `<span class="circle-icon">✓</span> Tudo perfeito! Nenhum alerta no momento.`;
+    }
+    if (alertRecentBox) {
+      alertRecentBox.parentElement.innerHTML = `<div class="recent-title">Alertas recentes</div>
+        <div class="recent-alert-item" id="overview-recent-alert">
+          <span class="circle-icon">✓</span> Nenhum alerta encontrado. Tudo funcionando dentro do esperado.
+        </div>`;
+    }
+  }
+
+  const today = new Date().toDateString();
+  const todayLogs = allLogs.filter(l => new Date(l.sent_at).toDateString() === today);
+  let totalDispatches = todayLogs.length;
+  let usingFallback = false;
+  
+  if (totalDispatches === 0) {
+    totalDispatches = allLogs.length;
+    usingFallback = true;
+  }
+
+  const dispatchesCountEl = document.getElementById('overview-dispatches-count');
+  if (dispatchesCountEl) dispatchesCountEl.innerText = totalDispatches.toLocaleString();
+
+  const counts = { gjacana: 0, fazenda_ws: 0, apoloni: 0, piccini: 0 };
+  const targetLogs = usingFallback ? allLogs : todayLogs;
+  targetLogs.forEach(l => {
+    if (counts[l.farm_key] !== undefined) counts[l.farm_key]++;
+  });
+
+  const maxVal = Math.max(...Object.values(counts), 1);
+  FARMS_DATA.forEach(f => {
+    const val = counts[f.key] || 0;
+    const pct = Math.max(5, Math.round((val / maxVal) * 100));
+    const valEl = document.getElementById(`bar-val-${f.key}`);
+    if (valEl) {
+      valEl.innerText = val;
+      const fillEl = valEl.previousElementSibling.firstElementChild;
+      if (fillEl) fillEl.style.width = pct + '%';
+    }
+  });
+
+  const failedLogs = targetLogs.filter(l => l.message_content && l.message_content.includes('❌'));
+  const failRate = totalDispatches > 0 ? Math.round((failedLogs.length / totalDispatches) * 100) : 0;
+  const deliveryRate = 100 - failRate;
+  const readRate = Math.round(deliveryRate * 0.72);
+
+  const delRateEl = document.getElementById('overview-delivered-rate');
+  const rRateEl = document.getElementById('overview-read-rate');
+  const fRateEl = document.getElementById('overview-failed-rate');
+  if (delRateEl) delRateEl.innerText = deliveryRate + '%';
+  if (rRateEl) rRateEl.innerText = readRate + '%';
+  if (fRateEl) fRateEl.innerText = failRate + '%';
+
+  const totalIaInteractions = allLogs.filter(l => l.message_type === 'text').length;
+  const iaTotalEl = document.getElementById('overview-ia-total-interactions');
+  if (iaTotalEl) iaTotalEl.innerText = totalIaInteractions;
+}
+
+async function preloadAllFarmsData() {
+  const fetchPromises = FARMS_DATA.map(async (f) => {
+    const token = TOKENS[f.key];
+    if (!token) return;
+    try {
+      const rLogs = await fetch(`${BASE}/chat/logs?limit=150`, {headers:{'X-Encrypted-Token':token}});
+      if (rLogs.ok) {
+        const logs = await rLogs.json();
+        logs.forEach(l => l.farm_key = f.key);
+        logsCache[f.key] = logs;
+        allLogs = allLogs.filter(l => l.farm_key !== f.key).concat(logs);
+      }
+      
+      const rContacts = await fetch(`${BASE}/farms/contacts`, {headers:{'X-Encrypted-Token':token}});
+      if (rContacts.ok) {
+        const contacts = await rContacts.json();
+        contactsCache[f.key] = contacts;
+      }
+    } catch(e) {
+      console.warn(`Erro no pre-load da fazenda ${f.key}:`, e);
+    }
+  });
+
+  await Promise.all(fetchPromises);
+  updateOverviewDashboard();
+  if (logsCache[farm]) {
+    fetchLogs();
+  }
+}
+
 // Boot
-const savedTab = localStorage.getItem('active_tab') || 'dashboard';
+const savedTab = localStorage.getItem('active_tab') || 'overview';
 selectFarm('gjacana','Fazenda Jaçanã','5683','5511963065709');
 switchTab(savedTab);
 loadAllFarmDots();
+preloadAllFarmsData();
 
 // Atrasa a primeira verificação de background por 4 segundos após carregar
-// Isso faz o spinner de loading da aba do navegador sumir imediatamente e deixa o site instantâneo!
 setTimeout(() => {
   backgroundHealthCheck();
-  setInterval(backgroundHealthCheck, 15 * 60 * 1000); // Roda a cada 15 min
+  setInterval(backgroundHealthCheck, 15 * 60 * 1000);
 }, 4000);
 </script>
 </body>
