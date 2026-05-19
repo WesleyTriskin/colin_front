@@ -66,35 +66,35 @@
         <a href="#" class="view-all-link" onclick="switchTab('api'); return false;">Ver todos os alertas <span>➔</span></a>
       </div>
 
-      <!-- Card 2: Disparos do Dia -->
+      <!-- Card 2: Volume de Disparos -->
       <div class="overview-card blue-theme">
         <div class="card-header">
-          <span class="card-title">2. Disparos Registrados</span>
+          <span class="card-title">2. Volume de Disparos</span>
           <span class="dots-btn">•••</span>
         </div>
         <div class="overview-main-metric">
           <div class="metric-value" id="overview-dispatches-count">0</div>
-          <div class="metric-label">Disparos realizados</div>
+          <div class="metric-label">Total de mensagens enviadas</div>
           <div class="metric-icon">✈</div>
         </div>
         
         <div class="overview-small-stats">
           <div class="small-stat-item">
-            <div class="stat-lbl">Entregues</div>
-            <div class="stat-val green-text" id="overview-delivered-rate">98%</div>
+            <div class="stat-lbl">Textos</div>
+            <div class="stat-val blue-text" id="overview-texts-count">0</div>
           </div>
           <div class="small-stat-item">
-            <div class="stat-lbl">Lidos</div>
-            <div class="stat-val blue-text" id="overview-read-rate">72%</div>
+            <div class="stat-lbl">Imagens</div>
+            <div class="stat-val green-text" id="overview-images-count">0</div>
           </div>
           <div class="small-stat-item">
-            <div class="stat-lbl">Falhas</div>
-            <div class="stat-val red-text" id="overview-failed-rate">2%</div>
+            <div class="stat-lbl">Média/Canal</div>
+            <div class="stat-val purple-text" id="overview-avg-channel">0</div>
           </div>
         </div>
 
         <div class="client-dispatches-section">
-          <div class="recent-title">Disparos por cliente</div>
+          <div class="recent-title">Mensagens por cliente</div>
           <div class="client-bar-list" id="overview-client-bars">
             <div class="client-bar-item">
               <span class="client-name">Piccini</span>
@@ -121,49 +121,52 @@
         <a href="#" class="view-all-link" onclick="switchTab('dashboard'); return false;">Ver relatório completo <span>➔</span></a>
       </div>
 
-      <!-- Card 3: Colin IA - Performance -->
+      <!-- Card 3: Relatórios do Sistema -->
       <div class="overview-card purple-theme">
         <div class="card-header">
-          <span class="card-title">3. Colin IA - Performance</span>
+          <span class="card-title">3. Relatórios do Sistema</span>
           <span class="dots-btn">•••</span>
         </div>
         <div class="overview-main-metric">
-          <div class="metric-value" id="overview-ia-resolutions">92%</div>
-          <div class="metric-label">Resumos Gerados com Sucesso</div>
-          <div class="metric-icon">🤖</div>
+          <div class="metric-value" id="overview-reports-count-total">0</div>
+          <div class="metric-label">Relatórios compilados</div>
+          <div class="metric-icon">📋</div>
         </div>
         
         <div class="overview-small-stats">
           <div class="small-stat-item">
-            <div class="stat-lbl">Resolvidas</div>
-            <div class="stat-val purple-text" id="overview-ia-resolved">100%</div>
+            <div class="stat-lbl">Máquinas</div>
+            <div class="stat-val purple-text" id="overview-reports-machines">0</div>
           </div>
           <div class="small-stat-item">
-            <div class="stat-lbl">Tokens (Média)</div>
-            <div class="stat-val orange-text">1.2k</div>
+            <div class="stat-lbl">Hídrico</div>
+            <div class="stat-val blue-text" id="overview-reports-hidrico">0</div>
           </div>
           <div class="small-stat-item">
-            <div class="stat-lbl">Tempo Limite</div>
-            <div class="stat-val green-text">0</div>
+            <div class="stat-lbl">Mercado</div>
+            <div class="stat-val orange-text" id="overview-reports-market">0</div>
           </div>
         </div>
 
         <div class="ia-metrics-section">
+          <div class="recent-title">Distribuição por Categoria</div>
           <div class="ia-metric-row">
-            <span class="ia-lbl">Confiança média da IA</span>
-            <div class="ia-progress-bar"><div class="ia-progress-fill" style="width: 94%;"></div></div>
-            <span class="ia-val">94%</span>
+            <span class="ia-lbl">Relatório Horário (Hour)</span>
+            <div class="ia-progress-bar"><div class="ia-progress-fill" id="bar-fill-hour" style="width: 5%;"></div></div>
+            <span class="ia-val" id="bar-val-report-hour">0</span>
           </div>
           <div class="ia-metric-row">
-            <span class="ia-lbl">Tempo médio geração IA</span>
-            <span class="ia-val-text">4.8s</span>
+            <span class="ia-lbl">Relatório Diário / D-1</span>
+            <div class="ia-progress-bar"><div class="ia-progress-fill" id="bar-fill-daily" style="width: 5%;"></div></div>
+            <span class="ia-val" id="bar-val-report-daily">0</span>
           </div>
           <div class="ia-metric-row">
-            <span class="ia-lbl">Interações totais (Log)</span>
-            <span class="ia-val-text" id="overview-ia-total-interactions">0</span>
+            <span class="ia-lbl">Mercado & Síntese</span>
+            <div class="ia-progress-bar"><div class="ia-progress-fill" id="bar-fill-market" style="width: 5%;"></div></div>
+            <span class="ia-val" id="bar-val-report-market">0</span>
           </div>
         </div>
-        <a href="#" class="view-all-link" onclick="switchTab('colin'); return false;">Ver detalhes da IA <span>➔</span></a>
+        <a href="#" class="view-all-link" onclick="switchTab('dashboard'); return false;">Ver detalhes no painel <span>➔</span></a>
       </div>
 
     </div>
@@ -1439,11 +1442,25 @@ function updateOverviewDashboard() {
     usingFallback = true;
   }
 
+  const targetLogs = usingFallback ? allLogs : todayLogs;
+
+  // 1. Update Card 2: Volume de Disparos
   const dispatchesCountEl = document.getElementById('overview-dispatches-count');
   if (dispatchesCountEl) dispatchesCountEl.innerText = totalDispatches.toLocaleString();
 
+  const totalTexts = targetLogs.filter(l => l.message_type === 'text').length;
+  const totalImages = targetLogs.filter(l => l.message_type === 'image').length;
+  const avgChannel = Math.round(totalDispatches / 4);
+
+  const textsCountEl = document.getElementById('overview-texts-count');
+  const imagesCountEl = document.getElementById('overview-images-count');
+  const avgChannelEl = document.getElementById('overview-avg-channel');
+  if (textsCountEl) textsCountEl.innerText = totalTexts;
+  if (imagesCountEl) imagesCountEl.innerText = totalImages;
+  if (avgChannelEl) avgChannelEl.innerText = avgChannel;
+
+  // Client messages bar chart
   const counts = { gjacana: 0, fazenda_ws: 0, apoloni: 0, piccini: 0 };
-  const targetLogs = usingFallback ? allLogs : todayLogs;
   targetLogs.forEach(l => {
     if (counts[l.farm_key] !== undefined) counts[l.farm_key]++;
   });
@@ -1460,21 +1477,68 @@ function updateOverviewDashboard() {
     }
   });
 
-  const failedLogs = targetLogs.filter(l => l.message_content && l.message_content.includes('❌'));
-  const failRate = totalDispatches > 0 ? Math.round((failedLogs.length / totalDispatches) * 100) : 0;
-  const deliveryRate = 100 - failRate;
-  const readRate = Math.round(deliveryRate * 0.72);
+  // 2. Update Card 3: Relatórios do Sistema
+  // Count compiled reports (text messages)
+  const totalReports = targetLogs.filter(l => l.message_type === 'text').length;
+  const reportsCountTotalEl = document.getElementById('overview-reports-count-total');
+  if (reportsCountTotalEl) reportsCountTotalEl.innerText = totalReports;
 
-  const delRateEl = document.getElementById('overview-delivered-rate');
-  const rRateEl = document.getElementById('overview-read-rate');
-  const fRateEl = document.getElementById('overview-failed-rate');
-  if (delRateEl) delRateEl.innerText = deliveryRate + '%';
-  if (rRateEl) rRateEl.innerText = readRate + '%';
-  if (fRateEl) fRateEl.innerText = failRate + '%';
+  // Count by report types
+  let countMachines = 0;
+  let countHidrico = 0;
+  let countMarket = 0;
 
-  const totalIaInteractions = allLogs.filter(l => l.message_type === 'text').length;
-  const iaTotalEl = document.getElementById('overview-ia-total-interactions');
-  if (iaTotalEl) iaTotalEl.innerText = totalIaInteractions;
+  let countHour = 0;
+  let countDaily = 0; // Daily + D1
+  let countMercadoNoticias = 0;
+
+  targetLogs.forEach(l => {
+    if (l.message_type !== 'text') return;
+    const c = l.message_content.toUpperCase();
+    
+    // Categorias principais
+    if (c.includes('OPERACIONAL') || c.includes('DIÁRIO') || c.includes('HORÁRIO')) {
+      countMachines++;
+    } else if (c.includes('HÍDRICO') || c.includes('AOOO PARCEIRO')) {
+      countHidrico++;
+    } else if (c.includes('COTAÇÕES') || c.includes('SÍNTESE') || c.includes('ECONOMIA')) {
+      countMarket++;
+    }
+
+    // Distribuição por tipo
+    if (c.includes('HORÁRIO')) {
+      countHour++;
+    } else if (c.includes('OPERACIONAL') || c.includes('DIÁRIO')) {
+      countDaily++;
+    } else if (c.includes('COTAÇÕES') || c.includes('SÍNTESE') || c.includes('ECONOMIA')) {
+      countMercadoNoticias++;
+    }
+  });
+
+  const repMachinesEl = document.getElementById('overview-reports-machines');
+  const repHidricoEl = document.getElementById('overview-reports-hidrico');
+  const repMarketEl = document.getElementById('overview-reports-market');
+  if (repMachinesEl) repMachinesEl.innerText = countMachines;
+  if (repHidricoEl) repHidricoEl.innerText = countHidrico;
+  if (repMarketEl) repMarketEl.innerText = countMarket;
+
+  // Update progress bars for report distribution
+  const maxRepType = Math.max(countHour, countDaily, countMercadoNoticias, 1);
+  
+  const valHourEl = document.getElementById('bar-val-report-hour');
+  const fillHourEl = document.getElementById('bar-fill-hour');
+  if (valHourEl) valHourEl.innerText = countHour;
+  if (fillHourEl) fillHourEl.style.width = Math.max(5, Math.round((countHour / maxRepType) * 100)) + '%';
+
+  const valDailyEl = document.getElementById('bar-val-report-daily');
+  const fillDailyEl = document.getElementById('bar-fill-daily');
+  if (valDailyEl) valDailyEl.innerText = countDaily;
+  if (fillDailyEl) fillDailyEl.style.width = Math.max(5, Math.round((countDaily / maxRepType) * 100)) + '%';
+
+  const valMarketEl = document.getElementById('bar-val-report-market');
+  const fillMarketEl = document.getElementById('bar-fill-market');
+  if (valMarketEl) valMarketEl.innerText = countMercadoNoticias;
+  if (fillMarketEl) fillMarketEl.style.width = Math.max(5, Math.round((countMercadoNoticias / maxRepType) * 100)) + '%';
 }
 
 async function preloadAllFarmsData() {
