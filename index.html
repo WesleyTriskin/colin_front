@@ -51,16 +51,36 @@
         </div>
         <div class="overview-main-metric">
           <div class="metric-value" id="overview-alerts-count">0</div>
-          <div class="metric-label">Alertas</div>
+          <div class="metric-label">Alertas ativos</div>
           <div class="metric-icon">✓</div>
         </div>
         <div class="status-alert-box success" id="overview-alerts-status">
           <span class="circle-icon">✓</span> Tudo perfeito! Nenhum alerta no momento.
         </div>
-        <div class="recent-alerts-section">
-          <div class="recent-title">Alertas recentes</div>
-          <div class="recent-alert-item" id="overview-recent-alert">
-            <span class="circle-icon">✓</span> Nenhum alerta encontrado. Tudo funcionando dentro do esperado.
+        
+        <div class="farm-alerts-section">
+          <div class="recent-title">Alertas por Fazenda</div>
+          <div class="client-bar-list" id="overview-farm-alerts">
+            <div class="client-bar-item">
+              <span class="client-name">Piccini</span>
+              <div class="bar-container"><div class="bar-fill alert-bar" id="alert-bar-piccini" style="width: 5%; background: var(--green);"></div></div>
+              <span class="client-val" id="alert-val-piccini">0</span>
+            </div>
+            <div class="client-bar-item">
+              <span class="client-name">Apoloni</span>
+              <div class="bar-container"><div class="bar-fill alert-bar" id="alert-bar-apoloni" style="width: 5%; background: var(--green);"></div></div>
+              <span class="client-val" id="alert-val-apoloni">0</span>
+            </div>
+            <div class="client-bar-item">
+              <span class="client-name">Jaçanã</span>
+              <div class="bar-container"><div class="bar-fill alert-bar" id="alert-bar-gjacana" style="width: 5%; background: var(--green);"></div></div>
+              <span class="client-val" id="alert-val-gjacana">0</span>
+            </div>
+            <div class="client-bar-item">
+              <span class="client-name">Fazenda WS</span>
+              <div class="bar-container"><div class="bar-fill alert-bar" id="alert-bar-fazenda_ws" style="width: 5%; background: var(--green);"></div></div>
+              <span class="client-val" id="alert-val-fazenda_ws">0</span>
+            </div>
           </div>
         </div>
         <a href="#" class="view-all-link" onclick="switchTab('api'); return false;">Ver todos os alertas <span>➔</span></a>
@@ -94,7 +114,7 @@
         </div>
 
         <div class="client-dispatches-section">
-          <div class="recent-title">Mensagens por cliente</div>
+          <div class="recent-title">Destinatários Únicos</div>
           <div class="client-bar-list" id="overview-client-bars">
             <div class="client-bar-item">
               <span class="client-name">Piccini</span>
@@ -121,63 +141,50 @@
         <a href="#" class="view-all-link" onclick="switchTab('dashboard'); return false;">Ver relatório completo <span>➔</span></a>
       </div>
 
-      <!-- Card 3: Relatórios do Sistema -->
+      <!-- Card 3: Colin IA - Interativo -->
       <div class="overview-card purple-theme">
         <div class="card-header">
-          <span class="card-title">3. Relatórios do Sistema</span>
-          <span class="dots-btn">•••</span>
+          <span class="card-title">3. Colin IA - Interativo</span>
+          <span class="badge-construction">Em Construção</span>
         </div>
-        <div class="overview-main-metric">
-          <div class="metric-value" id="overview-reports-count-total">0</div>
-          <div class="metric-label">Relatórios compilados</div>
-          <div class="metric-icon">📋</div>
-        </div>
-        
-        <div class="overview-small-stats">
-          <div class="small-stat-item">
-            <div class="stat-lbl">Máquinas</div>
-            <div class="stat-val purple-text" id="overview-reports-machines">0</div>
-          </div>
-          <div class="small-stat-item">
-            <div class="stat-lbl">Hídrico</div>
-            <div class="stat-val blue-text" id="overview-reports-hidrico">0</div>
-          </div>
-          <div class="small-stat-item">
-            <div class="stat-lbl">Mercado</div>
-            <div class="stat-val orange-text" id="overview-reports-market">0</div>
+        <div class="construction-container">
+          <div class="construction-image-wrapper">
+            <img src="images/colin_avatar.png" alt="Colin IA" class="construction-img">
+            <div class="construction-overlay">
+              <span class="construction-icon">🛠️</span>
+              <span class="construction-text">Nova Aba Interativa</span>
+              <span class="construction-sub">Acompanhe a evolução do Colin nas próximas atualizações.</span>
+            </div>
           </div>
         </div>
-
-        <div class="ia-metrics-section">
-          <div class="recent-title">Distribuição por Categoria</div>
-          <div class="ia-metric-row">
-            <span class="ia-lbl">Relatório Horário (Hour)</span>
-            <div class="ia-progress-bar"><div class="ia-progress-fill" id="bar-fill-hour" style="width: 5%;"></div></div>
-            <span class="ia-val" id="bar-val-report-hour">0</span>
-          </div>
-          <div class="ia-metric-row">
-            <span class="ia-lbl">Relatório Diário / D-1</span>
-            <div class="ia-progress-bar"><div class="ia-progress-fill" id="bar-fill-daily" style="width: 5%;"></div></div>
-            <span class="ia-val" id="bar-val-report-daily">0</span>
-          </div>
-          <div class="ia-metric-row">
-            <span class="ia-lbl">Mercado & Síntese</span>
-            <div class="ia-progress-bar"><div class="ia-progress-fill" id="bar-fill-market" style="width: 5%;"></div></div>
-            <span class="ia-val" id="bar-val-report-market">0</span>
-          </div>
-        </div>
-        <a href="#" class="view-all-link" onclick="switchTab('dashboard'); return false;">Ver detalhes no painel <span>➔</span></a>
+        <a href="#" class="view-all-link" onclick="switchTab('colin'); return false;">Acessar protótipo da IA <span>➔</span></a>
       </div>
 
     </div>
 
     <div class="overview-bottom-row">
-      <div class="small-overview-card">
+      <div class="small-overview-card channel-card">
         <div class="small-card-icon blue-bg">📞</div>
-        <div class="small-card-content">
+        <div class="small-card-content" style="width: 100%;">
           <div class="small-card-label">Canais Ativos</div>
-          <div class="small-card-value">4 <span class="trend-indicator up">▲</span></div>
-          <div class="small-card-sub">Canais conectados</div>
+          <div class="channels-status-list">
+            <div class="channel-status-item">
+              <span class="status-dot-mini success" id="status-mini-gjacana"></span>
+              <span class="channel-name-mini">Jaçanã</span>
+            </div>
+            <div class="channel-status-item">
+              <span class="status-dot-mini success" id="status-mini-apoloni"></span>
+              <span class="channel-name-mini">Apoloni</span>
+            </div>
+            <div class="channel-status-item">
+              <span class="status-dot-mini success" id="status-mini-piccini"></span>
+              <span class="channel-name-mini">Piccini</span>
+            </div>
+            <div class="channel-status-item">
+              <span class="status-dot-mini success" id="status-mini-fazenda_ws"></span>
+              <span class="channel-name-mini">Fazenda WS</span>
+            </div>
+          </div>
         </div>
       </div>
       
@@ -1371,21 +1378,38 @@ function backgroundHealthCheck() {
 }
 
 // Funções da Visão Geral (Overview)
+let farmAlertsCache = { gjacana: 0, fazenda_ws: 0, apoloni: 0, piccini: 0 };
+
 function updateOverviewDashboard() {
   let alertsCount = 0;
   let recentAlertsHtml = '';
   
+  // 1. Update Canais Ativos Status in bottom card and count bans
   FARMS_DATA.forEach(f => {
     const status = getFarmStatus(f.key);
+    const miniDot = document.getElementById(`status-mini-${f.key}`);
+    
     if (status === 'ban') {
       alertsCount++;
       recentAlertsHtml += `<div class="recent-alert-item" style="border-color: var(--red); color: var(--red);">
         <span class="circle-icon" style="background: var(--red); color: #fff;">!</span>
         O número da <strong>${f.name}</strong> está banido no WhatsApp.
       </div>`;
+      if (miniDot) {
+        miniDot.className = 'status-dot-mini danger';
+      }
+    } else if (status === 'checking' || status === 'slow') {
+      if (miniDot) {
+        miniDot.className = 'status-dot-mini warning';
+      }
+    } else {
+      if (miniDot) {
+        miniDot.className = 'status-dot-mini success';
+      }
     }
   });
 
+  // Slow endpoints alerts
   if (slowEndpoints.length > 0) {
     alertsCount += slowEndpoints.length;
     slowEndpoints.forEach(ep => {
@@ -1395,6 +1419,33 @@ function updateOverviewDashboard() {
       </div>`;
     });
   }
+
+  // Count machine alerts per farm
+  FARMS_DATA.forEach(f => {
+    const count = farmAlertsCache[f.key] || 0;
+    if (count > 0) {
+      alertsCount += count;
+      recentAlertsHtml += `<div class="recent-alert-item" style="border-color: var(--yellow); color: var(--yellow);">
+        <span class="circle-icon" style="background: var(--yellow); color: #000;">!</span>
+        <strong>${f.name}</strong> tem ${count} alertas de máquina ativos.
+      </div>`;
+    }
+
+    // Update Alertas por Fazenda card bars
+    const valEl = document.getElementById(`alert-val-${f.key}`);
+    const barEl = document.getElementById(`alert-bar-${f.key}`);
+    if (valEl) valEl.innerText = count;
+    
+    if (barEl) {
+      if (count > 0) {
+        barEl.style.width = Math.min(100, Math.max(10, count * 20)) + '%';
+        barEl.style.backgroundColor = 'var(--yellow)';
+      } else {
+        barEl.style.width = '5%';
+        barEl.style.backgroundColor = 'var(--green)';
+      }
+    }
+  });
 
   const alertCard = document.querySelector('.overview-card.green-theme');
   const alertMetricVal = document.getElementById('overview-alerts-count');
@@ -1444,7 +1495,7 @@ function updateOverviewDashboard() {
 
   const targetLogs = usingFallback ? allLogs : todayLogs;
 
-  // 1. Update Card 2: Volume de Disparos
+  // Update Card 2: Volume de Disparos
   const dispatchesCountEl = document.getElementById('overview-dispatches-count');
   if (dispatchesCountEl) dispatchesCountEl.innerText = totalDispatches.toLocaleString();
 
@@ -1459,15 +1510,24 @@ function updateOverviewDashboard() {
   if (imagesCountEl) imagesCountEl.innerText = totalImages;
   if (avgChannelEl) avgChannelEl.innerText = avgChannel;
 
-  // Client messages bar chart
-  const counts = { gjacana: 0, fazenda_ws: 0, apoloni: 0, piccini: 0 };
+  // Calculate unique phone numbers per farm
+  const uniquePhones = { gjacana: new Set(), fazenda_ws: new Set(), apoloni: new Set(), piccini: new Set() };
   targetLogs.forEach(l => {
-    if (counts[l.farm_key] !== undefined) counts[l.farm_key]++;
+    if (uniquePhones[l.farm_key] !== undefined && l.phone_number) {
+      uniquePhones[l.farm_key].add(l.phone_number);
+    }
   });
 
-  const maxVal = Math.max(...Object.values(counts), 1);
+  const maxVal = Math.max(
+    uniquePhones.gjacana.size,
+    uniquePhones.fazenda_ws.size,
+    uniquePhones.apoloni.size,
+    uniquePhones.piccini.size,
+    1
+  );
+
   FARMS_DATA.forEach(f => {
-    const val = counts[f.key] || 0;
+    const val = uniquePhones[f.key].size || 0;
     const pct = Math.max(5, Math.round((val / maxVal) * 100));
     const valEl = document.getElementById(`bar-val-${f.key}`);
     if (valEl) {
@@ -1476,69 +1536,6 @@ function updateOverviewDashboard() {
       if (fillEl) fillEl.style.width = pct + '%';
     }
   });
-
-  // 2. Update Card 3: Relatórios do Sistema
-  // Count compiled reports (text messages)
-  const totalReports = targetLogs.filter(l => l.message_type === 'text').length;
-  const reportsCountTotalEl = document.getElementById('overview-reports-count-total');
-  if (reportsCountTotalEl) reportsCountTotalEl.innerText = totalReports;
-
-  // Count by report types
-  let countMachines = 0;
-  let countHidrico = 0;
-  let countMarket = 0;
-
-  let countHour = 0;
-  let countDaily = 0; // Daily + D1
-  let countMercadoNoticias = 0;
-
-  targetLogs.forEach(l => {
-    if (l.message_type !== 'text') return;
-    const c = l.message_content.toUpperCase();
-    
-    // Categorias principais
-    if (c.includes('OPERACIONAL') || c.includes('DIÁRIO') || c.includes('HORÁRIO')) {
-      countMachines++;
-    } else if (c.includes('HÍDRICO') || c.includes('AOOO PARCEIRO')) {
-      countHidrico++;
-    } else if (c.includes('COTAÇÕES') || c.includes('SÍNTESE') || c.includes('ECONOMIA')) {
-      countMarket++;
-    }
-
-    // Distribuição por tipo
-    if (c.includes('HORÁRIO')) {
-      countHour++;
-    } else if (c.includes('OPERACIONAL') || c.includes('DIÁRIO')) {
-      countDaily++;
-    } else if (c.includes('COTAÇÕES') || c.includes('SÍNTESE') || c.includes('ECONOMIA')) {
-      countMercadoNoticias++;
-    }
-  });
-
-  const repMachinesEl = document.getElementById('overview-reports-machines');
-  const repHidricoEl = document.getElementById('overview-reports-hidrico');
-  const repMarketEl = document.getElementById('overview-reports-market');
-  if (repMachinesEl) repMachinesEl.innerText = countMachines;
-  if (repHidricoEl) repHidricoEl.innerText = countHidrico;
-  if (repMarketEl) repMarketEl.innerText = countMarket;
-
-  // Update progress bars for report distribution
-  const maxRepType = Math.max(countHour, countDaily, countMercadoNoticias, 1);
-  
-  const valHourEl = document.getElementById('bar-val-report-hour');
-  const fillHourEl = document.getElementById('bar-fill-hour');
-  if (valHourEl) valHourEl.innerText = countHour;
-  if (fillHourEl) fillHourEl.style.width = Math.max(5, Math.round((countHour / maxRepType) * 100)) + '%';
-
-  const valDailyEl = document.getElementById('bar-val-report-daily');
-  const fillDailyEl = document.getElementById('bar-fill-daily');
-  if (valDailyEl) valDailyEl.innerText = countDaily;
-  if (fillDailyEl) fillDailyEl.style.width = Math.max(5, Math.round((countDaily / maxRepType) * 100)) + '%';
-
-  const valMarketEl = document.getElementById('bar-val-report-market');
-  const fillMarketEl = document.getElementById('bar-fill-market');
-  if (valMarketEl) valMarketEl.innerText = countMercadoNoticias;
-  if (fillMarketEl) fillMarketEl.style.width = Math.max(5, Math.round((countMercadoNoticias / maxRepType) * 100)) + '%';
 }
 
 async function preloadAllFarmsData() {
@@ -1558,6 +1555,12 @@ async function preloadAllFarmsData() {
       if (rContacts.ok) {
         const contacts = await rContacts.json();
         contactsCache[f.key] = contacts;
+      }
+
+      const rAlerts = await fetch(`${BASE}/machines/alerts`, {headers:{'X-Encrypted-Token':token}});
+      if (rAlerts.ok) {
+        const alerts = await rAlerts.json();
+        farmAlertsCache[f.key] = alerts.length;
       }
     } catch(e) {
       console.warn(`Erro no pre-load da fazenda ${f.key}:`, e);

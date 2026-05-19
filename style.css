@@ -800,3 +800,103 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   color: var(--muted);
 }
 }
+
+/* OVERVIEW UPDATE: Construction Card, Mini Dots, and Channel List */
+.badge-construction {
+  background: rgba(139, 92, 246, 0.15);
+  color: var(--primary);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.construction-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+}
+
+.construction-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.construction-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(1px) brightness(0.6);
+}
+
+.construction-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  text-align: center;
+  gap: 8px;
+  background: rgba(26, 34, 56, 0.4);
+}
+
+.construction-icon {
+  font-size: 2.2rem;
+}
+
+.construction-text {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #fff;
+}
+
+.construction-sub {
+  font-size: 0.82rem;
+  color: #cbd5e1;
+}
+
+.channels-status-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 6px;
+  width: 100%;
+}
+
+.channel-status-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--sub);
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+.status-dot-mini {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+.status-dot-mini.success { background: var(--green); }
+.status-dot-mini.warning { background: var(--yellow); }
+.status-dot-mini.danger { background: var(--red); }
+
+.channel-name-mini {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text);
+}
