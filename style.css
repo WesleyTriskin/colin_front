@@ -188,16 +188,17 @@ body.light .ticker-wrap { background: rgba(0,0,0,0.03); }
 .badge { font-size: 0.72rem; color: var(--muted); background: rgba(255,255,255,0.04); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); white-space: nowrap; }
 
 /* REPORT BODY */
-.card-body { display: flex; gap: 16px; }
+.card-body { display: flex; gap: 16px; align-items: stretch; }
 .imgbox {
-  width: 48%; min-height: 220px;
+  width: 48%; height: 420px; flex-shrink: 0;
   background: var(--sub); border: 1px solid var(--border); border-radius: 10px;
-  display: flex; align-items: center; justify-content: center; overflow: hidden;
+  overflow: hidden; display: block;
 }
-.imgbox img { width: 100%; height: auto; object-fit: contain; display: block; }
+.imgbox img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 .msgbox {
   flex: 1;
+  height: 420px;
   background: var(--code);
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -208,6 +209,7 @@ body.light .ticker-wrap { background: rgba(0,0,0,0.03); }
   overflow-y: auto;
   color: var(--text);
   word-break: break-word;
+  box-sizing: border-box;
 }
 .msgbox a { color: var(--blue); text-decoration: none; font-weight: 600; }
 .msgbox a:hover { text-decoration: underline; }
