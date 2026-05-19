@@ -728,9 +728,9 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 /* Bottom Small Cards Row */
 .overview-bottom-row {
   display: grid;
-  grid-template-columns: 1fr 2.5fr;
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  margin-top: 10px;
+  margin-top: 16px;
 }
 
 .small-overview-card {

@@ -26,9 +26,18 @@
         <div class="leg-item"><span class="status-dot red"></span> Banido</div>
         <div class="leg-item"><span class="status-dot none"></span> Sem Número</div>
       </div>
-      <div class="topbar-actions" style="display: flex; gap: 8px;">
+      <div class="topbar-actions" style="display: flex; align-items: center; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 0.72rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px;">Período:</span>
+          <select id="overview-date-filter" onchange="updateOverviewDashboard()" style="background: var(--panel); color: var(--text); border: 1px solid var(--border); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; outline: none; font-family: inherit; transition: all 0.2s ease;">
+            <option value="today">Hoje</option>
+            <option value="7days">Últimos 7 dias</option>
+            <option value="30days">Últimos 30 dias</option>
+            <option value="all" selected>Todo o período</option>
+          </select>
+        </div>
         <button class="theme-btn" id="btn-test-api" onclick="forceCheckEndpoints()" style="display: none; align-items: center; gap: 8px; font-family:'Outfit',sans-serif;">🔄 Testar Endpoints</button>
-        <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">🌙 Modo Escuro</button>
+        <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" style="padding: 6px 12px; font-size: 0.8rem;">🌙 Modo Escuro</button>
       </div>
     </header>
 
@@ -41,19 +50,6 @@
 
   <!-- ABA 0: VISÃO GERAL -->
   <div id="tab-overview" class="tabcontent active">
-    
-    <div class="overview-header-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 4px;">
-      <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.4rem; font-weight: 900; margin: 0; color: var(--text);">Dashboard Executivo</h2>
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 0.82rem; font-weight: 700; color: var(--muted); text-transform: uppercase;">Período:</span>
-        <select id="overview-date-filter" onchange="updateOverviewDashboard()" style="background: var(--panel); color: var(--text); border: 1px solid var(--border); padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer; outline: none; font-family: inherit; transition: all 0.2s ease;">
-          <option value="today">Hoje</option>
-          <option value="7days">Últimos 7 dias</option>
-          <option value="30days">Últimos 30 dias</option>
-          <option value="all" selected>Todo o período</option>
-        </select>
-      </div>
-    </div>
 
     <div class="overview-grid">
       
@@ -97,7 +93,6 @@
             </div>
           </div>
         </div>
-        <a href="#" class="view-all-link" onclick="switchTab('api'); return false;">Ver todos os alertas <span>➔</span></a>
       </div>
 
       <!-- Card 2: Volume de Disparos -->
@@ -152,7 +147,6 @@
             </div>
           </div>
         </div>
-        <a href="#" class="view-all-link" onclick="switchTab('dashboard'); return false;">Ver relatório completo <span>➔</span></a>
       </div>
 
       <!-- Card 3: Colin IA - Interativo -->
@@ -174,84 +168,80 @@
 
     </div>
 
-    <div class="overview-bottom-row" style="margin-bottom: 16px;">
+    <!-- Row 2: Desempenho de Disparos Line Chart -->
+    <div class="overview-card chart-card" style="padding: 16px 20px; margin-top: 16px; display: flex; flex-direction: column; justify-content: space-between; min-height: 200px; height: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div class="small-card-icon purple-bg" style="width: 32px; height: 32px; font-size: 1.1rem; border-radius: 8px;">📈</div>
+          <div class="small-card-label" style="font-size: 0.85rem; font-weight: 800;">Desempenho de Disparos</div>
+        </div>
+        <div class="chart-legend" style="display: flex; gap: 12px; font-size: 0.75rem; font-weight: 700;">
+          <div style="display: flex; align-items: center; gap: 6px;"><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--yellow);"></span> Jaçanã</div>
+          <div style="display: flex; align-items: center; gap: 6px;"><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--primary);"></span> Apoloni</div>
+          <div style="display: flex; align-items: center; gap: 6px;"><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--green);"></span> Piccini</div>
+          <div style="display: flex; align-items: center; gap: 6px;"><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--blue);"></span> Fazenda WS</div>
+        </div>
+      </div>
+      <div id="overview-chart-container" style="width: 100%; margin-top: 10px;">
+        <!-- SVG chart will be injected here -->
+      </div>
+    </div>
+
+    <!-- Row 3: Canais Ativos and Small Metrics Cards -->
+    <div class="overview-bottom-row" style="margin-top: 16px;">
       
-      <!-- Left: Canais Ativos -->
-      <div class="small-overview-card channel-card" style="height: auto; min-height: 220px; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; padding: 20px;">
-        <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
-          <div class="small-card-icon blue-bg">📞</div>
-          <div class="small-card-label" style="font-size: 0.85rem; font-weight: 800;">Canais Ativos</div>
+      <!-- Canais Ativos -->
+      <div class="small-overview-card" style="padding: 12px 16px; display: flex; align-items: center; gap: 16px; justify-content: space-between; width: 100%; box-sizing: border-box;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div class="small-card-icon blue-bg" style="width: 32px; height: 32px; font-size: 1rem; border-radius: 8px; margin: 0;">📞</div>
+          <div class="small-card-label" style="font-size: 0.85rem; font-weight: 800; margin: 0;">Canais</div>
         </div>
-        <div class="channels-status-list" style="margin-top: 16px; width: 100%;">
-          <div class="channel-status-item">
-            <span class="status-dot-mini success" id="status-mini-gjacana"></span>
-            <span class="channel-name-mini">Jaçanã</span>
+        <div class="channels-status-list" style="display: flex; gap: 10px; margin: 0; align-items: center; flex-grow: 1; justify-content: flex-end;">
+          <div class="channel-status-item" style="margin: 0; display: flex; align-items: center; gap: 4px;">
+            <span class="status-dot-mini success" id="status-mini-gjacana" style="width: 6px; height: 6px; margin: 0;"></span>
+            <span class="channel-name-mini" style="font-size: 0.75rem; font-weight: 700; margin: 0;">JAC</span>
           </div>
-          <div class="channel-status-item">
-            <span class="status-dot-mini success" id="status-mini-apoloni"></span>
-            <span class="channel-name-mini">Apoloni</span>
+          <div class="channel-status-item" style="margin: 0; display: flex; align-items: center; gap: 4px;">
+            <span class="status-dot-mini success" id="status-mini-apoloni" style="width: 6px; height: 6px; margin: 0;"></span>
+            <span class="channel-name-mini" style="font-size: 0.75rem; font-weight: 700; margin: 0;">APO</span>
           </div>
-          <div class="channel-status-item">
-            <span class="status-dot-mini success" id="status-mini-piccini"></span>
-            <span class="channel-name-mini">Piccini</span>
+          <div class="channel-status-item" style="margin: 0; display: flex; align-items: center; gap: 4px;">
+            <span class="status-dot-mini success" id="status-mini-piccini" style="width: 6px; height: 6px; margin: 0;"></span>
+            <span class="channel-name-mini" style="font-size: 0.75rem; font-weight: 700; margin: 0;">PIC</span>
           </div>
-          <div class="channel-status-item">
-            <span class="status-dot-mini success" id="status-mini-fazenda_ws"></span>
-            <span class="channel-name-mini">Fazenda WS</span>
+          <div class="channel-status-item" style="margin: 0; display: flex; align-items: center; gap: 4px;">
+            <span class="status-dot-mini success" id="status-mini-fazenda_ws" style="width: 6px; height: 6px; margin: 0;"></span>
+            <span class="channel-name-mini" style="font-size: 0.75rem; font-weight: 700; margin: 0;">FWS</span>
           </div>
-        </div>
-      </div>
-
-      <!-- Right: Line Chart -->
-      <div class="small-overview-card chart-card" style="height: auto; min-height: 220px; display: flex; flex-direction: column; justify-content: space-between; padding: 20px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 10px;">
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <div class="small-card-icon purple-bg">📈</div>
-            <div class="small-card-label" style="font-size: 0.85rem; font-weight: 800;">Desempenho de Disparos</div>
-          </div>
-          <div class="chart-legend" style="display: flex; gap: 12px; font-size: 0.75rem; font-weight: 700;">
-            <div style="display: flex; align-items: center; gap: 6px;"><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--yellow);"></span> Jaçanã</div>
-            <div style="display: flex; align-items: center; gap: 6px;"><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--primary);"></span> Apoloni</div>
-            <div style="display: flex; align-items: center; gap: 6px;"><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--green);"></span> Piccini</div>
-            <div style="display: flex; align-items: center; gap: 6px;"><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--blue);"></span> Fazenda WS</div>
-          </div>
-        </div>
-        <div id="overview-chart-container" style="width: 100%; margin-top: 10px;">
-          <!-- SVG chart will be injected here -->
         </div>
       </div>
 
-    </div>
-
-    <!-- Row 3: Small Metrics Cards -->
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px;">
-      <div class="small-overview-card">
-        <div class="small-card-icon purple-bg">📋</div>
+      <!-- Tipos de Relatório -->
+      <div class="small-overview-card" style="padding: 12px 16px;">
+        <div class="small-card-icon purple-bg" style="width: 32px; height: 32px; font-size: 1rem; border-radius: 8px;">📋</div>
         <div class="small-card-content">
-          <div class="small-card-label">Tipos de Relatório</div>
-          <div class="small-card-value">5</div>
-          <div class="small-card-sub">Formatos ativos</div>
+          <div class="small-card-label" style="font-size: 0.8rem; font-weight: 700;">Relatórios</div>
+          <div class="small-card-value" style="font-size: 1.1rem; font-weight: 900; line-height: 1.1;">5 Formatos</div>
         </div>
       </div>
 
-      <div class="small-overview-card">
-        <div class="small-card-icon green-bg">📉</div>
+      <!-- Taxa de Opt-out -->
+      <div class="small-overview-card" style="padding: 12px 16px;">
+        <div class="small-card-icon green-bg" style="width: 32px; height: 32px; font-size: 1rem; border-radius: 8px;">📉</div>
         <div class="small-card-content">
-          <div class="small-card-label">Taxa de Opt-out</div>
-          <div class="small-card-value">0,00%</div>
-          <div class="small-card-sub">Últimos 7 dias</div>
+          <div class="small-card-label" style="font-size: 0.8rem; font-weight: 700;">Opt-out</div>
+          <div class="small-card-value" style="font-size: 1.1rem; font-weight: 900; line-height: 1.1;">0,00%</div>
         </div>
       </div>
 
-      <div class="small-overview-card">
-        <div class="small-card-icon orange-bg">⚡</div>
+      <!-- Uptime APIs -->
+      <div class="small-overview-card" style="padding: 12px 16px;">
+        <div class="small-card-icon orange-bg" style="width: 32px; height: 32px; font-size: 1rem; border-radius: 8px;">⚡</div>
         <div class="small-card-content">
-          <div class="small-card-label">Uptime APIs</div>
-          <div class="small-card-value">99.8%</div>
-          <div class="small-card-sub">Sistemas operacionais</div>
+          <div class="small-card-label" style="font-size: 0.8rem; font-weight: 700;">Uptime</div>
+          <div class="small-card-value" style="font-size: 1.1rem; font-weight: 900; line-height: 1.1;">99.8%</div>
         </div>
       </div>
-    </div>
   </div>
 
   <!-- ABA 1: DASHBOARD -->
@@ -1728,6 +1718,11 @@ function drawOverviewLineChart(logs, dateFilter) {
     `;
 
     points.forEach(p => {
+      if (p.val > 0) {
+        dotsHtml += `
+          <text x="${p.x}" y="${p.y - 8}" fill="${colors[farmKey]}" font-size="8" font-weight="900" text-anchor="middle" stroke="var(--panel)" stroke-width="2.5" paint-order="stroke fill" style="pointer-events: none;">${p.val}</text>
+        `;
+      }
       dotsHtml += `
         <circle cx="${p.x}" cy="${p.y}" r="3.5" fill="var(--panel)" stroke="${colors[farmKey]}" stroke-width="2" style="transition: all 0.3s ease; cursor: pointer;" />
         <title>${FARMS_DATA.find(f => f.key === farmKey).name}: ${p.val} disparos</title>
