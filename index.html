@@ -128,24 +128,50 @@
 
     </div><!-- /grid2 -->
 
-    <!-- Tabela de Contatos -->
+    <!-- Tabela de Auditoria de Logs de Envios -->
     <div class="tbl-wrap">
-      <div class="section-title" style="display: flex; align-items: center; flex-wrap: wrap;">Auditoria de Envios por Destinatário <span id="farm-wallet-info" style="font-size: 0.85rem; font-weight: 500; color: var(--muted); margin-left: 12px; padding-left:12px; border-left:1px solid var(--border);"></span></div>
+      <div class="section-title" style="display: flex; align-items: center; flex-wrap: wrap; margin-bottom: 16px;">
+        Auditoria de Logs de Envios
+        <span id="farm-wallet-info" style="font-size: 0.85rem; font-weight: 500; color: var(--muted); margin-left: 12px; padding-left:12px; border-left:1px solid var(--border);"></span>
+      </div>
+
+      <!-- Barra de Filtros (Glassmorphic) -->
+      <div class="filter-bar" style="display: flex; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; align-items: center; background: rgba(255,255,255,0.02); padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border);">
+        <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 6px;">
+          <label style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); font-weight: 700;">Filtrar por Nome</label>
+          <select id="filter-name" onchange="renderLogsTable()" style="background: var(--code); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font-family: inherit; font-size: 0.9rem; outline: none; cursor: pointer; width: 100%;">
+            <option value="">Todos os Nomes</option>
+          </select>
+        </div>
+        <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 6px;">
+          <label style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); font-weight: 700;">Filtrar por Telefone</label>
+          <select id="filter-phone" onchange="renderLogsTable()" style="background: var(--code); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font-family: inherit; font-size: 0.9rem; outline: none; cursor: pointer; width: 100%;">
+            <option value="">Todos os Telefones</option>
+          </select>
+        </div>
+        <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 6px;">
+          <label style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); font-weight: 700;">Filtrar por Dia</label>
+          <select id="filter-day" onchange="renderLogsTable()" style="background: var(--code); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font-family: inherit; font-size: 0.9rem; outline: none; cursor: pointer; width: 100%;">
+            <option value="">Todos os Dias</option>
+          </select>
+        </div>
+      </div>
+
       <div class="tbl-scroll">
         <table>
           <thead>
             <tr>
-              <th>Telefone / Nome</th>
-              <th style="min-width:240px">Status</th>
-              <th>D-1</th>
-              <th>Daily</th>
-              <th>Hour</th>
-              <th>Hídrico</th>
-              <th>Market</th>
+              <th>Destinatário</th>
+              <th style="min-width: 80px;">Dia</th>
+              <th style="text-align: center; min-width: 90px;">D-1</th>
+              <th style="text-align: center; min-width: 90px;">Daily</th>
+              <th style="text-align: center; min-width: 90px;">Hour</th>
+              <th style="text-align: center; min-width: 90px;">Hídrico</th>
+              <th style="text-align: center; min-width: 90px;">Market</th>
             </tr>
           </thead>
           <tbody id="tbody">
-            <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px">Buscando contatos no banco de dados...</td></tr>
+            <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px">Buscando logs de envio no banco de dados...</td></tr>
           </tbody>
         </table>
       </div>
@@ -228,7 +254,23 @@ function parseWhatsApp(text) {
     .replace(/\n/g, '<br>');
 }
 
-function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+function closeModal(){ 
+  document.getElementById('modal').classList.remove('open'); 
+  const m = document.getElementById('modal-body');
+  m.style.background = '';
+  m.style.backgroundImage = '';
+  m.style.backgroundBlendMode = '';
+  m.style.padding = '';
+  m.style.border = '';
+  m.style.maxHeight = '';
+  m.style.overflow = '';
+  m.style.overflowY = '';
+  m.style.display = '';
+  m.style.flexDirection = '';
+  m.style.alignItems = '';
+  const modalBox = document.querySelector('.modal-box');
+  if (modalBox) modalBox.style.maxWidth = '';
+}
 document.getElementById('modal').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
 document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal(); });
 
@@ -349,45 +391,34 @@ function selectFarm(key, name, wallet, phone){
 
 function findNearestImage(logs, textLog){
   const idx = logs.indexOf(textLog);
-  for(let i=idx+1; i<Math.min(idx+8,logs.length); i++){
+  if (idx === -1) return null;
+  for(let i=idx+1; i<logs.length; i++){
     if(logs[i].message_type==='image') return logs[i].message_content;
   }
   return null;
 }
+
 
 function setImg(id, src){
   const el = document.getElementById(id);
   el.src = src || SVG_PLACEHOLDER;
 }
 
+const logsCache = {};
+const contactsCache = {};
+
 async function fetchLogs(){
-  const token = TOKENS[farm];
-  // Limpa textos
-  ['d1','daily','hour','hidrico','cotacoes','noticias','economia'].forEach(k=>{
-    document.getElementById('msg-'+k).innerText = 'Carregando...';
-    document.getElementById('time-'+k).innerHTML = '—';
-  });
+  const activeFarmAtStart = farm;
+  const token = TOKENS[activeFarmAtStart];
+  
+  const processAndApplyLogs = (logs, targetFarm) => {
+    // Sincroniza logs no allLogs global
+    allLogs = allLogs.filter(l => l.farm_key !== targetFarm).concat(logs);
 
-  if(!token){
-    ['d1','daily','hour','hidrico','cotacoes','noticias','economia'].forEach(k=>{
-      document.getElementById('msg-'+k).innerHTML = '<i style="color:var(--yellow)">Token JWT não cadastrado para esta fazenda.</i>';
-      document.getElementById('time-'+k).innerHTML = '—';
-      const imgEl = document.getElementById('img-'+k);
-      if(imgEl) imgEl.src = SVG_NO_ACCESS;
-    });
-    loadContacts();
-    return;
-  }
+    // Se o usuário mudou de fazenda durante a requisição, ignora para evitar tab bleeding
+    if (farm !== targetFarm) return;
 
-  try {
-    const r = await fetch(`${BASE}/chat/logs?limit=200`, {headers:{'X-Encrypted-Token':token}});
-    if(!r.ok) throw new Error('API retornou '+r.status);
-    allLogs = await r.json();
-
-    // Filtra pela fazenda atual
-    const fl = allLogs.filter(l => l.farm_key === farm);
-
-    // Filtros EXATOS baseados nos dados reais do banco
+    const fl = logs.filter(l => l.farm_key === targetFarm);
     const find = kw => fl.find(l => l.message_type==='text' && l.message_content.includes(kw));
 
     const d1txt    = find('RELATÓRIO OPERACIONAL');
@@ -405,7 +436,7 @@ async function fetchLogs(){
         ? parseWhatsApp(log.message_content)
         : `<i style="color:var(--muted)">Nenhum envio encontrado nos logs.</i>`;
       requestAnimationFrame(() => {
-        msgEl.style.transition = 'opacity 0.35s ease';
+        msgEl.style.transition = 'opacity 0.25s ease';
         msgEl.style.opacity = '1';
       });
       const timeEl = document.getElementById('time-'+key);
@@ -434,104 +465,441 @@ async function fetchLogs(){
     apply('noticias', notixtxt);
     apply('economia', ecotxt);
 
-    // Imagens base64 (já vêm com prefixo data:image/jpeg;base64,)
     setImg('img-d1',     d1txt    ? findNearestImage(fl, d1txt)    : null);
     setImg('img-daily',  dailytxt ? findNearestImage(fl, dailytxt) : null);
     setImg('img-hour',   hourtxt  ? findNearestImage(fl, hourtxt)  : null);
     setImg('img-hidrico',hidrtxt  ? findNearestImage(fl, hidrtxt)  : null);
+  };
 
-  } catch(e){
-    console.error(e);
+  // Se não tem token, exibe mensagem apropriada
+  if(!token){
     ['d1','daily','hour','hidrico','cotacoes','noticias','economia'].forEach(k=>{
-      document.getElementById('msg-'+k).innerHTML = `<span style="color:var(--red)">Erro: ${e.message}</span>`;
+      document.getElementById('msg-'+k).innerHTML = '<i style="color:var(--yellow)">Token JWT não cadastrado para esta fazenda.</i>';
+      document.getElementById('time-'+k).innerHTML = '—';
+      const imgEl = document.getElementById('img-'+k);
+      if(imgEl) imgEl.src = SVG_NO_ACCESS;
+    });
+    loadContacts();
+    return;
+  }
+
+  // Se já temos os logs em cache para esta fazenda, aplica IMEDIATAMENTE!
+  if (logsCache[activeFarmAtStart]) {
+    processAndApplyLogs(logsCache[activeFarmAtStart], activeFarmAtStart);
+    loadContacts();
+  } else {
+    // Se não está no cache, exibe "Carregando..." temporariamente para evitar piscada vazia
+    ['d1','daily','hour','hidrico','cotacoes','noticias','economia'].forEach(k=>{
+      document.getElementById('msg-'+k).innerText = 'Carregando...';
+      document.getElementById('time-'+k).innerHTML = '—';
     });
   }
-  loadContacts();
+
+  // Sincroniza em background
+  try {
+    const r = await fetch(`${BASE}/chat/logs?limit=200`, {headers:{'X-Encrypted-Token':token}});
+    if(!r.ok) throw new Error('API retornou '+r.status);
+    const freshLogs = await r.json();
+    
+    // Atualiza cache e aplica dados na tela
+    logsCache[activeFarmAtStart] = freshLogs;
+    processAndApplyLogs(freshLogs, activeFarmAtStart);
+    loadContacts();
+  } catch(e){
+    console.error("Erro ao atualizar logs:", e);
+    if (!logsCache[activeFarmAtStart] && farm === activeFarmAtStart) {
+      ['d1','daily','hour','hidrico','cotacoes','noticias','economia'].forEach(k=>{
+        document.getElementById('msg-'+k).innerHTML = `<span style="color:var(--red)">Erro: ${e.message}</span>`;
+      });
+    }
+  }
+}
+
+// ── SISTEMA DE AUDITORIA DE LOGS DE ENVIOS ──────────────────────────────
+let currentLogs = [];
+let allFarmsContacts = [];
+const contactMap = {};
+
+function getCalendarDate(dateStr) {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr);
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  return `${day}/${month}`;
+}
+
+function getReportType(content) {
+  if (!content) return null;
+  const c = content.toUpperCase();
+  if (c.includes('RELATÓRIO OPERACIONAL')) return 'D-1';
+  if (c.includes('FECHAMENTO DIÁRIO')) return 'Daily';
+  if (c.includes('RELATÓRIO HORÁRIO')) return 'Hour';
+  if (c.includes('BALANÇO HÍDRICO')) return 'Hídrico';
+  if (c.includes('COTAÇÕES DO DIA') || c.includes('SÍNTESE GERAL') || c.includes('ECONOMIA & POLÍTICA') || c.includes('ECONOMIA &AMP; POLÍTICA')) return 'Market';
+  return null;
+}
+
+function formatPhone(num) {
+  if (!num) return '—';
+  let clean = num.replace(/\D/g, '');
+  if (clean.startsWith('55') && clean.length >= 12) {
+    const ddd = clean.substring(2, 4);
+    const rest = clean.substring(4);
+    if (rest.length === 9) {
+      return `+55 (${ddd}) ${rest.substring(0, 5)}-${rest.substring(5)}`;
+    } else {
+      return `+55 (${ddd}) ${rest.substring(0, 4)}-${rest.substring(4)}`;
+    }
+  }
+  return `+${clean}`;
 }
 
 async function loadContacts() {
+  const activeFarmAtStart = farm;
   const tbody = document.getElementById('tbody');
-  try {
-    let contacts = [];
+  const token = TOKENS[activeFarmAtStart] || TOKENS['gjacana'];
+  
+  const processAndApplyContacts = (contacts, targetFarm) => {
+    // Se o usuário mudou de fazenda durante a requisição, ignora
+    if (farm !== targetFarm) return;
+
+    // Limpa dicionário anterior para evitar vazamento entre fazendas
+    for (const key in contactMap) delete contactMap[key];
     
-    // 1. Tenta buscar da API Oficial (que o backend vai criar)
-    try {
-      const r = await fetch('https://prx.triskin.tech/api_data/v1/farms/overview');
-      if (r.ok) {
-        const raw = await r.json();
-        contacts = Array.isArray(raw) ? raw : (raw.farms || []);
+    const contactsList = Array.isArray(contacts) ? contacts : (contacts.contacts || []);
+    contactsList.forEach(c => {
+      if (c.phone_number) {
+        contactMap[c.phone_number] = c.contact_name;
       }
-    } catch(e) {
-      console.warn("API de farms overview indisponível ainda.");
-    }
-
-    // 2. Sincroniza status do BD para o LocalStorage se vieram do banco
-    if (contacts.length > 0) {
-      FARMS_DATA.forEach(f => {
-        const farmDb = contacts.find(c => c.farm_key === f.key);
-        if(farmDb && farmDb.status) {
-          let st = farmDb.status;
-          
-          const lsKey = 'farm_status_' + f.key;
-          if(localStorage.getItem(lsKey) !== st) {
-             localStorage.setItem(lsKey, st);
-             setFarmDot(f.key, st);
-          }
-        }
-      });
-    }
-
-    // 4. Filtra os contatos da fazenda ativa para a tabela
-    const farmContacts = contacts.filter(c => c.farm_key === farm);
-
-    // 5. Renderiza tabela
-    if (!farmContacts.length) {
-      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Nenhum contato para ${farm}.</td></tr>`;
-      return;
-    }
-    tbody.innerHTML = '';
-    const grouped = {};
-    farmContacts.forEach(c => {
-      if (!grouped[c.phone_number]) grouped[c.phone_number] = {name: c.contact_name, notes: c.notes};
     });
-    for (const phone in grouped) {
-      const d = grouped[phone];
-      let st = 'ok';
-      if (d.notes?.includes('[STATUS:inc]'))   st = 'inc';
-      if (d.notes?.includes('[STATUS:ban]'))   st = 'ban';
-      if (d.notes?.includes('[STATUS:maint]')) st = 'maint';
-      
-      const ul = allLogs.filter(l => l.phone_number === phone && l.message_type === 'text');
-      const ld = kw => { 
-        const l = ul.find(x => x.message_content.includes(kw)); 
-        const res = fmt(l ? l.sent_at : null);
-        if (res.isAlert) {
-          return `<span class="date-cell" style="border: 1px solid var(--red); color: var(--red); padding: 1px 4px; border-radius: 4px; display: inline-block; font-size: 0.7rem; font-weight: normal; line-height: 1;" title="Alerta: Relatório não é de hoje!">${res.text}</span>`;
-        }
-        return `<span class="date-cell">${res.text}</span>`;
-      };
-      
-      tbody.innerHTML += `<tr>
-        <td><div class="phone">${phone}</div><div class="cname">${d.name || 'Sem nome'}</div></td>
-        <td>
-          <span style="display:inline-block; padding: 4px 8px; border-radius: 6px; font-size:0.85rem; font-weight:700; ${
-            st==='ok' ? 'background:rgba(16,185,129,0.15); color:var(--green);' :
-            st==='inc' ? 'background:rgba(245,158,11,0.15); color:var(--yellow);' :
-            st==='ban' ? 'background:rgba(239,68,68,0.15); color:var(--red);' :
-            'background:rgba(150,150,150,0.15); color:#aaa;'
-          }">
-            ${st==='ok' ? '🟢 OK' : st==='inc' ? '🟡 Instável' : st==='ban' ? '🔴 Banido' : '⚪ Sem Número'}
-          </span>
-        </td>
-        <td>${ld('RELATÓRIO OPERACIONAL')}</td>
-        <td>${ld('FECHAMENTO DIÁRIO')}</td>
-        <td>${ld('RELATÓRIO HORÁRIO')}</td>
-        <td>${ld('balanço hídrico')}</td>
-        <td>${ld('COTAÇÕES DO DIA')}</td>
-      </tr>`;
+
+    const activeFarmLogs = allLogs.filter(l => l.farm_key === targetFarm);
+    currentLogs = activeFarmLogs;
+
+    populateFilterSelects(activeFarmLogs);
+    renderLogsTable();
+  };
+
+  // Se já temos contatos em cache, aplica IMEDIATAMENTE!
+  if (contactsCache[activeFarmAtStart]) {
+    processAndApplyContacts(contactsCache[activeFarmAtStart], activeFarmAtStart);
+  }
+
+  try {
+    const r = await fetch(`${BASE}/farms/contacts`, {headers:{'X-Encrypted-Token':token}});
+    if (r.ok) {
+      const freshContacts = await r.json();
+      contactsCache[activeFarmAtStart] = freshContacts;
+      processAndApplyContacts(freshContacts, activeFarmAtStart);
     }
   } catch(e) {
-    tbody.innerHTML = `<tr><td colspan="7" style="color:var(--red);text-align:center;padding:20px">Erro ao carregar contatos: ${e.message}<br><small style="color:var(--muted)">Aguarde a atualização da API.</small></td></tr>`;
+    console.warn("Erro ao buscar contatos da API:", e);
+    if (!contactsCache[activeFarmAtStart] && farm === activeFarmAtStart) {
+      tbody.innerHTML = `<tr><td colspan="7" style="color:var(--red);text-align:center;padding:20px">Erro ao carregar contatos: ${e.message}</td></tr>`;
+    }
+  }
+}
+
+function populateFilterSelects(logs) {
+  const filterName = document.getElementById('filter-name');
+  const filterPhone = document.getElementById('filter-phone');
+  const filterDay = document.getElementById('filter-day');
+
+  const selectedName = filterName.value;
+  const selectedPhone = filterPhone.value;
+  const selectedDay = filterDay.value;
+
+  const names = new Set();
+  const phones = new Set();
+  const days = new Set();
+
+  logs.forEach(l => {
+    if (l.phone_number) {
+      phones.add(l.phone_number);
+      const name = contactMap[l.phone_number] || 'Contato Externo';
+      names.add(name);
+    }
+    if (l.sent_at) {
+      days.add(getCalendarDate(l.sent_at));
+    }
+  });
+
+  const sortedNames = Array.from(names).sort();
+  const sortedPhones = Array.from(phones).sort();
+  const sortedDays = Array.from(days).sort((a, b) => {
+    const parseDate = s => {
+      const [d, m] = s.split('/');
+      return new Date(2026, parseInt(m) - 1, parseInt(d));
+    };
+    return parseDate(b) - parseDate(a);
+  });
+
+  filterName.innerHTML = '<option value="">Todos os Nomes</option>';
+  sortedNames.forEach(n => {
+    filterName.innerHTML += `<option value="${n}">${n}</option>`;
+  });
+
+  filterPhone.innerHTML = '<option value="">Todos os Telefones</option>';
+  sortedPhones.forEach(p => {
+    filterPhone.innerHTML += `<option value="${p}">${formatPhone(p)}</option>`;
+  });
+
+  filterDay.innerHTML = '<option value="">Todos os Dias</option>';
+  sortedDays.forEach(d => {
+    filterDay.innerHTML += `<option value="${d}">${d}</option>`;
+  });
+
+  if (sortedNames.includes(selectedName)) filterName.value = selectedName;
+  if (sortedPhones.includes(selectedPhone)) filterPhone.value = selectedPhone;
+  if (sortedDays.includes(selectedDay)) filterDay.value = selectedDay;
+}
+
+function renderLogsTable() {
+  const tbody = document.getElementById('tbody');
+  const filterName = document.getElementById('filter-name').value;
+  const filterPhone = document.getElementById('filter-phone').value;
+  const filterDay = document.getElementById('filter-day').value;
+
+  const activeFarmLogs = allLogs.filter(l => l.farm_key === farm);
+
+  // Group by phone and day
+  const groups = {};
+  activeFarmLogs.forEach(l => {
+    if (!l.phone_number) return;
+    const day = getCalendarDate(l.sent_at);
+    const key = `${l.phone_number}_${day}`;
+    if (!groups[key]) {
+      groups[key] = {
+        phone_number: l.phone_number,
+        name: contactMap[l.phone_number] || 'Contato Externo',
+        day: day,
+        logs: []
+      };
+    }
+    groups[key].logs.push(l);
+  });
+
+  let rows = Object.values(groups);
+
+  if (filterName) {
+    rows = rows.filter(r => r.name === filterName);
+  }
+  if (filterPhone) {
+    rows = rows.filter(r => r.phone_number === filterPhone);
+  }
+  if (filterDay) {
+    rows = rows.filter(r => r.day === filterDay);
+  }
+
+  rows.sort((a, b) => {
+    const parseDate = s => {
+      const [d, m] = s.split('/');
+      return new Date(2026, parseInt(m) - 1, parseInt(d));
+    };
+    const dateDiff = parseDate(b.day) - parseDate(a.day);
+    if (dateDiff !== 0) return dateDiff;
+    return a.phone_number.localeCompare(b.phone_number);
+  });
+
+  if (rows.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px">Nenhum log de disparo atende aos filtros selecionados.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = '';
+  rows.forEach(r => {
+    const phone = r.phone_number;
+    const day = r.day;
+    const name = r.name;
+
+    const getColContent = (type) => {
+      if (type === 'Market') {
+        const hasMarket = r.logs.some(l => l.message_type === 'text' && getReportType(l.message_content) === 'Market');
+        if (!hasMarket) return '<span style="color:var(--muted)">—</span>';
+        return `<div style="display:flex; flex-direction:column; gap:4px; align-items:center;">
+          <button class="btn-view-msg" style="width:100%; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:700; background:rgba(59,130,246,0.15); color:var(--blue); cursor:pointer;" onclick="openMessage('${phone}', '${day}', 'Market', 'text')">💬 Texto</button>
+        </div>`;
+      }
+
+      const textLog = r.logs.find(l => l.message_type === 'text' && getReportType(l.message_content) === type);
+      if (!textLog) return '<span style="color:var(--muted)">—</span>';
+
+      const imgData = findNearestImage(activeFarmLogs, textLog);
+
+      let html = '<div style="display:flex; flex-direction:column; gap:4px; align-items:center;">';
+      html += `<button class="btn-view-msg" style="width:100%; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:700; background:rgba(59,130,246,0.15); color:var(--blue); cursor:pointer;" onclick="openMessage('${phone}', '${day}', '${type}', 'text')">💬 Texto</button>`;
+      
+      if (imgData) {
+        html += `<button class="btn-view-msg" style="width:100%; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:700; background:rgba(16,185,129,0.15); color:var(--green); cursor:pointer;" onclick="openMessage('${phone}', '${day}', '${type}', 'image')">🖼️ Mapa</button>`;
+      }
+      html += '</div>';
+      return html;
+    };
+
+    tbody.innerHTML += `
+      <tr>
+        <td>
+          <div style="font-weight:700; color:var(--text); font-size:0.95rem;">${name}</div>
+          <div style="color:var(--muted); font-size:0.8rem; margin-top:2px;">${formatPhone(phone)}</div>
+        </td>
+        <td>
+          <span style="font-weight:600; color:var(--primary); font-size:0.9rem;">${day}</span>
+        </td>
+        <td style="text-align:center;">${getColContent('D-1')}</td>
+        <td style="text-align:center;">${getColContent('Daily')}</td>
+        <td style="text-align:center;">${getColContent('Hour')}</td>
+        <td style="text-align:center;">${getColContent('Hídrico')}</td>
+        <td style="text-align:center;">${getColContent('Market')}</td>
+      </tr>
+    `;
+  });
+}
+
+function openMessage(phone, date, type, format) {
+  const activeFarmLogs = allLogs.filter(l => l.farm_key === farm);
+  const fl = activeFarmLogs.filter(l => l.phone_number === phone && getCalendarDate(l.sent_at) === date);
+
+  const modal = document.getElementById('modal');
+  const mTitle = document.getElementById('modal-title');
+  const mBody = document.getElementById('modal-body');
+
+  mBody.innerHTML = '';
+  // Reseta estilos prévios
+  mBody.style.background = '';
+  mBody.style.backgroundImage = '';
+  mBody.style.backgroundBlendMode = '';
+  mBody.style.padding = '';
+  mBody.style.border = '';
+  mBody.style.maxHeight = '';
+  mBody.style.overflow = '';
+  mBody.style.overflowY = '';
+  mBody.style.display = '';
+  mBody.style.flexDirection = '';
+  mBody.style.alignItems = '';
+
+  const modalBox = document.querySelector('.modal-box');
+  if (modalBox) {
+    if (type === 'Market') {
+      modalBox.style.maxWidth = '1300px';
+    } else {
+      modalBox.style.maxWidth = ''; // Restaura o padrão de 820px do CSS
+    }
+  }
+
+  if (format === 'image') {
+    const textLog = fl.find(l => l.message_type === 'text' && getReportType(l.message_content) === type);
+    if (!textLog) {
+      alert("Relatório de texto correspondente não encontrado.");
+      return;
+    }
+    const imgData = findNearestImage(activeFarmLogs, textLog);
+    if (!imgData) {
+      alert("Mapa correspondente não encontrado nos logs.");
+      return;
+    }
+
+    mTitle.innerText = `${type} — Visualização do Mapa (${date})`;
+    
+    let formattedSrc = imgData;
+    if (!formattedSrc.startsWith('data:')) {
+      formattedSrc = `data:image/jpeg;base64,${formattedSrc}`;
+    }
+
+    // Estilo premium para o visualizador de mapa
+    mBody.style.background = 'transparent';
+    mBody.style.border = 'none';
+    mBody.style.padding = '0';
+    mBody.style.maxHeight = 'none';
+    mBody.style.overflow = 'visible';
+
+    mBody.innerHTML = `
+      <div style="display:flex; justify-content:center; align-items:center; background:#0e1117; padding:20px; border-radius:12px; border:1px solid var(--border); max-height:70vh; overflow:auto;">
+        <img src="${formattedSrc}" style="max-width:100%; max-height:65vh; border-radius:8px; box-shadow:0 10px 40px rgba(0,0,0,0.5); object-fit:contain;" alt="Mapa do Relatório">
+      </div>
+    `;
+    modal.classList.add('open');
+  } else {
+    if (type === 'Market') {
+      const marketLogs = fl.filter(l => l.message_type === 'text' && getReportType(l.message_content) === 'Market');
+      if (marketLogs.length === 0) {
+        alert("Mensagens de mercado não encontradas.");
+        return;
+      }
+
+      // Ordena por horário de envio
+      marketLogs.sort((a, b) => new Date(a.sent_at) - new Date(b.sent_at));
+
+      mTitle.innerText = `Market — Relatórios do Dia (${date})`;
+
+      // Visual de chat do WhatsApp
+      mBody.style.background = '#0b141a';
+      mBody.style.backgroundImage = "url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')";
+      mBody.style.backgroundBlendMode = 'overlay';
+      mBody.style.padding = '24px';
+      mBody.style.border = '1px solid rgba(255,255,255,0.05)';
+      mBody.style.maxHeight = '65vh';
+      mBody.style.overflowY = 'auto';
+      mBody.style.display = 'flex';
+      mBody.style.flexDirection = 'row';
+      mBody.style.flexWrap = 'wrap';
+      mBody.style.gap = '20px';
+      mBody.style.alignItems = 'stretch';
+      mBody.style.justifyContent = 'center';
+
+      let itemsHtml = '';
+      marketLogs.forEach(log => {
+        const parsedText = parseWhatsApp(log.message_content || '');
+        const timeStr = new Date(log.sent_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        let title = 'Mercado';
+        const txt = log.message_content || '';
+        const uc = txt.toUpperCase();
+        if (uc.includes('COTAÇÕES')) title = '📊 Cotações do Dia';
+        else if (uc.includes('SÍNTESE')) title = '📰 Síntese Geral';
+        else if (uc.includes('ECONOMIA')) title = '💼 Economia & Política';
+
+        itemsHtml += `
+          <div style="flex: 1 1 300px; min-width: 280px; max-width: 400px; background: #202c33; color: #e9edef; padding: 16px; border-radius: 10px; box-shadow: 0 1px 0.5px rgba(0,0,0,0.13); font-family: inherit; font-size: 0.95rem; line-height: 1.6; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div style="font-weight: 800; font-size: 1.05rem; color: var(--primary); margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 6px;">${title}</div>
+              <div style="white-space: pre-wrap; word-break: break-word; text-align: left;">${parsedText}</div>
+            </div>
+            <div style="text-align: right; font-size: 0.72rem; color: #8696a0; margin-top: 12px;">${timeStr}</div>
+          </div>
+        `;
+      });
+
+      mBody.innerHTML = itemsHtml;
+      modal.classList.add('open');
+    } else {
+      const textLog = fl.find(l => l.message_type === 'text' && getReportType(l.message_content) === type);
+      if (!textLog) {
+        alert("Mensagem de texto não encontrada.");
+        return;
+      }
+
+      mTitle.innerText = `${type} — Mensagem do WhatsApp (${date})`;
+      const parsedText = parseWhatsApp(textLog.message_content || '');
+
+      mBody.style.background = '#0b141a';
+      mBody.style.backgroundImage = "url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')";
+      mBody.style.backgroundBlendMode = 'overlay';
+      mBody.style.padding = '24px';
+      mBody.style.border = '1px solid rgba(255,255,255,0.05)';
+      mBody.style.maxHeight = '60vh';
+      mBody.style.overflowY = 'auto';
+      mBody.style.display = 'flex';
+      mBody.style.flexDirection = 'column';
+      mBody.style.alignItems = 'flex-start';
+
+      mBody.innerHTML = `
+        <div style="background: #202c33; color: #e9edef; padding: 12px 16px; border-radius: 0 10px 10px 10px; max-width: 85%; box-shadow: 0 1px 0.5px rgba(0,0,0,0.13); font-family: inherit; font-size: 1.05rem; line-height: 1.6; white-space: pre-wrap; word-break: break-word; text-align: left;">
+          ${parsedText}
+          <div style="text-align: right; font-size: 0.72rem; color: #8696a0; margin-top: 6px;">${new Date(textLog.sent_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+        </div>
+      `;
+      modal.classList.add('open');
+    }
   }
 }
 
