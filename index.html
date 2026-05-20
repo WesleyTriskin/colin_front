@@ -27,16 +27,7 @@
         <div class="leg-item"><span class="status-dot none"></span> Sem Número</div>
       </div>
       <div class="topbar-actions" style="display: flex; align-items: center; gap: 12px;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="font-size: 0.72rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px;">Período:</span>
-          <select id="overview-date-filter" onchange="updateOverviewDashboard()" style="background: var(--panel); color: var(--text); border: 1px solid var(--border); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; outline: none; font-family: inherit; transition: all 0.2s ease;">
-            <option value="today">Hoje</option>
-            <option value="7days">Últimos 7 dias</option>
-            <option value="30days">Últimos 30 dias</option>
-            <option value="all" selected>Todo o período</option>
-          </select>
-        </div>
-        <button class="theme-btn" id="btn-test-api" onclick="forceCheckEndpoints()" style="display: none; align-items: center; gap: 8px; font-family:'Outfit',sans-serif;">🔄 Testar Endpoints</button>
+        <button class="theme-btn" id="btn-test-api" onclick="forceCheckEndpoints()" style="display: none; align-items: center; gap: 8px; font-family:'Outfit',sans-serif; white-space: nowrap;">🔄 Testar Endpoints</button>
         <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">🌙 Modo Escuro</button>
       </div>
     </header>
@@ -54,7 +45,7 @@
     <div class="overview-grid">
       
       <!-- Card 1: Alertas Operacionais -->
-      <div class="overview-card green-theme">
+      <div class="overview-card green-theme" style="grid-row: span 2; display: flex; flex-direction: column;">
         <div class="card-header">
           <span class="card-title">1. Alertas Operacionais</span>
           <span class="dots-btn">•••</span>
@@ -68,35 +59,19 @@
           <span class="circle-icon">✓</span> Tudo perfeito! Nenhum alerta no momento.
         </div>
         
-        <div class="farm-alerts-section">
-          <div class="recent-title">Alertas por Fazenda</div>
-          <div class="client-bar-list" id="overview-farm-alerts">
-            <div class="client-bar-item">
-              <span class="client-name">Piccini</span>
-              <div class="bar-container"><div class="bar-fill alert-bar" id="alert-bar-piccini" style="width: 5%; background: var(--green);"></div></div>
-              <span class="client-val" id="alert-val-piccini">0</span>
-            </div>
-            <div class="client-bar-item">
-              <span class="client-name">Apoloni</span>
-              <div class="bar-container"><div class="bar-fill alert-bar" id="alert-bar-apoloni" style="width: 5%; background: var(--green);"></div></div>
-              <span class="client-val" id="alert-val-apoloni">0</span>
-            </div>
-            <div class="client-bar-item">
-              <span class="client-name">Jaçanã</span>
-              <div class="bar-container"><div class="bar-fill alert-bar" id="alert-bar-gjacana" style="width: 5%; background: var(--green);"></div></div>
-              <span class="client-val" id="alert-val-gjacana">0</span>
-            </div>
-            <div class="client-bar-item">
-              <span class="client-name">Fazenda WS</span>
-              <div class="bar-container"><div class="bar-fill alert-bar" id="alert-bar-fazenda_ws" style="width: 5%; background: var(--green);"></div></div>
-              <span class="client-val" id="alert-val-fazenda_ws">0</span>
+        <div class="farm-alerts-section" style="margin-top: 16px; flex-grow: 1; display: flex; flex-direction: column; gap: 10px; min-height: 0;">
+          <div class="recent-title">Endpoints e Canais com Alerta</div>
+          <div class="client-bar-list" id="overview-endpoint-alerts" style="gap: 8px;">
+            <div class="recent-alert-item" id="overview-recent-alert" style="border-color: var(--green); color: var(--green); margin: 0; display: flex; align-items: center; gap: 10px; padding: 10px 14px;">
+              <span class="circle-icon" style="background: var(--green); color: #fff;">✓</span>
+              <span>Nenhum alerta operacional ativo. Tudo funcionando dentro do esperado.</span>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Card 2: Volume de Disparos -->
-      <div class="overview-card blue-theme">
+      <div class="overview-card blue-theme" style="grid-row: span 2; display: flex; flex-direction: column;">
         <div class="card-header">
           <span class="card-title">2. Volume de Disparos</span>
           <span class="dots-btn">•••</span>
@@ -122,29 +97,10 @@
           </div>
         </div>
 
-        <div class="client-dispatches-section">
-          <div class="recent-title">Destinatários Únicos</div>
-          <div class="client-bar-list" id="overview-client-bars">
-            <div class="client-bar-item">
-              <span class="client-name">Piccini</span>
-              <div class="bar-container"><div class="bar-fill" style="width: 5%;"></div></div>
-              <span class="client-val" id="bar-val-piccini">0</span>
-            </div>
-            <div class="client-bar-item">
-              <span class="client-name">Apoloni</span>
-              <div class="bar-container"><div class="bar-fill" style="width: 5%;"></div></div>
-              <span class="client-val" id="bar-val-apoloni">0</span>
-            </div>
-            <div class="client-bar-item">
-              <span class="client-name">Jaçanã</span>
-              <div class="bar-container"><div class="bar-fill" style="width: 5%;"></div></div>
-              <span class="client-val" id="bar-val-gjacana">0</span>
-            </div>
-            <div class="client-bar-item">
-              <span class="client-name">Fazenda WS</span>
-              <div class="bar-container"><div class="bar-fill" style="width: 5%;"></div></div>
-              <span class="client-val" id="bar-val-fazenda_ws">0</span>
-            </div>
+        <div class="client-dispatches-section" style="margin-top: 16px; flex-grow: 1; display: flex; flex-direction: column; gap: 10px; min-height: 0;">
+          <div class="recent-title">Detalhamento por Fazenda</div>
+          <div class="client-bar-list" id="overview-client-bars" style="gap: 12px;">
+            <!-- Dynamic detailed dispatches breakdown will be rendered here -->
           </div>
         </div>
       </div>
@@ -166,62 +122,31 @@
         </div>
       </div>
 
-      <!-- Left: Line Chart Card (Spans 2 columns, aligns perfectly with Card 1 and Card 2) -->
-      <div class="overview-card chart-card" style="grid-column: span 2; padding: 16px 20px; display: flex; flex-direction: column; justify-content: space-between; height: 390px; box-sizing: border-box;">
-        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <div class="small-card-icon purple-bg" style="width: 28px; height: 28px; font-size: 0.95rem; border-radius: 6px;">📈</div>
-            <span class="card-title">Desempenho de Disparos</span>
-          </div>
-          <div class="chart-legend" style="display: flex; gap: 12px; font-size: 0.72rem; font-weight: 700;">
-            <div style="display: flex; align-items: center; gap: 4px;"><span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--yellow);"></span> Jaçanã</div>
-            <div style="display: flex; align-items: center; gap: 4px;"><span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--primary);"></span> Apoloni</div>
-            <div style="display: flex; align-items: center; gap: 4px;"><span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--green);"></span> Piccini</div>
-            <div style="display: flex; align-items: center; gap: 4px;"><span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--blue);"></span> Fazenda WS</div>
-          </div>
-        </div>
-        <div id="overview-chart-container" style="width: 100%; margin-top: 8px; flex-grow: 1; min-height: 280px;">
-          <!-- SVG chart will be injected here -->
-        </div>
-      </div>
-
       <!-- Right: Grid of Small Metrics Cards (Spans 1 column, aligns perfectly with Card 3) -->
-      <div style="grid-column: span 1; display: grid; grid-template-rows: 200px 174px; gap: 16px; height: 390px; box-sizing: border-box;">
+      <div style="grid-column: span 1; display: grid; grid-template-rows: 110px 96px; gap: 16px; height: 222px; box-sizing: border-box;">
         
         <!-- Canais Ativos -->
-        <div class="small-overview-card" style="padding: 16px 20px; display: flex; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 16px; height: 100%; box-sizing: border-box;">
+        <div class="small-overview-card" style="padding: 10px 16px; display: flex; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 10px; height: 100%; box-sizing: border-box;">
           <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-            <div class="small-card-icon blue-bg" style="width: 28px; height: 28px; font-size: 1.1rem; border-radius: 6px; margin: 0;">📞</div>
-            <span class="card-title" style="font-size: 1rem;">Canais Ativos</span>
+            <div class="small-card-icon blue-bg" style="width: 24px; height: 24px; font-size: 0.9rem; border-radius: 6px; margin: 0; display: flex; align-items: center; justify-content: center;">📞</div>
+            <span class="card-title" style="font-size: 0.95rem;">Canais Ativos</span>
           </div>
-          <div class="channels-status-list" style="margin-top: 0; gap: 8px;">
-            <div class="channel-status-item" style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 6px 10px; width: 100%; box-sizing: border-box;">
-              <div style="display: flex; align-items: center; gap: 6px;">
-                <span class="status-dot-mini success" id="status-mini-gjacana"></span>
-                <span class="channel-name-mini" style="font-size: 0.88rem; font-weight: 800;">Jaçanã</span>
-              </div>
-              <span style="font-size: 0.8rem; color: var(--muted); font-weight: 700; margin-left: 12px;">Carteira 5683 • (11) 96306-5709</span>
+          <div class="channels-status-list">
+            <div class="channel-status-item">
+              <span class="status-dot-mini success" id="status-mini-gjacana"></span>
+              <span class="channel-name-mini">Jaçanã</span>
             </div>
-            <div class="channel-status-item" style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 6px 10px; width: 100%; box-sizing: border-box;">
-              <div style="display: flex; align-items: center; gap: 6px;">
-                <span class="status-dot-mini success" id="status-mini-apoloni"></span>
-                <span class="channel-name-mini" style="font-size: 0.88rem; font-weight: 800;">Apoloni</span>
-              </div>
-              <span style="font-size: 0.8rem; color: var(--muted); font-weight: 700; margin-left: 12px;">Carteira 6153 • (44) 3101-1106</span>
+            <div class="channel-status-item">
+              <span class="status-dot-mini success" id="status-mini-apoloni"></span>
+              <span class="channel-name-mini">Apoloni</span>
             </div>
-            <div class="channel-status-item" style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 6px 10px; width: 100%; box-sizing: border-box;">
-              <div style="display: flex; align-items: center; gap: 6px;">
-                <span class="status-dot-mini success" id="status-mini-piccini"></span>
-                <span class="channel-name-mini" style="font-size: 0.88rem; font-weight: 800;">Piccini</span>
-              </div>
-              <span style="font-size: 0.8rem; color: var(--muted); font-weight: 700; margin-left: 12px;">Carteira 6084 • (66) 3184-0130</span>
+            <div class="channel-status-item">
+              <span class="status-dot-mini success" id="status-mini-piccini"></span>
+              <span class="channel-name-mini">Piccini</span>
             </div>
-            <div class="channel-status-item" style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 6px 10px; width: 100%; box-sizing: border-box;">
-              <div style="display: flex; align-items: center; gap: 6px;">
-                <span class="status-dot-mini success" id="status-mini-fazenda_ws"></span>
-                <span class="channel-name-mini" style="font-size: 0.88rem; font-weight: 800;">Fazenda WS</span>
-              </div>
-              <span style="font-size: 0.8rem; color: var(--muted); font-weight: 700; margin-left: 12px;">Carteira 5702 • (11) 96267-8385</span>
+            <div class="channel-status-item">
+              <span class="status-dot-mini success" id="status-mini-fazenda_ws"></span>
+              <span class="channel-name-mini">Fazenda WS</span>
             </div>
           </div>
         </div>
@@ -229,29 +154,29 @@
         <!-- Three columns of sub-metrics -->
         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; height: 100%;">
           <!-- Tipos de Relatório -->
-          <div class="small-overview-card" style="padding: 8px 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 6px; height: 100%; box-sizing: border-box;">
-            <div class="small-card-icon purple-bg" style="width: 32px; height: 32px; font-size: 1.1rem; border-radius: 6px; margin: 0; display: flex; align-items: center; justify-content: center;">📋</div>
+          <div class="small-overview-card" style="padding: 6px 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 4px; height: 100%; box-sizing: border-box;">
+            <div class="small-card-icon purple-bg" style="width: 24px; height: 24px; font-size: 0.95rem; border-radius: 6px; margin: 0; display: flex; align-items: center; justify-content: center;">📋</div>
             <div class="small-card-content" style="display: flex; flex-direction: column; align-items: center;">
-              <div class="small-card-label" style="font-size: 0.8rem; font-weight: 800; color: var(--muted); line-height: 1;">Relatórios</div>
-              <div class="small-card-value" style="font-size: 1.25rem; font-weight: 900; line-height: 1.1; margin-top: 4px; white-space: nowrap;">5 Formatos</div>
+              <div class="small-card-label" style="font-size: 0.78rem; font-weight: 800; color: var(--muted); line-height: 1;">Relatórios</div>
+              <div class="small-card-value" style="font-size: 1.1rem; font-weight: 900; line-height: 1.1; margin-top: 4px; white-space: nowrap;">5 Formatos</div>
             </div>
           </div>
 
           <!-- Taxa de Opt-out -->
-          <div class="small-overview-card" style="padding: 8px 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 6px; height: 100%; box-sizing: border-box;">
-            <div class="small-card-icon green-bg" style="width: 32px; height: 32px; font-size: 1.1rem; border-radius: 6px; margin: 0; display: flex; align-items: center; justify-content: center;">📉</div>
+          <div class="small-overview-card" style="padding: 6px 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 4px; height: 100%; box-sizing: border-box;">
+            <div class="small-card-icon green-bg" style="width: 24px; height: 24px; font-size: 0.95rem; border-radius: 6px; margin: 0; display: flex; align-items: center; justify-content: center;">%</div>
             <div class="small-card-content" style="display: flex; flex-direction: column; align-items: center;">
-              <div class="small-card-label" style="font-size: 0.8rem; font-weight: 800; color: var(--muted); line-height: 1;">Opt-out</div>
-              <div class="small-card-value" style="font-size: 1.25rem; font-weight: 900; line-height: 1.1; margin-top: 4px; white-space: nowrap;">0,00%</div>
+              <div class="small-card-label" style="font-size: 0.78rem; font-weight: 800; color: var(--muted); line-height: 1;">Opt-out</div>
+              <div class="small-card-value" style="font-size: 1.1rem; font-weight: 900; line-height: 1.1; margin-top: 4px; white-space: nowrap;">0,00%</div>
             </div>
           </div>
 
           <!-- Uptime APIs -->
-          <div class="small-overview-card" style="padding: 8px 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 6px; height: 100%; box-sizing: border-box;">
-            <div class="small-card-icon orange-bg" style="width: 32px; height: 32px; font-size: 1.1rem; border-radius: 6px; margin: 0; display: flex; align-items: center; justify-content: center;">⚡</div>
+          <div class="small-overview-card" style="padding: 6px 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 4px; height: 100%; box-sizing: border-box;">
+            <div class="small-card-icon orange-bg" style="width: 24px; height: 24px; font-size: 0.95rem; border-radius: 6px; margin: 0; display: flex; align-items: center; justify-content: center;">⚡</div>
             <div class="small-card-content" style="display: flex; flex-direction: column; align-items: center;">
-              <div class="small-card-label" style="font-size: 0.8rem; font-weight: 800; color: var(--muted); line-height: 1;">Uptime</div>
-              <div class="small-card-value" style="font-size: 1.25rem; font-weight: 900; line-height: 1.1; margin-top: 4px; white-space: nowrap;">99.8%</div>
+              <div class="small-card-label" style="font-size: 0.78rem; font-weight: 800; color: var(--muted); line-height: 1;">Uptime</div>
+              <div class="small-card-value" style="font-size: 1.1rem; font-weight: 900; line-height: 1.1; margin-top: 4px; white-space: nowrap;">99.8%</div>
             </div>
           </div>
         </div>
@@ -566,6 +491,12 @@ function switchTab(id){
   document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.tabcontent').forEach(c=>c.classList.remove('active'));
   
+  if (id === 'overview') {
+    document.body.style.overflow = 'hidden';
+  } else {
+    document.body.style.overflow = '';
+  }
+  
   const testBtn = document.getElementById('btn-test-api');
   if(id==='api'){
     if(testBtn) testBtn.style.display = 'flex';
@@ -688,12 +619,23 @@ function selectFarm(key, name, wallet, phone){
 }
 
 function findNearestImage(logs, textLog){
-  const idx = logs.indexOf(textLog);
-  if (idx === -1) return null;
-  for(let i=idx+1; i<logs.length; i++){
-    if(logs[i].message_type==='image') return logs[i].message_content;
-  }
-  return null;
+  if (!textLog) return null;
+  const textTime = new Date(textLog.sent_at).getTime();
+  let closestImg = null;
+  let minDiff = Infinity;
+
+  logs.forEach(l => {
+    if (l.message_type === 'image' && l.phone_number === textLog.phone_number) {
+      const imgTime = new Date(l.sent_at).getTime();
+      const diff = Math.abs(textTime - imgTime);
+      // Garante que a imagem foi enviada em até 5 minutos (300.000 ms) do texto do relatório
+      if (diff < minDiff && diff < 5 * 60 * 1000) {
+        minDiff = diff;
+        closestImg = l.message_content;
+      }
+    }
+  });
+  return closestImg;
 }
 
 
@@ -1262,14 +1204,23 @@ function buildEndpoints(force = false){
   
   if(!grid.children.length){
     let html = '';
+    let currentSectionClass = 'section-sistema';
     ENDPOINTS.forEach((ep, i) => {
       if(ep.section){
         html += `<div class="api-section-label">${ep.section}</div>`;
+        if (ep.section.includes('Sistema')) currentSectionClass = 'section-sistema';
+        else if (ep.section.includes('Commodities') || ep.section.includes('Mercado')) currentSectionClass = 'section-commodities';
+        else if (ep.section.includes('Clima') || ep.section.includes('Irrigação')) currentSectionClass = 'section-clima';
+        else if (ep.section.includes('Máquinas')) currentSectionClass = 'section-maquinas';
+        else if (ep.section.includes('Produção')) currentSectionClass = 'section-producao';
       } else {
-        html += `<div class="api-card" id="acard-${i}" onclick="showPayload('${ep.path}')">
-          <div>
+        html += `<div class="api-card ${currentSectionClass}" id="acard-${i}" onclick="showPayload('${ep.path}')">
+          <div class="api-card-left">
             <span class="api-name">${ep.name}</span>
-            <span class="api-path">GET ${ep.path}</span>
+            <div class="api-path-wrapper">
+              <span class="api-method-badge get">GET</span>
+              <span class="api-path">${ep.path}</span>
+            </div>
           </div>
           <div class="api-right">
             <span class="led checking" id="led-${i}"></span>
@@ -1299,6 +1250,7 @@ function buildEndpoints(force = false){
         lat.style.color = res.latency.includes('ms') && parseInt(res.latency) > 3000 ? 'var(--yellow)' : '';
       }
     });
+    updateOverviewDashboard();
     return;
   }
 
@@ -1384,6 +1336,7 @@ function buildEndpoints(force = false){
           }
           localStorage.setItem(cacheKey, JSON.stringify(cacheResults));
           localStorage.setItem(cacheTimeKey, Date.now().toString());
+          updateOverviewDashboard();
         }
       });
   });
@@ -1392,6 +1345,8 @@ function buildEndpoints(force = false){
 function forceCheckEndpoints() {
   buildEndpoints(true);
 }
+
+
 
 function backgroundHealthCheck() {
   ENDPOINTS.forEach(ep => {
@@ -1453,50 +1408,43 @@ function updateOverviewDashboard() {
     }
   });
 
-  // Count machine alerts per farm (completely apart from API endpoints alerts)
-  FARMS_DATA.forEach(f => {
-    const count = farmAlertsCache[f.key] || 0;
-    if (count > 0) {
-      alertsCount += count;
-      recentAlertsHtml += `<div class="recent-alert-item" style="border-color: var(--yellow); color: var(--yellow);">
-        <span class="circle-icon" style="background: var(--yellow); color: #000;">!</span>
-        <strong>${f.name}</strong> tem ${count} alertas de máquina ativos.
-      </div>`;
-    }
-
-    // Update Alertas por Fazenda card bars
-    const valEl = document.getElementById(`alert-val-${f.key}`);
-    const barEl = document.getElementById(`alert-bar-${f.key}`);
-    if (valEl) valEl.innerText = count;
+  // 2. Count slow/failing endpoint alerts from health checks
+  const endpointAlerts = getEndpointAlerts();
+  endpointAlerts.forEach(ep => {
+    alertsCount++;
+    const isRed = ep.status === 'red';
+    const color = isRed ? 'var(--red)' : 'var(--yellow)';
+    const bgColor = isRed ? 'var(--red)' : 'var(--yellow)';
+    const textColor = isRed ? '#fff' : '#000';
+    const text = isRed ? `Endpoint <strong>${ep.name}</strong> está offline/com erro.` : `Endpoint <strong>${ep.name}</strong> lento (${ep.latency}).`;
     
-    if (barEl) {
-      if (count > 0) {
-        barEl.style.width = Math.min(100, Math.max(10, count * 20)) + '%';
-        barEl.style.backgroundColor = 'var(--yellow)';
-      } else {
-        barEl.style.width = '5%';
-        barEl.style.backgroundColor = 'var(--green)';
-      }
-    }
+    recentAlertsHtml += `<div class="recent-alert-item" style="border-color: ${color}; color: ${color}; margin: 0; display: flex; align-items: center; gap: 10px; padding: 10px 14px;">
+      <span class="circle-icon" style="background: ${bgColor}; color: ${textColor}; font-weight: bold; font-family: monospace;">!</span>
+      <span>${text}</span>
+    </div>`;
   });
 
   const alertCard = document.querySelector('.overview-card.green-theme');
   const alertMetricVal = document.getElementById('overview-alerts-count');
   const alertStatusBox = document.getElementById('overview-alerts-status');
-  const alertRecentBox = document.getElementById('overview-recent-alert');
+  const alertRecentBox = document.getElementById('overview-endpoint-alerts');
 
   if (alertsCount > 0) {
-    if (alertCard) alertCard.style.borderTopColor = 'var(--red)';
+    const hasRed = endpointAlerts.some(e => e.status === 'red') || FARMS_DATA.some(f => getFarmStatus(f.key) === 'ban');
+    if (alertCard) alertCard.style.borderTopColor = hasRed ? 'var(--red)' : 'var(--yellow)';
     if (alertMetricVal) {
       alertMetricVal.innerText = alertsCount;
-      alertMetricVal.style.color = 'var(--red)';
+      alertMetricVal.style.color = hasRed ? 'var(--red)' : 'var(--yellow)';
     }
     if (alertStatusBox) {
       alertStatusBox.className = 'status-alert-box warning';
-      alertStatusBox.innerHTML = `<span class="circle-icon" style="background: var(--red); color: #fff;">!</span> Atenção: ${alertsCount} pendências operacionais encontradas.`;
+      alertStatusBox.style.color = hasRed ? 'var(--red)' : 'var(--yellow)';
+      alertStatusBox.style.borderColor = hasRed ? 'rgba(239,68,68,0.2)' : 'rgba(245,158,11,0.2)';
+      alertStatusBox.style.backgroundColor = hasRed ? 'rgba(239,68,68,0.05)' : 'rgba(245,158,11,0.05)';
+      alertStatusBox.innerHTML = `<span class="circle-icon" style="background: ${hasRed ? 'var(--red)' : 'var(--yellow)'}; color: ${hasRed ? '#fff' : '#000'}; font-weight: bold;">!</span> Atenção: ${alertsCount} pendências operacionais encontradas.`;
     }
     if (alertRecentBox) {
-      alertRecentBox.parentElement.innerHTML = `<div class="recent-title">Alertas por Fazenda</div>` + recentAlertsHtml;
+      alertRecentBox.innerHTML = recentAlertsHtml;
     }
   } else {
     if (alertCard) alertCard.style.borderTopColor = 'var(--green)';
@@ -1506,17 +1454,21 @@ function updateOverviewDashboard() {
     }
     if (alertStatusBox) {
       alertStatusBox.className = 'status-alert-box success';
+      alertStatusBox.style.color = 'var(--green)';
+      alertStatusBox.style.borderColor = 'rgba(16,185,129,0.2)';
+      alertStatusBox.style.backgroundColor = 'rgba(16,185,129,0.05)';
       alertStatusBox.innerHTML = `<span class="circle-icon">✓</span> Tudo perfeito! Nenhum alerta no momento.`;
     }
     if (alertRecentBox) {
-      alertRecentBox.parentElement.innerHTML = `<div class="recent-title">Alertas por Fazenda</div>
-        <div class="recent-alert-item" id="overview-recent-alert">
-          <span class="circle-icon">✓</span> Nenhum alerta operacional ativo. Tudo funcionando dentro do esperado.
+      alertRecentBox.innerHTML = `
+        <div class="recent-alert-item" id="overview-recent-alert" style="border-color: var(--green); color: var(--green); margin: 0; display: flex; align-items: center; gap: 10px; padding: 10px 14px;">
+          <span class="circle-icon" style="background: var(--green); color: #fff;">✓</span>
+          <span>Nenhum alerta operacional ativo. Tudo funcionando dentro do esperado.</span>
         </div>`;
     }
   }
 
-  const dateFilter = document.getElementById('overview-date-filter') ? document.getElementById('overview-date-filter').value : 'all';
+  const dateFilter = document.getElementById('overview-date-filter') ? document.getElementById('overview-date-filter').value : 'today';
   let targetLogs = allLogs;
   const now = new Date();
 
@@ -1533,7 +1485,7 @@ function updateOverviewDashboard() {
     targetLogs = allLogs.filter(l => new Date(l.sent_at) >= limitDate);
   }
 
-  // Group target logs into submission blocks (reports)
+  // Group target logs into submission blocks (reports) using a 5-minute window and track report types inside blocks
   const sortedLogs = [...targetLogs].sort((a, b) => new Date(a.sent_at) - new Date(b.sent_at));
   const blocks = [];
   sortedLogs.forEach(log => {
@@ -1541,15 +1493,22 @@ function updateOverviewDashboard() {
     const matchingBlockIndex = blocks.findIndex(b => {
       return b.farm_key === log.farm_key &&
              b.phone_number === log.phone_number &&
-             Math.abs(b.time - logTime) < 60 * 1000;
+             Math.abs(b.time - logTime) < 5 * 60 * 1000;
     });
+    
+    const type = getReportType(log.message_content);
     
     if (matchingBlockIndex === -1) {
       blocks.push({
         farm_key: log.farm_key,
         phone_number: log.phone_number,
-        time: logTime
+        time: logTime,
+        types: type ? [type] : []
       });
+    } else {
+      if (type && !blocks[matchingBlockIndex].types.includes(type)) {
+        blocks[matchingBlockIndex].types.push(type);
+      }
     }
   });
 
@@ -1586,215 +1545,111 @@ function updateOverviewDashboard() {
     1
   );
 
+  let clientBarsHtml = '';
   FARMS_DATA.forEach(f => {
     const val = uniquePhones[f.key].size || 0;
     const pct = Math.max(5, Math.round((val / maxVal) * 100));
-    const valEl = document.getElementById(`bar-val-${f.key}`);
-    if (valEl) {
-      valEl.innerText = val;
-      const fillEl = valEl.previousElementSibling.firstElementChild;
-      if (fillEl) fillEl.style.width = pct + '%';
-    }
-  });
-
-  // Draw Line Chart
-  drawOverviewLineChart(allLogs, dateFilter);
-}
-
-function drawOverviewLineChart(logs, dateFilter) {
-  const now = new Date();
-  let timeUnits = [];
-  
-  if (dateFilter === 'today') {
-    // Show hours of today (last 12 hours, step of 2)
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date();
-      d.setHours(d.getHours() - i * 2);
-      const hStr = d.getHours();
-      timeUnits.push({
-        key: hStr + 'h',
-        label: hStr + ':00',
-        matchFn: (logDate) => {
-          const diffMs = now - logDate;
-          const diffHours = diffMs / (1000 * 60 * 60);
-          return diffHours >= i * 2 && diffHours < (i * 2 + 2) && logDate.toDateString() === now.toDateString();
-        }
-      });
-    }
-  } else if (dateFilter === '30days') {
-    // Show last 30 days in 6 intervals of 5 days
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i * 5);
-      timeUnits.push({
-        key: d.toDateString(),
-        label: d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' }),
-        matchFn: (logDate) => {
-          const diffDays = Math.floor((now - logDate) / (1000 * 60 * 60 * 24));
-          return diffDays >= i * 5 && diffDays < (i * 5 + 5);
-        }
-      });
-    }
-  } else {
-    // last 7 days or all (default to last 7 days)
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      timeUnits.push({
-        key: d.toDateString(),
-        label: d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' }),
-        matchFn: (logDate) => logDate.toDateString() === d.toDateString()
-      });
-    }
-  }
-
-  const numPoints = timeUnits.length;
-
-  const counts = {
-    gjacana: Array(numPoints).fill(0),
-    fazenda_ws: Array(numPoints).fill(0),
-    apoloni: Array(numPoints).fill(0),
-    piccini: Array(numPoints).fill(0)
-  };
-
-  const sortedLogs = [...logs].sort((a, b) => new Date(a.sent_at) - new Date(b.sent_at));
-  const blocks = [];
-  sortedLogs.forEach(log => {
-    const logTime = new Date(log.sent_at).getTime();
-    const matchingBlockIndex = blocks.findIndex(b => {
-      return b.farm_key === log.farm_key &&
-             b.phone_number === log.phone_number &&
-             Math.abs(b.time - logTime) < 60 * 1000;
-    });
     
-    if (matchingBlockIndex === -1) {
-      blocks.push({
-        farm_key: log.farm_key,
-        phone_number: log.phone_number,
-        time: logTime,
-        date: new Date(log.sent_at)
-      });
-    }
-  });
+    // Calculate grouped consolidated reports for each farm
+    const farmBlocks = blocks.filter(b => b.farm_key === f.key);
+    const totalReports = farmBlocks.length;
 
-  blocks.forEach(b => {
-    const idx = timeUnits.findIndex(tu => tu.matchFn(b.date));
-    if (idx !== -1 && counts[b.farm_key] !== undefined) {
-      counts[b.farm_key][idx]++;
-    }
-  });
+    const d1Count = farmBlocks.filter(b => b.types.includes('D-1')).length;
+    const dailyCount = farmBlocks.filter(b => b.types.includes('Daily')).length;
+    const hourCount = farmBlocks.filter(b => b.types.includes('Hour')).length;
+    const hidricoCount = farmBlocks.filter(b => b.types.includes('Hídrico')).length;
+    const marketCount = farmBlocks.filter(b => b.types.includes('Market')).length;
 
-  const container = document.getElementById('overview-chart-container');
-  if (!container) return;
-
-  const rect = container.getBoundingClientRect();
-  const width = rect.width || 600;
-  const height = rect.height || 170;
-
-  const padding = { top: 20, right: 25, bottom: 25, left: 35 };
-
-  const chartWidth = width - padding.left - padding.right;
-  const chartHeight = height - padding.top - padding.bottom;
-
-  const allVals = Object.values(counts).flat();
-  const maxVal = Math.max(...allVals, 5);
-
-  let gridHtml = '';
-  const yTicks = 3;
-  for (let i = 0; i <= yTicks; i++) {
-    const yVal = Math.round((maxVal / yTicks) * i);
-    const yPos = padding.top + chartHeight - (i / yTicks) * chartHeight;
-    gridHtml += `
-      <line x1="${padding.left}" y1="${yPos}" x2="${width - padding.right}" y2="${yPos}" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,3" />
-      <text x="${padding.left - 8}" y="${yPos + 3}" fill="var(--muted)" font-size="9" font-family="'Outfit', sans-serif" font-weight="500" text-anchor="end">${yVal}</text>
-    `;
-  }
-
-  timeUnits.forEach((tu, idx) => {
-    const xPos = padding.left + (idx / (numPoints - 1)) * chartWidth;
-    gridHtml += `
-      <text x="${xPos}" y="${height - 6}" fill="var(--muted)" font-size="9" font-family="'Outfit', sans-serif" font-weight="500" text-anchor="middle">${tu.label}</text>
+    clientBarsHtml += `
+      <div style="background: var(--sub); border: 1px solid var(--border); padding: 12px; border-radius: 8px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 0.95rem; font-weight: 800; font-family: 'Outfit', sans-serif;">${f.name}</span>
+          <div style="display: flex; gap: 8px;">
+            <span class="badge" style="padding: 2px 6px; font-size: 0.72rem; border-color: rgba(96,165,250,0.3); color: var(--blue);">👥 ${val} únicos</span>
+            <span class="badge" style="padding: 2px 6px; font-size: 0.72rem; border-color: rgba(16,185,129,0.3); color: var(--green);">✈️ ${totalReports} envios</span>
+          </div>
+        </div>
+        <div class="bar-container" style="height: 6px; background: rgba(255,255,255,0.03); border-radius: 3px; overflow: hidden; width: 100%;">
+          <div class="bar-fill" style="width: ${pct}%; height: 100%; background: var(--blue); border-radius: 3px;"></div>
+        </div>
+        <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 2px; font-size: 0.7rem; font-weight: 700; color: var(--muted);">
+          <span style="background: rgba(139,92,246,0.08); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(139,92,246,0.12);">D-1: ${d1Count}</span>
+          <span style="background: rgba(16,185,129,0.08); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(16,185,129,0.12);">Daily: ${dailyCount}</span>
+          <span style="background: rgba(245,158,11,0.08); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(245,158,11,0.12);">Hour: ${hourCount}</span>
+          <span style="background: rgba(59,130,246,0.08); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(59,130,246,0.12);">Hídrico: ${hidricoCount}</span>
+          <span style="background: rgba(155,111,247,0.08); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(155,111,247,0.12);">Market: ${marketCount}</span>
+        </div>
+      </div>
     `;
   });
-
-  const colors = {
-    gjacana: 'var(--yellow)',
-    fazenda_ws: 'var(--blue)',
-    apoloni: 'var(--primary)',
-    piccini: 'var(--green)'
-  };
-
-  let linesHtml = '';
-  let dotsHtml = '';
-
-  Object.keys(counts).forEach(farmKey => {
-    const points = counts[farmKey].map((val, idx) => {
-      const x = padding.left + (idx / (numPoints - 1)) * chartWidth;
-      const y = padding.top + chartHeight - (val / maxVal) * chartHeight;
-      return { x, y, val };
-    });
-
-    const pathD = points.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
-    linesHtml += `
-      <path d="${pathD}" fill="none" stroke="${colors[farmKey]}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="transition: all 0.3s ease;" />
-    `;
-
-    points.forEach(p => {
-      if (p.val > 0) {
-        dotsHtml += `
-          <text x="${p.x}" y="${p.y - 8}" fill="${colors[farmKey]}" font-size="9" font-family="'Outfit', sans-serif" font-weight="600" text-anchor="middle" stroke="var(--panel)" stroke-width="2.5" paint-order="stroke fill" style="pointer-events: none;">${p.val}</text>
-        `;
-      }
-      dotsHtml += `
-        <circle cx="${p.x}" cy="${p.y}" r="3" fill="var(--panel)" stroke="${colors[farmKey]}" stroke-width="1.2" style="transition: all 0.3s ease; cursor: pointer;" />
-        <title>${FARMS_DATA.find(f => f.key === farmKey).name}: ${p.val} disparos</title>
-      `;
-    });
-  });
-
-  container.innerHTML = `
-    <svg viewBox="0 0 ${width} ${height}" style="width: 100%; height: 100%; display: block; overflow: visible;">
-      ${gridHtml}
-      ${linesHtml}
-      ${dotsHtml}
-    </svg>
-  `;
+  
+  const clientBarsEl = document.getElementById('overview-client-bars');
+  if (clientBarsEl) clientBarsEl.innerHTML = clientBarsHtml;
 }
 
-async function preloadAllFarmsData() {
-  const fetchPromises = FARMS_DATA.map(async (f) => {
+function getEndpointAlerts() {
+  const cacheData = localStorage.getItem('api_health_cache');
+  if (!cacheData) return [];
+  try {
+    const results = JSON.parse(cacheData);
+    const alerts = [];
+    results.forEach(res => {
+      const ep = ENDPOINTS[res.index];
+      if (ep && (res.status === 'down' || res.status === 'checking')) {
+        alerts.push({
+          name: ep.name,
+          path: ep.path,
+          status: res.status === 'down' ? 'red' : 'yellow',
+          latency: res.latency
+        });
+      }
+    });
+    return alerts;
+  } catch(e) {
+    return [];
+  }
+}
+
+function preloadAllFarmsData() {
+  FARMS_DATA.forEach(f => {
     const token = TOKENS[f.key];
     if (!token) return;
-    try {
-      const rLogs = await fetch(`${BASE}/chat/logs?limit=150`, {headers:{'X-Encrypted-Token':token}});
-      if (rLogs.ok) {
-        const logs = await rLogs.json();
-        logs.forEach(l => l.farm_key = f.key);
-        logsCache[f.key] = logs;
-        allLogs = allLogs.filter(l => l.farm_key !== f.key).concat(logs);
-      }
-      
-      const rContacts = await fetch(`${BASE}/farms/contacts`, {headers:{'X-Encrypted-Token':token}});
-      if (rContacts.ok) {
-        const contacts = await rContacts.json();
+
+    // Fetch logs in parallel
+    fetch(`${BASE}/chat/logs?limit=150`, {headers:{'X-Encrypted-Token':token}})
+      .then(r => r.ok ? r.json() : [])
+      .then(logs => {
+        if (logs && logs.length) {
+          logs.forEach(l => l.farm_key = f.key);
+          logsCache[f.key] = logs;
+          allLogs = allLogs.filter(l => l.farm_key !== f.key).concat(logs);
+          
+          // Incremental UI updates
+          updateOverviewDashboard();
+          if (f.key === farm) {
+            fetchLogs();
+          }
+        }
+      })
+      .catch(e => console.warn(`Erro no pre-load de logs para ${f.key}:`, e));
+
+    // Fetch contacts in parallel
+    fetch(`${BASE}/farms/contacts`, {headers:{'X-Encrypted-Token':token}})
+      .then(r => r.ok ? r.json() : [])
+      .then(contacts => {
         contactsCache[f.key] = contacts;
-      }
+      })
+      .catch(e => console.warn(`Erro no pre-load de contatos para ${f.key}:`, e));
 
-      const rAlerts = await fetch(`${BASE}/machines/alerts`, {headers:{'X-Encrypted-Token':token}});
-      if (rAlerts.ok) {
-        const alerts = await rAlerts.json();
+    // Fetch alerts in parallel
+    fetch(`${BASE}/machines/alerts`, {headers:{'X-Encrypted-Token':token}})
+      .then(r => r.ok ? r.json() : [])
+      .then(alerts => {
         farmAlertsCache[f.key] = alerts.length;
-      }
-    } catch(e) {
-      console.warn(`Erro no pre-load da fazenda ${f.key}:`, e);
-    }
+        updateOverviewDashboard();
+      })
+      .catch(e => console.warn(`Erro no pre-load de alertas para ${f.key}:`, e));
   });
-
-  await Promise.all(fetchPromises);
-  updateOverviewDashboard();
-  if (logsCache[farm]) {
-    fetchLogs();
-  }
 }
 
 // Boot
@@ -1803,14 +1658,7 @@ selectFarm('gjacana','Fazenda Jaçanã','5683','5511963065709');
 switchTab(savedTab);
 loadAllFarmDots();
 preloadAllFarmsData();
-
-// Window resize handler to redraw charts dynamically
-window.addEventListener('resize', () => {
-  const activeTab = localStorage.getItem('active_tab') || 'overview';
-  if (activeTab === 'overview') {
-    drawOverviewLineChart(allLogs, document.getElementById('overview-date-filter') ? document.getElementById('overview-date-filter').value : 'all');
-  }
-});
+buildEndpoints(false);
 
 // Atrasa a primeira verificação de background por 4 segundos após carregar
 setTimeout(() => {
