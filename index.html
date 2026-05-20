@@ -27,7 +27,16 @@
         <div class="leg-item"><span class="status-dot none"></span> Sem Número</div>
       </div>
       <div class="topbar-actions" style="display: flex; align-items: center; gap: 12px;">
-        <button class="theme-btn" id="btn-test-api" onclick="forceCheckEndpoints()" style="display: none; align-items: center; gap: 8px; font-family:'Outfit',sans-serif; white-space: nowrap;">🔄 Testar Endpoints</button>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 0.72rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px;">Período:</span>
+          <select id="overview-date-filter" onchange="updateOverviewDashboard()" style="background: var(--panel); color: var(--text); border: 1px solid var(--border); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; outline: none; font-family: inherit; transition: all 0.2s ease;">
+            <option value="today">Hoje</option>
+            <option value="7days">Últimos 7 dias</option>
+            <option value="30days">Últimos 30 dias</option>
+            <option value="all" selected>Todo o período</option>
+          </select>
+        </div>
+        <button class="theme-btn" id="btn-test-api" onclick="forceCheckEndpoints()" style="display: none; align-items: center; gap: 8px; font-family:'Outfit',sans-serif;">🔄 Testar Endpoints</button>
         <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">🌙 Modo Escuro</button>
       </div>
     </header>
@@ -40,46 +49,65 @@
   </div>
 
   <!-- ABA 0: VISÃO GERAL -->
-  <div id="tab-overview" class="tabcontent active" style="flex-direction: column; height: calc(100vh - 195px); overflow: hidden; gap: 16px;">
+  <div id="tab-overview" class="tabcontent active">
 
-    <div class="overview-grid" style="flex: 1; min-height: 0;">
+    <div class="overview-grid">
       
       <!-- Card 1: Alertas Operacionais -->
-      <div class="overview-card green-theme" style="display: flex; flex-direction: column; overflow: hidden;">
+      <div class="overview-card green-theme">
         <div class="card-header">
           <span class="card-title">1. Alertas Operacionais</span>
           <span class="dots-btn">•••</span>
         </div>
         <div class="overview-main-metric">
           <div class="metric-value" id="overview-alerts-count">0</div>
-          <div class="metric-label">Erros de API / Banidos</div>
-          <div class="metric-icon">⚠️</div>
+          <div class="metric-label">Alertas ativos</div>
+          <div class="metric-icon">✓</div>
         </div>
-        <div class="status-alert-box success" id="overview-alerts-status" style="margin-top: 12px; flex-shrink: 0;">
+        <div class="status-alert-box success" id="overview-alerts-status">
           <span class="circle-icon">✓</span> Tudo perfeito! Nenhum alerta no momento.
         </div>
         
-        <div class="farm-alerts-section" style="margin-top: 16px; flex: 1; display: flex; flex-direction: column; min-height: 0;">
-          <div class="recent-title" style="flex-shrink: 0;">Detalhamento dos Alertas</div>
-          <div class="client-bar-list" id="overview-api-alerts-list" style="margin-top: 8px; flex: 1; overflow-y: auto; padding-right: 4px;">
-            <div style="font-size: 0.85rem; color: var(--muted); text-align: center; padding: 10px;">Sem alertas detalhados.</div>
+        <div class="farm-alerts-section">
+          <div class="recent-title">Alertas por Fazenda</div>
+          <div class="client-bar-list" id="overview-farm-alerts">
+            <div class="client-bar-item">
+              <span class="client-name">Piccini</span>
+              <div class="bar-container"><div class="bar-fill alert-bar" id="alert-bar-piccini" style="width: 5%; background: var(--green);"></div></div>
+              <span class="client-val" id="alert-val-piccini">0</span>
+            </div>
+            <div class="client-bar-item">
+              <span class="client-name">Apoloni</span>
+              <div class="bar-container"><div class="bar-fill alert-bar" id="alert-bar-apoloni" style="width: 5%; background: var(--green);"></div></div>
+              <span class="client-val" id="alert-val-apoloni">0</span>
+            </div>
+            <div class="client-bar-item">
+              <span class="client-name">Jaçanã</span>
+              <div class="bar-container"><div class="bar-fill alert-bar" id="alert-bar-gjacana" style="width: 5%; background: var(--green);"></div></div>
+              <span class="client-val" id="alert-val-gjacana">0</span>
+            </div>
+            <div class="client-bar-item">
+              <span class="client-name">Fazenda WS</span>
+              <div class="bar-container"><div class="bar-fill alert-bar" id="alert-bar-fazenda_ws" style="width: 5%; background: var(--green);"></div></div>
+              <span class="client-val" id="alert-val-fazenda_ws">0</span>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Card 2: Volume de Disparos -->
-      <div class="overview-card blue-theme" style="display: flex; flex-direction: column; overflow: hidden;">
-        <div class="card-header" style="flex-shrink: 0;">
+      <div class="overview-card blue-theme">
+        <div class="card-header">
           <span class="card-title">2. Volume de Disparos</span>
           <span class="dots-btn">•••</span>
         </div>
-        <div class="overview-main-metric" style="flex-shrink: 0;">
+        <div class="overview-main-metric">
           <div class="metric-value" id="overview-dispatches-count">0</div>
-          <div class="metric-label">Total de Mensagens Enviadas</div>
+          <div class="metric-label">Total de mensagens enviadas</div>
           <div class="metric-icon">✈</div>
         </div>
-
-        <div class="overview-small-stats" style="margin-top: 12px; flex-shrink: 0;">
+        
+        <div class="overview-small-stats">
           <div class="small-stat-item">
             <div class="stat-lbl">Textos</div>
             <div class="stat-val blue-text" id="overview-texts-count">0</div>
@@ -94,24 +122,43 @@
           </div>
         </div>
 
-        <div style="margin-top: 16px; flex: 1; display: flex; flex-direction: column; min-height: 0;">
-          <div class="recent-title" style="flex-shrink: 0;">Análise de Entregas</div>
-          <div class="client-bar-list" id="overview-client-bars" style="margin-top: 8px; gap: 8px; flex: 1; overflow-y: auto;">
-            <!-- Barras geradas por JS -->
+        <div class="client-dispatches-section">
+          <div class="recent-title">Destinatários Únicos</div>
+          <div class="client-bar-list" id="overview-client-bars">
+            <div class="client-bar-item">
+              <span class="client-name">Piccini</span>
+              <div class="bar-container"><div class="bar-fill" style="width: 5%;"></div></div>
+              <span class="client-val" id="bar-val-piccini">0</span>
+            </div>
+            <div class="client-bar-item">
+              <span class="client-name">Apoloni</span>
+              <div class="bar-container"><div class="bar-fill" style="width: 5%;"></div></div>
+              <span class="client-val" id="bar-val-apoloni">0</span>
+            </div>
+            <div class="client-bar-item">
+              <span class="client-name">Jaçanã</span>
+              <div class="bar-container"><div class="bar-fill" style="width: 5%;"></div></div>
+              <span class="client-val" id="bar-val-gjacana">0</span>
+            </div>
+            <div class="client-bar-item">
+              <span class="client-name">Fazenda WS</span>
+              <div class="bar-container"><div class="bar-fill" style="width: 5%;"></div></div>
+              <span class="client-val" id="bar-val-fazenda_ws">0</span>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Card 3: Colin IA - Interativo -->
       <div class="overview-card purple-theme" style="padding: 0; overflow: hidden; position: relative;">
-        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+        <div class="construction-image-wrapper" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 0; border: none;">
           <img src="images/colin_avatar.png" alt="Colin IA" class="construction-img" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: blur(1.5px) brightness(0.55);">
           <div class="construction-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(26, 34, 56, 0.45); padding: 24px; box-sizing: border-box; text-align: center;">
             <div class="card-header" style="position: absolute; top: 20px; left: 24px; right: 24px; border: none; display: flex; justify-content: space-between; align-items: center; width: calc(100% - 48px); padding: 0;">
               <span class="card-title" style="color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-weight: 800;">3. Colin IA - Interativo</span>
               <span class="badge-construction" style="background: rgba(255, 255, 255, 0.15); color: #fff; border: 1px solid rgba(255, 255, 255, 0.25); text-shadow: none; font-size: 0.7rem; letter-spacing: 0.5px; font-weight: 800; padding: 4px 8px; border-radius: 6px;">EM CONSTRUÇÃO</span>
             </div>
-            <span class="construction-icon" style="font-size: 2.5rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); margin-top: 20px;">🛠️</span>
+            <span class="construction-icon" style="font-size: 2.5rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">🛠️</span>
             <span class="construction-text" style="font-size: 1.4rem; color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,0.6); margin-top: 10px; font-weight: 900; font-family: 'Outfit', sans-serif;">Nova Aba Interativa</span>
             <span class="construction-sub" style="font-size: 0.85rem; color: #e2e8f0; text-shadow: 0 1px 3px rgba(0,0,0,0.6); max-width: 260px; margin: 0 auto; line-height: 1.4;">Acompanhe a evolução do Colin nas próximas atualizações.</span>
             <a href="#" class="view-all-link" onclick="switchTab('colin'); return false;" style="position: absolute; bottom: 20px; left: 24px; right: 24px; margin: 0; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.4); display: flex; justify-content: flex-end; align-items: center; text-decoration: none; width: calc(100% - 48px);">Acessar protótipo da IA <span style="margin-left: 6px;">➔</span></a>
@@ -119,58 +166,100 @@
         </div>
       </div>
 
-    </div>
-
-    <!-- SMALL METRICS ROW (BOTTOM) -->
-    <div class="overview-bottom-row" style="display: grid; grid-template-columns: 2.2fr 1fr 1fr 1fr; gap: 16px; flex-shrink: 0;">
-      
-      <!-- Canais Ativos -->
-      <div class="small-overview-card" style="padding: 12px 16px; display: flex; flex-direction: column; align-items: stretch; gap: 10px; justify-content: center;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <div class="small-card-icon blue-bg" style="width: 28px; height: 28px; font-size: 1.1rem; border-radius: 6px; margin: 0;">📞</div>
-          <span class="card-title" style="font-size: 0.95rem; margin: 0;">Canais Ativos</span>
-        </div>
-        <div class="channels-status-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-          <div style="display: flex; flex-direction: column; gap: 2px;">
-            <div style="display: flex; align-items: center; gap: 6px;"><span class="status-dot-mini success" id="status-mini-gjacana"></span><span style="font-size: 0.85rem; font-weight: 800;">Jaçanã</span></div>
-            <span style="font-size: 0.75rem; color: var(--muted); font-weight: 700; margin-left: 14px;">(11) 96306-5709</span>
+      <!-- Left: Line Chart Card (Spans 2 columns, aligns perfectly with Card 1 and Card 2) -->
+      <div class="overview-card chart-card" style="grid-column: span 2; padding: 16px 20px; display: flex; flex-direction: column; justify-content: space-between; height: 390px; box-sizing: border-box;">
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div class="small-card-icon purple-bg" style="width: 28px; height: 28px; font-size: 0.95rem; border-radius: 6px;">📈</div>
+            <span class="card-title">Desempenho de Disparos</span>
           </div>
-          <div style="display: flex; flex-direction: column; gap: 2px;">
-            <div style="display: flex; align-items: center; gap: 6px;"><span class="status-dot-mini success" id="status-mini-apoloni"></span><span style="font-size: 0.85rem; font-weight: 800;">Apoloni</span></div>
-            <span style="font-size: 0.75rem; color: var(--muted); font-weight: 700; margin-left: 14px;">(44) 3101-1106</span>
-          </div>
-          <div style="display: flex; flex-direction: column; gap: 2px;">
-            <div style="display: flex; align-items: center; gap: 6px;"><span class="status-dot-mini success" id="status-mini-piccini"></span><span style="font-size: 0.85rem; font-weight: 800;">Piccini</span></div>
-            <span style="font-size: 0.75rem; color: var(--muted); font-weight: 700; margin-left: 14px;">(66) 3184-0130</span>
-          </div>
-          <div style="display: flex; flex-direction: column; gap: 2px;">
-            <div style="display: flex; align-items: center; gap: 6px;"><span class="status-dot-mini success" id="status-mini-fazenda_ws"></span><span style="font-size: 0.85rem; font-weight: 800;">Fazenda WS</span></div>
-            <span style="font-size: 0.75rem; color: var(--muted); font-weight: 700; margin-left: 14px;">(11) 96267-8385</span>
+          <div class="chart-legend" style="display: flex; gap: 12px; font-size: 0.72rem; font-weight: 700;">
+            <div style="display: flex; align-items: center; gap: 4px;"><span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--yellow);"></span> Jaçanã</div>
+            <div style="display: flex; align-items: center; gap: 4px;"><span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--primary);"></span> Apoloni</div>
+            <div style="display: flex; align-items: center; gap: 4px;"><span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--green);"></span> Piccini</div>
+            <div style="display: flex; align-items: center; gap: 4px;"><span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--blue);"></span> Fazenda WS</div>
           </div>
         </div>
-      </div>
-      
-      <!-- Relatórios -->
-      <div class="small-overview-card" style="padding: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 6px;">
-        <div class="small-card-icon purple-bg" style="width: 32px; height: 32px; font-size: 1.1rem; border-radius: 6px; margin: 0;">📋</div>
-        <div class="small-card-label" style="font-size: 0.75rem; margin: 0;">Relatórios</div>
-        <div class="small-card-value" style="font-size: 1.1rem;">5 Formatos</div>
+        <div id="overview-chart-container" style="width: 100%; margin-top: 8px; flex-grow: 1; min-height: 280px;">
+          <!-- SVG chart will be injected here -->
+        </div>
       </div>
 
-      <!-- Opt-out -->
-      <div class="small-overview-card" style="padding: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 6px;">
-        <div class="small-card-icon green-bg" style="width: 32px; height: 32px; font-size: 1.1rem; border-radius: 6px; margin: 0;">📉</div>
-        <div class="small-card-label" style="font-size: 0.75rem; margin: 0;">Opt-out</div>
-        <div class="small-card-value" style="font-size: 1.1rem;">0,00%</div>
+      <!-- Right: Grid of Small Metrics Cards (Spans 1 column, aligns perfectly with Card 3) -->
+      <div style="grid-column: span 1; display: grid; grid-template-rows: 200px 174px; gap: 16px; height: 390px; box-sizing: border-box;">
+        
+        <!-- Canais Ativos -->
+        <div class="small-overview-card" style="padding: 16px 20px; display: flex; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 16px; height: 100%; box-sizing: border-box;">
+          <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
+            <div class="small-card-icon blue-bg" style="width: 28px; height: 28px; font-size: 1.1rem; border-radius: 6px; margin: 0;">📞</div>
+            <span class="card-title" style="font-size: 1rem;">Canais Ativos</span>
+          </div>
+          <div class="channels-status-list" style="margin-top: 0; gap: 8px;">
+            <div class="channel-status-item" style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 6px 10px; width: 100%; box-sizing: border-box;">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="status-dot-mini success" id="status-mini-gjacana"></span>
+                <span class="channel-name-mini" style="font-size: 0.88rem; font-weight: 800;">Jaçanã</span>
+              </div>
+              <span style="font-size: 0.8rem; color: var(--muted); font-weight: 700; margin-left: 12px;">Carteira 5683 • (11) 96306-5709</span>
+            </div>
+            <div class="channel-status-item" style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 6px 10px; width: 100%; box-sizing: border-box;">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="status-dot-mini success" id="status-mini-apoloni"></span>
+                <span class="channel-name-mini" style="font-size: 0.88rem; font-weight: 800;">Apoloni</span>
+              </div>
+              <span style="font-size: 0.8rem; color: var(--muted); font-weight: 700; margin-left: 12px;">Carteira 6153 • (44) 3101-1106</span>
+            </div>
+            <div class="channel-status-item" style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 6px 10px; width: 100%; box-sizing: border-box;">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="status-dot-mini success" id="status-mini-piccini"></span>
+                <span class="channel-name-mini" style="font-size: 0.88rem; font-weight: 800;">Piccini</span>
+              </div>
+              <span style="font-size: 0.8rem; color: var(--muted); font-weight: 700; margin-left: 12px;">Carteira 6084 • (66) 3184-0130</span>
+            </div>
+            <div class="channel-status-item" style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 6px 10px; width: 100%; box-sizing: border-box;">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="status-dot-mini success" id="status-mini-fazenda_ws"></span>
+                <span class="channel-name-mini" style="font-size: 0.88rem; font-weight: 800;">Fazenda WS</span>
+              </div>
+              <span style="font-size: 0.8rem; color: var(--muted); font-weight: 700; margin-left: 12px;">Carteira 5702 • (11) 96267-8385</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Three columns of sub-metrics -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; height: 100%;">
+          <!-- Tipos de Relatório -->
+          <div class="small-overview-card" style="padding: 8px 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 6px; height: 100%; box-sizing: border-box;">
+            <div class="small-card-icon purple-bg" style="width: 32px; height: 32px; font-size: 1.1rem; border-radius: 6px; margin: 0; display: flex; align-items: center; justify-content: center;">📋</div>
+            <div class="small-card-content" style="display: flex; flex-direction: column; align-items: center;">
+              <div class="small-card-label" style="font-size: 0.8rem; font-weight: 800; color: var(--muted); line-height: 1;">Relatórios</div>
+              <div class="small-card-value" style="font-size: 1.25rem; font-weight: 900; line-height: 1.1; margin-top: 4px; white-space: nowrap;">5 Formatos</div>
+            </div>
+          </div>
+
+          <!-- Taxa de Opt-out -->
+          <div class="small-overview-card" style="padding: 8px 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 6px; height: 100%; box-sizing: border-box;">
+            <div class="small-card-icon green-bg" style="width: 32px; height: 32px; font-size: 1.1rem; border-radius: 6px; margin: 0; display: flex; align-items: center; justify-content: center;">📉</div>
+            <div class="small-card-content" style="display: flex; flex-direction: column; align-items: center;">
+              <div class="small-card-label" style="font-size: 0.8rem; font-weight: 800; color: var(--muted); line-height: 1;">Opt-out</div>
+              <div class="small-card-value" style="font-size: 1.25rem; font-weight: 900; line-height: 1.1; margin-top: 4px; white-space: nowrap;">0,00%</div>
+            </div>
+          </div>
+
+          <!-- Uptime APIs -->
+          <div class="small-overview-card" style="padding: 8px 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 6px; height: 100%; box-sizing: border-box;">
+            <div class="small-card-icon orange-bg" style="width: 32px; height: 32px; font-size: 1.1rem; border-radius: 6px; margin: 0; display: flex; align-items: center; justify-content: center;">⚡</div>
+            <div class="small-card-content" style="display: flex; flex-direction: column; align-items: center;">
+              <div class="small-card-label" style="font-size: 0.8rem; font-weight: 800; color: var(--muted); line-height: 1;">Uptime</div>
+              <div class="small-card-value" style="font-size: 1.25rem; font-weight: 900; line-height: 1.1; margin-top: 4px; white-space: nowrap;">99.8%</div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
-      <!-- Uptime APIs -->
-      <div class="small-overview-card" style="padding: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 6px;">
-        <div class="small-card-icon orange-bg" style="width: 32px; height: 32px; font-size: 1.1rem; border-radius: 6px; margin: 0;">⚡</div>
-        <div class="small-card-label" style="font-size: 0.75rem; margin: 0;">Uptime</div>
-        <div class="small-card-value" style="font-size: 1.1rem;">99.8%</div>
-      </div>
     </div>
+  </div>
 
   <!-- ABA 1: DASHBOARD -->
   <div id="tab-dashboard" class="tabcontent">
@@ -270,160 +359,6 @@
       </div>
 
       <!-- Barra de Filtros (Glassmorphic) -->
-      <div class="filter-bar" style="display: flex; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; align-items: center; background: rgba(255,255,255,0.02); padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border);">
-        <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 6px;">
-          <label style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); font-weight: 700;">Filtrar por Nome</label>
-          <select id="filter-name" onchange="renderLogsTable()" style="background: var(--code); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font-family: inherit; font-size: 0.9rem; outline: none; cursor: pointer; width: 100%;">
-            <option value="">Todos os Nomes</option>
-          </select>
-        </div>
-        <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 6px;">
-          <label style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); font-weight: 700;">Filtrar por Telefone</label>
-          <select id="filter-phone" onchange="renderLogsTable()" style="background: var(--code); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font-family: inherit; font-size: 0.9rem; outline: none; cursor: pointer; width: 100%;">
-            <option value="">Todos os Telefones</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="tbl-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Destinatário</th>
-              <th style="text-align: center; min-width: 90px;">D-1</th>
-              <th style="text-align: center; min-width: 90px;">Daily</th>
-              <th style="text-align: center; min-width: 90px;">Hour</th>
-              <th style="text-align: center; min-width: 90px;">Hídrico</th>
-              <th style="text-align: center; min-width: 90px;">Market</th>
-            </tr>
-          </thead>
-          <tbody id="tbody">
-            <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px">Buscando logs de envio no banco de dados...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-  </div><!-- /tab-dashboard -->
-
-  <!-- ABA 2: ENDPOINTS -->
-  <div id="tab-api" class="tabcontent">
-    <div class="api-grid" id="api-grid"></div>
-  </div>
-
-  <!-- ABA 3: COLIN INTERATIVO -->
-  <div id="tab-colin" class="tabcontent">
-    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:65vh; color:var(--muted); text-align:center; gap:24px;">
-      <div class="colin-avatar-wrap">
-        <img src="images/colin_avatar.png" alt="Colin Agent" class="colin-avatar">
-        <div class="colin-pulse"></div>
-      </div>
-      <h2 style="font-family:'Outfit',sans-serif; font-size:2.4rem; color:var(--text); font-weight:900; letter-spacing:-0.5px;">Monitoramento: Agente Colin</h2>
-      <div style="background:var(--sub); border:1px solid var(--border); padding:24px 32px; border-radius:14px; max-width:640px; box-shadow:0 8px 30px rgba(0,0,0,0.1);">
-        <p style="font-size:1.15rem; line-height:1.7; color:var(--text); font-weight:700;">🚧 Este módulo de auditoria está em construção.</p>
-        <p style="font-size:1rem; line-height:1.6; color:var(--muted); margin-top:12px;">Ele será exclusivo para <strong>leitura e acompanhamento</strong>. Aqui você poderá monitorar em tempo real as <strong>mensagens recebidas</strong> pelo agente, as <strong>ferramentas (tools)</strong> que ele está utilizando para tomar decisões e as <strong>queries executadas</strong> diretamente no banco de dados.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- ABA 1: PAINEL MENSAGERIA -->
-  <div id="tab-dashboard" class="tabcontent">
-
-    <div class="farm-bar">
-      <button class="fbtn active" id="btn-gjacana"    onclick="selectFarm('gjacana','Fazenda Jaçanã','5683','5511963065709')">
-        <div class="fbtn-top"><span class="farm-dot none" id="dot-gjacana"></span>Fazenda Jaçanã</div>
-        <div class="fbtn-wallet">Carteira 5683 • (11) 96306-5709</div>
-      </button>
-      <button class="fbtn"        id="btn-fazenda_ws" onclick="selectFarm('fazenda_ws','Fazenda WS','5702','5511962678385')">
-        <div class="fbtn-top"><span class="farm-dot none" id="dot-fazenda_ws"></span>Fazenda WS</div>
-        <div class="fbtn-wallet">Carteira 5702 • (11) 96267-8385</div>
-      </button>
-      <button class="fbtn"        id="btn-apoloni"    onclick="selectFarm('apoloni','Apoloni','6153','554431011106')">
-        <div class="fbtn-top"><span class="farm-dot none" id="dot-apoloni"></span>Apoloni</div>
-        <div class="fbtn-wallet">Carteira 6153 • (44) 3101-1106</div>
-      </button>
-      <button class="fbtn"        id="btn-piccini"    onclick="selectFarm('piccini','Piccini','6084','556631840130')">
-        <div class="fbtn-top"><span class="farm-dot none" id="dot-piccini"></span>Piccini</div>
-        <div class="fbtn-wallet">Carteira 6084 • (66) 3184-0130</div>
-      </button>
-    </div>
-
-    <div class="grid2">
-
-      <!-- 1. D-1 -->
-      <div class="card fw">
-        <div class="card-header">
-          <span class="card-title">1. Mapa de Máquinas — D-1 (Fechamento Ontem)</span>
-          <span class="badge" id="time-d1">—</span>
-        </div>
-        <div class="card-body">
-          <div class="imgbox"><img id="img-d1" src="" alt="D-1" onerror="this.src='https://via.placeholder.com/600x420?text=Sem+Imagem'"></div>
-          <div class="msgbox" id="msg-d1">Carregando...</div>
-        </div>
-      </div>
-
-      <!-- 2. Daily -->
-      <div class="card fw">
-        <div class="card-header">
-          <span class="card-title">2. Fechamento Diário</span>
-          <span class="badge" id="time-daily">—</span>
-        </div>
-        <div class="card-body">
-          <div class="imgbox"><img id="img-daily" src="" alt="Daily" onerror="this.src='https://via.placeholder.com/600x420?text=Sem+Imagem'"></div>
-          <div class="msgbox" id="msg-daily">Carregando...</div>
-        </div>
-      </div>
-
-      <!-- 3. Hour -->
-      <div class="card fw">
-        <div class="card-header">
-          <span class="card-title">3. Relatório Horário / Alertas (Hour)</span>
-          <span class="badge" id="time-hour">—</span>
-        </div>
-        <div class="card-body">
-          <div class="imgbox"><img id="img-hour" src="" alt="Hour" onerror="this.src='https://via.placeholder.com/600x420?text=Sem+Imagem'"></div>
-          <div class="msgbox" id="msg-hour">Carregando...</div>
-        </div>
-      </div>
-
-      <!-- 4. Hídrico -->
-      <div class="card fw">
-        <div class="card-header">
-          <span class="card-title">4. Balanço Hídrico / Irrigação</span>
-          <span class="badge" id="time-hidrico">—</span>
-        </div>
-        <div class="card-body">
-          <div class="imgbox"><img id="img-hidrico" src="" alt="Hídrico" onerror="this.src='https://via.placeholder.com/600x420?text=Sem+Imagem'"></div>
-          <div class="msgbox" id="msg-hidrico">Carregando...</div>
-        </div>
-      </div>
-
-      <!-- 5. Market (grid3 dentro do grid2) -->
-      <div class="grid3">
-        <div class="card">
-          <div class="card-header"><span class="card-title">5.1 Cotações do Dia</span><span class="badge" id="time-cotacoes">—</span></div>
-          <div class="msgbox" id="msg-cotacoes">Carregando...</div>
-        </div>
-        <div class="card">
-          <div class="card-header"><span class="card-title">5.2 Síntese / Notícias</span><span class="badge" id="time-noticias">—</span></div>
-          <div class="msgbox" id="msg-noticias">Carregando...</div>
-        </div>
-        <div class="card">
-          <div class="card-header"><span class="card-title">5.3 Economia &amp; Política</span><span class="badge" id="time-economia">—</span></div>
-          <div class="msgbox" id="msg-economia">Carregando...</div>
-        </div>
-      </div>
-
-    </div><!-- /grid2 -->
-
-    <!-- Tabela de Auditoria de Logs de Envios -->
-    <div class="tbl-wrap">
-      <div class="section-title" style="display: flex; align-items: center; flex-wrap: wrap; margin-bottom: 16px;">
-        Auditoria de Logs de Envios
-        <span id="farm-wallet-info" style="font-size: 0.85rem; font-weight: 500; color: var(--muted); margin-left: 12px; padding-left:12px; border-left:1px solid var(--border);"></span>
-      </div>
-
-      <!-- Barra de Filtros -->
       <div class="filter-bar" style="display: flex; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; align-items: center; background: rgba(255,255,255,0.02); padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border);">
         <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 6px;">
           <label style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); font-weight: 700;">Filtrar por Nome</label>
@@ -629,9 +564,7 @@ document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal();
 
 function switchTab(id){
   document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.tabcontent').forEach(c=>{ c.classList.remove('active'); c.style.display = ''; });
-  // O tab-overview precisa de display:none explícito quando não ativo (CSS sozinho não basta por causa do inline style)
-  document.getElementById('tab-overview').style.display = 'none';
+  document.querySelectorAll('.tabcontent').forEach(c=>c.classList.remove('active'));
   
   const testBtn = document.getElementById('btn-test-api');
   if(id==='api'){
@@ -645,9 +578,7 @@ function switchTab(id){
   if(id==='overview') {
     const btn = Array.from(document.querySelectorAll('.tab')).find(b => b.getAttribute('onclick').includes('overview'));
     if (btn) btn.classList.add('active');
-    const ovEl = document.getElementById('tab-overview');
-    ovEl.classList.add('active');
-    ovEl.style.display = 'flex';
+    document.getElementById('tab-overview').classList.add('active');
     updateOverviewDashboard();
   } else if(id==='dashboard'){
     const btn = Array.from(document.querySelectorAll('.tab')).find(b => b.getAttribute('onclick').includes('dashboard'));
@@ -710,12 +641,10 @@ function updateTicker() {
   const ticker = document.getElementById('ticker-content');
   let msgs = [];
   
-  // Verifica se há alguma fazenda com número banido
-  FARMS_DATA.forEach(f => {
-    if (getFarmStatus(f.key) === 'ban') {
-      msgs.push(`<span class="ticker-item danger">🚫 O número da ${f.name} (${formatPhone(f.phone)}) está BANIDO.</span>`);
-    }
-  });
+  // O warning de tokens vazios não é mais necessário
+  if (getFarmStatus('fazenda_ws') === 'ban') {
+    msgs.push(`<span class="ticker-item danger">🚫 O número principal da Fazenda WS está BANIDO.</span>`);
+  }
 
   slowEndpoints.forEach(ep => {
     msgs.push(`<span class="ticker-item danger">🐢 Endpoint ${ep.name} demorando (${ep.ms}ms)</span>`);
@@ -759,21 +688,12 @@ function selectFarm(key, name, wallet, phone){
 }
 
 function findNearestImage(logs, textLog){
-  if (!textLog || !textLog.phone_number) return null;
-  const textTime = new Date(textLog.sent_at).getTime();
-  const images = logs.filter(l => l.message_type === 'image' && l.phone_number === textLog.phone_number);
-  
-  let closestImg = null;
-  let minDiff = 15 * 60 * 1000; // maximum 15 minutes difference
-  
-  for (const img of images) {
-    const diff = Math.abs(new Date(img.sent_at).getTime() - textTime);
-    if (diff < minDiff) {
-      minDiff = diff;
-      closestImg = img.message_content;
-    }
+  const idx = logs.indexOf(textLog);
+  if (idx === -1) return null;
+  for(let i=idx+1; i<logs.length; i++){
+    if(logs[i].message_type==='image') return logs[i].message_content;
   }
-  return closestImg;
+  return null;
 }
 
 
@@ -881,7 +801,7 @@ async function fetchLogs(){
 
   // Sincroniza em background
   try {
-    const r = await fetch(`${BASE}/chat/logs`, {headers:{'X-Encrypted-Token':token}});
+    const r = await fetch(`${BASE}/chat/logs?limit=200`, {headers:{'X-Encrypted-Token':token}});
     if(!r.ok) throw new Error('API retornou '+r.status);
     const freshLogs = await r.json();
     
@@ -919,9 +839,7 @@ function getReportType(content) {
   if (c.includes('FECHAMENTO DIÁRIO')) return 'Daily';
   if (c.includes('RELATÓRIO HORÁRIO')) return 'Hour';
   if (c.includes('BALANÇO HÍDRICO')) return 'Hídrico';
-  if (c.includes('COTAÇÕES DO DIA')) return 'Market_Cotacoes';
-  if (c.includes('SÍNTESE GERAL')) return 'Market_Sintese';
-  if (c.includes('ECONOMIA & POLÍTICA') || c.includes('ECONOMIA &AMP; POLÍTICA')) return 'Market_Economia';
+  if (c.includes('COTAÇÕES DO DIA') || c.includes('SÍNTESE GERAL') || c.includes('ECONOMIA & POLÍTICA') || c.includes('ECONOMIA &AMP; POLÍTICA')) return 'Market';
   return null;
 }
 
@@ -989,12 +907,15 @@ async function loadContacts() {
 function populateFilterSelects(logs) {
   const filterName = document.getElementById('filter-name');
   const filterPhone = document.getElementById('filter-phone');
+  const filterDay = document.getElementById('filter-day');
 
   const selectedName = filterName.value;
   const selectedPhone = filterPhone.value;
+  const selectedDay = filterDay.value;
 
   const names = new Set();
   const phones = new Set();
+  const days = new Set();
 
   logs.forEach(l => {
     if (l.phone_number) {
@@ -1002,16 +923,20 @@ function populateFilterSelects(logs) {
       const name = contactMap[l.phone_number] || 'Contato Externo';
       names.add(name);
     }
+    if (l.sent_at) {
+      days.add(getCalendarDate(l.sent_at));
+    }
   });
-
-  // Also include all contacts from contactMap so they are filterable even if no logs
-  for (const phone in contactMap) {
-    phones.add(phone);
-    names.add(contactMap[phone]);
-  }
 
   const sortedNames = Array.from(names).sort();
   const sortedPhones = Array.from(phones).sort();
+  const sortedDays = Array.from(days).sort((a, b) => {
+    const parseDate = s => {
+      const [d, m] = s.split('/');
+      return new Date(2026, parseInt(m) - 1, parseInt(d));
+    };
+    return parseDate(b) - parseDate(a);
+  });
 
   filterName.innerHTML = '<option value="">Todos os Nomes</option>';
   sortedNames.forEach(n => {
@@ -1023,40 +948,39 @@ function populateFilterSelects(logs) {
     filterPhone.innerHTML += `<option value="${p}">${formatPhone(p)}</option>`;
   });
 
+  filterDay.innerHTML = '<option value="">Todos os Dias</option>';
+  sortedDays.forEach(d => {
+    filterDay.innerHTML += `<option value="${d}">${d}</option>`;
+  });
+
   if (sortedNames.includes(selectedName)) filterName.value = selectedName;
   if (sortedPhones.includes(selectedPhone)) filterPhone.value = selectedPhone;
+  if (sortedDays.includes(selectedDay)) filterDay.value = selectedDay;
 }
 
 function renderLogsTable() {
   const tbody = document.getElementById('tbody');
   const filterName = document.getElementById('filter-name').value;
   const filterPhone = document.getElementById('filter-phone').value;
+  const filterDay = document.getElementById('filter-day').value;
 
   const activeFarmLogs = allLogs.filter(l => l.farm_key === farm);
 
-  // Group by phone
+  // Group by phone and day
   const groups = {};
-  
-  // First, initialize groups for ALL contacts of this farm so we see everyone even if no logs
-  for (const phone in contactMap) {
-    groups[phone] = {
-      phone_number: phone,
-      name: contactMap[phone],
-      logs: []
-    };
-  }
-
-  // Add logs to groups
   activeFarmLogs.forEach(l => {
     if (!l.phone_number) return;
-    if (!groups[l.phone_number]) {
-      groups[l.phone_number] = {
+    const day = getCalendarDate(l.sent_at);
+    const key = `${l.phone_number}_${day}`;
+    if (!groups[key]) {
+      groups[key] = {
         phone_number: l.phone_number,
         name: contactMap[l.phone_number] || 'Contato Externo',
+        day: day,
         logs: []
       };
     }
-    groups[l.phone_number].logs.push(l);
+    groups[key].logs.push(l);
   });
 
   let rows = Object.values(groups);
@@ -1067,65 +991,46 @@ function renderLogsTable() {
   if (filterPhone) {
     rows = rows.filter(r => r.phone_number === filterPhone);
   }
+  if (filterDay) {
+    rows = rows.filter(r => r.day === filterDay);
+  }
 
-  rows.sort((a, b) => a.name.localeCompare(b.name));
+  rows.sort((a, b) => {
+    const parseDate = s => {
+      const [d, m] = s.split('/');
+      return new Date(2026, parseInt(m) - 1, parseInt(d));
+    };
+    const dateDiff = parseDate(b.day) - parseDate(a.day);
+    if (dateDiff !== 0) return dateDiff;
+    return a.phone_number.localeCompare(b.phone_number);
+  });
 
   if (rows.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:30px">Nenhum contato encontrado.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px">Nenhum log de disparo atende aos filtros selecionados.</td></tr>`;
     return;
   }
 
   tbody.innerHTML = '';
   rows.forEach(r => {
     const phone = r.phone_number;
+    const day = r.day;
     const name = r.name;
 
     const getColContent = (type) => {
       if (type === 'Market') {
-        const cotLog = r.logs.find(l => l.message_type === 'text' && getReportType(l.message_content) === 'Market_Cotacoes');
-        const sinLog = r.logs.find(l => l.message_type === 'text' && getReportType(l.message_content) === 'Market_Sintese');
-        const ecoLog = r.logs.find(l => l.message_type === 'text' && getReportType(l.message_content) === 'Market_Economia');
-        
-        if (!cotLog && !sinLog && !ecoLog) return '<span style="color:var(--muted)">—</span>';
-        
-        // Get the date of the most recent message among the three
-        let maxDate = 0;
-        let dayStr = '—';
-        [cotLog, sinLog, ecoLog].forEach(log => {
-          if (log && new Date(log.sent_at).getTime() > maxDate) {
-            maxDate = new Date(log.sent_at).getTime();
-            dayStr = getCalendarDate(log.sent_at);
-          }
-        });
-
-        let html = '<div style="display:flex; flex-direction:column; gap:4px; align-items:center;">';
-        html += `<div style="font-size:0.75rem; color:var(--muted); font-weight:600; margin-bottom:2px;">${dayStr}</div>`;
-        
-        if (cotLog) {
-          const d = getCalendarDate(cotLog.sent_at);
-          html += `<button class="btn-view-msg" style="width:100%; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:700; background:rgba(59,130,246,0.15); color:var(--blue); cursor:pointer;" onclick="openMessage('${phone}', '${d}', 'Market_Cotacoes', 'text')">💬 Cotações</button>`;
-        }
-        if (sinLog) {
-          const d = getCalendarDate(sinLog.sent_at);
-          html += `<button class="btn-view-msg" style="width:100%; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:700; background:rgba(59,130,246,0.15); color:var(--blue); cursor:pointer;" onclick="openMessage('${phone}', '${d}', 'Market_Sintese', 'text')">💬 Síntese</button>`;
-        }
-        if (ecoLog) {
-          const d = getCalendarDate(ecoLog.sent_at);
-          html += `<button class="btn-view-msg" style="width:100%; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:700; background:rgba(59,130,246,0.15); color:var(--blue); cursor:pointer;" onclick="openMessage('${phone}', '${d}', 'Market_Economia', 'text')">💬 Economia</button>`;
-        }
-        
-        html += '</div>';
-        return html;
+        const hasMarket = r.logs.some(l => l.message_type === 'text' && getReportType(l.message_content) === 'Market');
+        if (!hasMarket) return '<span style="color:var(--muted)">—</span>';
+        return `<div style="display:flex; flex-direction:column; gap:4px; align-items:center;">
+          <button class="btn-view-msg" style="width:100%; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:700; background:rgba(59,130,246,0.15); color:var(--blue); cursor:pointer;" onclick="openMessage('${phone}', '${day}', 'Market', 'text')">💬 Texto</button>
+        </div>`;
       }
 
       const textLog = r.logs.find(l => l.message_type === 'text' && getReportType(l.message_content) === type);
       if (!textLog) return '<span style="color:var(--muted)">—</span>';
-      
-      const day = getCalendarDate(textLog.sent_at);
+
       const imgData = findNearestImage(activeFarmLogs, textLog);
 
       let html = '<div style="display:flex; flex-direction:column; gap:4px; align-items:center;">';
-      html += `<div style="font-size:0.75rem; color:var(--muted); font-weight:600; margin-bottom:2px;">${day}</div>`;
       html += `<button class="btn-view-msg" style="width:100%; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:700; background:rgba(59,130,246,0.15); color:var(--blue); cursor:pointer;" onclick="openMessage('${phone}', '${day}', '${type}', 'text')">💬 Texto</button>`;
       
       if (imgData) {
@@ -1140,6 +1045,9 @@ function renderLogsTable() {
         <td>
           <div style="font-weight:700; color:var(--text); font-size:0.95rem;">${name}</div>
           <div style="color:var(--muted); font-size:0.8rem; margin-top:2px;">${formatPhone(phone)}</div>
+        </td>
+        <td>
+          <span style="font-weight:600; color:var(--primary); font-size:0.9rem;">${day}</span>
         </td>
         <td style="text-align:center;">${getColContent('D-1')}</td>
         <td style="text-align:center;">${getColContent('Daily')}</td>
@@ -1527,32 +1435,55 @@ function updateOverviewDashboard() {
     
     if (status === 'ban') {
       alertsCount++;
-      recentAlertsHtml += `<div class="recent-alert-item" style="border-color: var(--red); color: var(--red); padding: 10px; margin-bottom: 6px;">
+      recentAlertsHtml += `<div class="recent-alert-item" style="border-color: var(--red); color: var(--red);">
         <span class="circle-icon" style="background: var(--red); color: #fff;">!</span>
-        O número da <strong>${f.name}</strong> (Carteira ${f.wallet} - ${formatPhone(f.phone)}) está BANIDO no WhatsApp.
+        O número da <strong>${f.name}</strong> está banido no WhatsApp.
       </div>`;
-      if (miniDot) miniDot.className = 'status-dot-mini danger';
+      if (miniDot) {
+        miniDot.className = 'status-dot-mini danger';
+      }
     } else if (status === 'checking' || status === 'slow') {
-      if (miniDot) miniDot.className = 'status-dot-mini warning';
+      if (miniDot) {
+        miniDot.className = 'status-dot-mini warning';
+      }
     } else {
-      if (miniDot) miniDot.className = 'status-dot-mini success';
+      if (miniDot) {
+        miniDot.className = 'status-dot-mini success';
+      }
     }
   });
 
-  // 2. Add API slow/error endpoints to alerts
-  slowEndpoints.forEach(ep => {
-    alertsCount++;
-    recentAlertsHtml += `<div class="recent-alert-item" style="border-color: var(--yellow); color: var(--yellow); padding: 10px; margin-bottom: 6px;">
-      <span class="circle-icon" style="background: var(--yellow); color: #000;">!</span>
-      <strong>Endpoint Lento/Fora:</strong> ${ep.name} (${ep.ms}ms)
-    </div>`;
+  // Count machine alerts per farm (completely apart from API endpoints alerts)
+  FARMS_DATA.forEach(f => {
+    const count = farmAlertsCache[f.key] || 0;
+    if (count > 0) {
+      alertsCount += count;
+      recentAlertsHtml += `<div class="recent-alert-item" style="border-color: var(--yellow); color: var(--yellow);">
+        <span class="circle-icon" style="background: var(--yellow); color: #000;">!</span>
+        <strong>${f.name}</strong> tem ${count} alertas de máquina ativos.
+      </div>`;
+    }
+
+    // Update Alertas por Fazenda card bars
+    const valEl = document.getElementById(`alert-val-${f.key}`);
+    const barEl = document.getElementById(`alert-bar-${f.key}`);
+    if (valEl) valEl.innerText = count;
+    
+    if (barEl) {
+      if (count > 0) {
+        barEl.style.width = Math.min(100, Math.max(10, count * 20)) + '%';
+        barEl.style.backgroundColor = 'var(--yellow)';
+      } else {
+        barEl.style.width = '5%';
+        barEl.style.backgroundColor = 'var(--green)';
+      }
+    }
   });
 
-  // Update Alertas UI
   const alertCard = document.querySelector('.overview-card.green-theme');
   const alertMetricVal = document.getElementById('overview-alerts-count');
   const alertStatusBox = document.getElementById('overview-alerts-status');
-  const alertRecentList = document.getElementById('overview-api-alerts-list');
+  const alertRecentBox = document.getElementById('overview-recent-alert');
 
   if (alertsCount > 0) {
     if (alertCard) alertCard.style.borderTopColor = 'var(--red)';
@@ -1562,10 +1493,10 @@ function updateOverviewDashboard() {
     }
     if (alertStatusBox) {
       alertStatusBox.className = 'status-alert-box warning';
-      alertStatusBox.innerHTML = `<span class="circle-icon" style="background: var(--red); color: #fff;">!</span> Atenção: ${alertsCount} alertas detectados.`;
+      alertStatusBox.innerHTML = `<span class="circle-icon" style="background: var(--red); color: #fff;">!</span> Atenção: ${alertsCount} pendências operacionais encontradas.`;
     }
-    if (alertRecentList) {
-      alertRecentList.innerHTML = recentAlertsHtml;
+    if (alertRecentBox) {
+      alertRecentBox.parentElement.innerHTML = `<div class="recent-title">Alertas por Fazenda</div>` + recentAlertsHtml;
     }
   } else {
     if (alertCard) alertCard.style.borderTopColor = 'var(--green)';
@@ -1577,81 +1508,257 @@ function updateOverviewDashboard() {
       alertStatusBox.className = 'status-alert-box success';
       alertStatusBox.innerHTML = `<span class="circle-icon">✓</span> Tudo perfeito! Nenhum alerta no momento.`;
     }
-    if (alertRecentList) {
-      alertRecentList.innerHTML = `<div style="font-size: 0.85rem; color: var(--muted); text-align: center; padding: 10px;">Nenhum alerta ativo. Sistemas 100% operacionais.</div>`;
+    if (alertRecentBox) {
+      alertRecentBox.parentElement.innerHTML = `<div class="recent-title">Alertas por Fazenda</div>
+        <div class="recent-alert-item" id="overview-recent-alert">
+          <span class="circle-icon">✓</span> Nenhum alerta operacional ativo. Tudo funcionando dentro do esperado.
+        </div>`;
     }
   }
 
-  // 3. Update Volume de Disparos bars
-  let barsHtml = '';
-  let totalDispatches = 0;
-  let totalTexts = 0;
-  let totalImages = 0;
+  const dateFilter = document.getElementById('overview-date-filter') ? document.getElementById('overview-date-filter').value : 'all';
+  let targetLogs = allLogs;
+  const now = new Date();
 
-  // First pass to get max unique phones and max msgs for scale
-  let maxUnique = 1;
-  let maxMsgs = 1;
-  const farmStats = {};
+  if (dateFilter === 'today') {
+    const todayStr = now.toDateString();
+    targetLogs = allLogs.filter(l => new Date(l.sent_at).toDateString() === todayStr);
+  } else if (dateFilter === '7days') {
+    const limitDate = new Date();
+    limitDate.setDate(now.getDate() - 7);
+    targetLogs = allLogs.filter(l => new Date(l.sent_at) >= limitDate);
+  } else if (dateFilter === '30days') {
+    const limitDate = new Date();
+    limitDate.setDate(now.getDate() - 30);
+    targetLogs = allLogs.filter(l => new Date(l.sent_at) >= limitDate);
+  }
 
-  FARMS_DATA.forEach(f => {
-    const farmLogs = allLogs.filter(l => l.farm_key === f.key);
-    const msgs = farmLogs.length;
-    // Pega contatos únicos filtrando nulos
-    const unique = new Set(farmLogs.map(l => l.phone_number).filter(p => p)).size;
-    if (unique > maxUnique) maxUnique = unique;
-    if (msgs > maxMsgs) maxMsgs = msgs;
-    farmStats[f.key] = { msgs, unique, logs: farmLogs };
+  // Group target logs into submission blocks (reports)
+  const sortedLogs = [...targetLogs].sort((a, b) => new Date(a.sent_at) - new Date(b.sent_at));
+  const blocks = [];
+  sortedLogs.forEach(log => {
+    const logTime = new Date(log.sent_at).getTime();
+    const matchingBlockIndex = blocks.findIndex(b => {
+      return b.farm_key === log.farm_key &&
+             b.phone_number === log.phone_number &&
+             Math.abs(b.time - logTime) < 60 * 1000;
+    });
+    
+    if (matchingBlockIndex === -1) {
+      blocks.push({
+        farm_key: log.farm_key,
+        phone_number: log.phone_number,
+        time: logTime
+      });
+    }
   });
 
-  FARMS_DATA.forEach(f => {
-    const stats = farmStats[f.key];
-    
-    totalDispatches += stats.msgs;
-    
-    const textLogs = stats.logs.filter(l => l.message_type === 'text');
-    const imageLogs = stats.logs.filter(l => l.message_type === 'image');
-    
-    totalTexts += textLogs.length;
-    totalImages += imageLogs.length;
+  const totalDispatchesBlocks = blocks.length;
 
-    // Draw the double bar chart
-    const pctUnique = Math.max(5, Math.round((stats.unique / maxUnique) * 100));
-    const pctMsgs = Math.max(5, Math.round((stats.msgs / maxMsgs) * 100));
-
-    barsHtml += `
-      <div class="client-bar-item" style="flex-wrap: wrap; padding: 6px 8px; align-items: flex-start; gap: 4px; border-bottom: 1px solid var(--border); border-radius: 0; background: transparent;">
-        <span class="client-name" style="width: 100%; font-size: 0.85rem; margin-bottom: 2px; white-space: nowrap;">${f.name}</span>
-        
-        <div style="display: flex; width: 100%; align-items: center; gap: 10px;">
-          <span style="font-size:0.7rem; color:var(--muted); width: 45px; font-weight: 700;">Pessoas</span>
-          <div class="bar-container" style="flex-grow: 1; height: 6px;"><div class="bar-fill" style="width: ${pctUnique}%; background: var(--purple);"></div></div>
-          <span class="client-val" style="width: 30px; font-size: 0.8rem;">${stats.unique}</span>
-        </div>
-
-        <div style="display: flex; width: 100%; align-items: center; gap: 10px;">
-          <span style="font-size:0.7rem; color:var(--muted); width: 45px; font-weight: 700;">Envios</span>
-          <div class="bar-container" style="flex-grow: 1; height: 6px;"><div class="bar-fill" style="width: ${pctMsgs}%; background: var(--blue);"></div></div>
-          <span class="client-val" style="width: 30px; font-size: 0.8rem;">${stats.msgs}</span>
-        </div>
-      </div>
-    `;
-  });
-
+  // Update Card 2: Volume de Disparos (using grouped blocks)
   const dispatchesCountEl = document.getElementById('overview-dispatches-count');
-  if (dispatchesCountEl) dispatchesCountEl.innerText = totalDispatches.toLocaleString();
+  if (dispatchesCountEl) dispatchesCountEl.innerText = totalDispatchesBlocks.toLocaleString();
+
+  const totalTexts = targetLogs.filter(l => l.message_type === 'text').length;
+  const totalImages = targetLogs.filter(l => l.message_type === 'image').length;
+  const avgChannel = Math.round(totalDispatchesBlocks / 4);
 
   const textsCountEl = document.getElementById('overview-texts-count');
   const imagesCountEl = document.getElementById('overview-images-count');
   const avgChannelEl = document.getElementById('overview-avg-channel');
   if (textsCountEl) textsCountEl.innerText = totalTexts;
   if (imagesCountEl) imagesCountEl.innerText = totalImages;
-  if (avgChannelEl) avgChannelEl.innerText = Math.round(totalDispatches / Math.max(1, FARMS_DATA.length));
+  if (avgChannelEl) avgChannelEl.innerText = avgChannel;
 
-  const barsListEl = document.getElementById('overview-client-bars');
+  // Calculate unique phone numbers per farm
+  const uniquePhones = { gjacana: new Set(), fazenda_ws: new Set(), apoloni: new Set(), piccini: new Set() };
+  targetLogs.forEach(l => {
+    if (uniquePhones[l.farm_key] !== undefined && l.phone_number) {
+      uniquePhones[l.farm_key].add(l.phone_number);
+    }
+  });
+
+  const maxVal = Math.max(
+    uniquePhones.gjacana.size,
+    uniquePhones.fazenda_ws.size,
+    uniquePhones.apoloni.size,
+    uniquePhones.piccini.size,
+    1
+  );
+
+  FARMS_DATA.forEach(f => {
+    const val = uniquePhones[f.key].size || 0;
+    const pct = Math.max(5, Math.round((val / maxVal) * 100));
+    const valEl = document.getElementById(`bar-val-${f.key}`);
+    if (valEl) {
+      valEl.innerText = val;
+      const fillEl = valEl.previousElementSibling.firstElementChild;
+      if (fillEl) fillEl.style.width = pct + '%';
+    }
+  });
+
+  // Draw Line Chart
+  drawOverviewLineChart(allLogs, dateFilter);
+}
+
+function drawOverviewLineChart(logs, dateFilter) {
+  const now = new Date();
+  let timeUnits = [];
   
-  if (barsListEl) {
-    barsListEl.innerHTML = barsHtml;
+  if (dateFilter === 'today') {
+    // Show hours of today (last 12 hours, step of 2)
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setHours(d.getHours() - i * 2);
+      const hStr = d.getHours();
+      timeUnits.push({
+        key: hStr + 'h',
+        label: hStr + ':00',
+        matchFn: (logDate) => {
+          const diffMs = now - logDate;
+          const diffHours = diffMs / (1000 * 60 * 60);
+          return diffHours >= i * 2 && diffHours < (i * 2 + 2) && logDate.toDateString() === now.toDateString();
+        }
+      });
+    }
+  } else if (dateFilter === '30days') {
+    // Show last 30 days in 6 intervals of 5 days
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i * 5);
+      timeUnits.push({
+        key: d.toDateString(),
+        label: d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' }),
+        matchFn: (logDate) => {
+          const diffDays = Math.floor((now - logDate) / (1000 * 60 * 60 * 24));
+          return diffDays >= i * 5 && diffDays < (i * 5 + 5);
+        }
+      });
+    }
+  } else {
+    // last 7 days or all (default to last 7 days)
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      timeUnits.push({
+        key: d.toDateString(),
+        label: d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' }),
+        matchFn: (logDate) => logDate.toDateString() === d.toDateString()
+      });
+    }
   }
+
+  const numPoints = timeUnits.length;
+
+  const counts = {
+    gjacana: Array(numPoints).fill(0),
+    fazenda_ws: Array(numPoints).fill(0),
+    apoloni: Array(numPoints).fill(0),
+    piccini: Array(numPoints).fill(0)
+  };
+
+  const sortedLogs = [...logs].sort((a, b) => new Date(a.sent_at) - new Date(b.sent_at));
+  const blocks = [];
+  sortedLogs.forEach(log => {
+    const logTime = new Date(log.sent_at).getTime();
+    const matchingBlockIndex = blocks.findIndex(b => {
+      return b.farm_key === log.farm_key &&
+             b.phone_number === log.phone_number &&
+             Math.abs(b.time - logTime) < 60 * 1000;
+    });
+    
+    if (matchingBlockIndex === -1) {
+      blocks.push({
+        farm_key: log.farm_key,
+        phone_number: log.phone_number,
+        time: logTime,
+        date: new Date(log.sent_at)
+      });
+    }
+  });
+
+  blocks.forEach(b => {
+    const idx = timeUnits.findIndex(tu => tu.matchFn(b.date));
+    if (idx !== -1 && counts[b.farm_key] !== undefined) {
+      counts[b.farm_key][idx]++;
+    }
+  });
+
+  const container = document.getElementById('overview-chart-container');
+  if (!container) return;
+
+  const rect = container.getBoundingClientRect();
+  const width = rect.width || 600;
+  const height = rect.height || 170;
+
+  const padding = { top: 20, right: 25, bottom: 25, left: 35 };
+
+  const chartWidth = width - padding.left - padding.right;
+  const chartHeight = height - padding.top - padding.bottom;
+
+  const allVals = Object.values(counts).flat();
+  const maxVal = Math.max(...allVals, 5);
+
+  let gridHtml = '';
+  const yTicks = 3;
+  for (let i = 0; i <= yTicks; i++) {
+    const yVal = Math.round((maxVal / yTicks) * i);
+    const yPos = padding.top + chartHeight - (i / yTicks) * chartHeight;
+    gridHtml += `
+      <line x1="${padding.left}" y1="${yPos}" x2="${width - padding.right}" y2="${yPos}" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,3" />
+      <text x="${padding.left - 8}" y="${yPos + 3}" fill="var(--muted)" font-size="9" font-family="'Outfit', sans-serif" font-weight="500" text-anchor="end">${yVal}</text>
+    `;
+  }
+
+  timeUnits.forEach((tu, idx) => {
+    const xPos = padding.left + (idx / (numPoints - 1)) * chartWidth;
+    gridHtml += `
+      <text x="${xPos}" y="${height - 6}" fill="var(--muted)" font-size="9" font-family="'Outfit', sans-serif" font-weight="500" text-anchor="middle">${tu.label}</text>
+    `;
+  });
+
+  const colors = {
+    gjacana: 'var(--yellow)',
+    fazenda_ws: 'var(--blue)',
+    apoloni: 'var(--primary)',
+    piccini: 'var(--green)'
+  };
+
+  let linesHtml = '';
+  let dotsHtml = '';
+
+  Object.keys(counts).forEach(farmKey => {
+    const points = counts[farmKey].map((val, idx) => {
+      const x = padding.left + (idx / (numPoints - 1)) * chartWidth;
+      const y = padding.top + chartHeight - (val / maxVal) * chartHeight;
+      return { x, y, val };
+    });
+
+    const pathD = points.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+    linesHtml += `
+      <path d="${pathD}" fill="none" stroke="${colors[farmKey]}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="transition: all 0.3s ease;" />
+    `;
+
+    points.forEach(p => {
+      if (p.val > 0) {
+        dotsHtml += `
+          <text x="${p.x}" y="${p.y - 8}" fill="${colors[farmKey]}" font-size="9" font-family="'Outfit', sans-serif" font-weight="600" text-anchor="middle" stroke="var(--panel)" stroke-width="2.5" paint-order="stroke fill" style="pointer-events: none;">${p.val}</text>
+        `;
+      }
+      dotsHtml += `
+        <circle cx="${p.x}" cy="${p.y}" r="3" fill="var(--panel)" stroke="${colors[farmKey]}" stroke-width="1.2" style="transition: all 0.3s ease; cursor: pointer;" />
+        <title>${FARMS_DATA.find(f => f.key === farmKey).name}: ${p.val} disparos</title>
+      `;
+    });
+  });
+
+  container.innerHTML = `
+    <svg viewBox="0 0 ${width} ${height}" style="width: 100%; height: 100%; display: block; overflow: visible;">
+      ${gridHtml}
+      ${linesHtml}
+      ${dotsHtml}
+    </svg>
+  `;
 }
 
 async function preloadAllFarmsData() {
@@ -1659,7 +1766,7 @@ async function preloadAllFarmsData() {
     const token = TOKENS[f.key];
     if (!token) return;
     try {
-      const rLogs = await fetch(`${BASE}/chat/logs`, {headers:{'X-Encrypted-Token':token}});
+      const rLogs = await fetch(`${BASE}/chat/logs?limit=150`, {headers:{'X-Encrypted-Token':token}});
       if (rLogs.ok) {
         const logs = await rLogs.json();
         logs.forEach(l => l.farm_key = f.key);
