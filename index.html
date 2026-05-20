@@ -326,6 +326,167 @@
     </div>
   </div>
 
+  <!-- ABA 1: PAINEL MENSAGERIA -->
+  <div id="tab-dashboard" class="tabcontent">
+
+    <div class="farm-bar">
+      <button class="fbtn active" id="btn-gjacana"    onclick="selectFarm('gjacana','Fazenda Jaçanã','5683','5511963065709')">
+        <div class="fbtn-top"><span class="farm-dot none" id="dot-gjacana"></span>Fazenda Jaçanã</div>
+        <div class="fbtn-wallet">Carteira 5683 • (11) 96306-5709</div>
+      </button>
+      <button class="fbtn"        id="btn-fazenda_ws" onclick="selectFarm('fazenda_ws','Fazenda WS','5702','5511962678385')">
+        <div class="fbtn-top"><span class="farm-dot none" id="dot-fazenda_ws"></span>Fazenda WS</div>
+        <div class="fbtn-wallet">Carteira 5702 • (11) 96267-8385</div>
+      </button>
+      <button class="fbtn"        id="btn-apoloni"    onclick="selectFarm('apoloni','Apoloni','6153','554431011106')">
+        <div class="fbtn-top"><span class="farm-dot none" id="dot-apoloni"></span>Apoloni</div>
+        <div class="fbtn-wallet">Carteira 6153 • (44) 3101-1106</div>
+      </button>
+      <button class="fbtn"        id="btn-piccini"    onclick="selectFarm('piccini','Piccini','6084','556631840130')">
+        <div class="fbtn-top"><span class="farm-dot none" id="dot-piccini"></span>Piccini</div>
+        <div class="fbtn-wallet">Carteira 6084 • (66) 3184-0130</div>
+      </button>
+    </div>
+
+    <div class="grid2">
+
+      <!-- 1. D-1 -->
+      <div class="card fw">
+        <div class="card-header">
+          <span class="card-title">1. Mapa de Máquinas — D-1 (Fechamento Ontem)</span>
+          <span class="badge" id="time-d1">—</span>
+        </div>
+        <div class="card-body">
+          <div class="imgbox"><img id="img-d1" src="" alt="D-1" onerror="this.src='https://via.placeholder.com/600x420?text=Sem+Imagem'"></div>
+          <div class="msgbox" id="msg-d1">Carregando...</div>
+        </div>
+      </div>
+
+      <!-- 2. Daily -->
+      <div class="card fw">
+        <div class="card-header">
+          <span class="card-title">2. Fechamento Diário</span>
+          <span class="badge" id="time-daily">—</span>
+        </div>
+        <div class="card-body">
+          <div class="imgbox"><img id="img-daily" src="" alt="Daily" onerror="this.src='https://via.placeholder.com/600x420?text=Sem+Imagem'"></div>
+          <div class="msgbox" id="msg-daily">Carregando...</div>
+        </div>
+      </div>
+
+      <!-- 3. Hour -->
+      <div class="card fw">
+        <div class="card-header">
+          <span class="card-title">3. Relatório Horário / Alertas (Hour)</span>
+          <span class="badge" id="time-hour">—</span>
+        </div>
+        <div class="card-body">
+          <div class="imgbox"><img id="img-hour" src="" alt="Hour" onerror="this.src='https://via.placeholder.com/600x420?text=Sem+Imagem'"></div>
+          <div class="msgbox" id="msg-hour">Carregando...</div>
+        </div>
+      </div>
+
+      <!-- 4. Hídrico -->
+      <div class="card fw">
+        <div class="card-header">
+          <span class="card-title">4. Balanço Hídrico / Irrigação</span>
+          <span class="badge" id="time-hidrico">—</span>
+        </div>
+        <div class="card-body">
+          <div class="imgbox"><img id="img-hidrico" src="" alt="Hídrico" onerror="this.src='https://via.placeholder.com/600x420?text=Sem+Imagem'"></div>
+          <div class="msgbox" id="msg-hidrico">Carregando...</div>
+        </div>
+      </div>
+
+      <!-- 5. Market (grid3 dentro do grid2) -->
+      <div class="grid3">
+        <div class="card">
+          <div class="card-header"><span class="card-title">5.1 Cotações do Dia</span><span class="badge" id="time-cotacoes">—</span></div>
+          <div class="msgbox" id="msg-cotacoes">Carregando...</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">5.2 Síntese / Notícias</span><span class="badge" id="time-noticias">—</span></div>
+          <div class="msgbox" id="msg-noticias">Carregando...</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">5.3 Economia &amp; Política</span><span class="badge" id="time-economia">—</span></div>
+          <div class="msgbox" id="msg-economia">Carregando...</div>
+        </div>
+      </div>
+
+    </div><!-- /grid2 -->
+
+    <!-- Tabela de Auditoria de Logs de Envios -->
+    <div class="tbl-wrap">
+      <div class="section-title" style="display: flex; align-items: center; flex-wrap: wrap; margin-bottom: 16px;">
+        Auditoria de Logs de Envios
+        <span id="farm-wallet-info" style="font-size: 0.85rem; font-weight: 500; color: var(--muted); margin-left: 12px; padding-left:12px; border-left:1px solid var(--border);"></span>
+      </div>
+
+      <!-- Barra de Filtros -->
+      <div class="filter-bar" style="display: flex; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; align-items: center; background: rgba(255,255,255,0.02); padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border);">
+        <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 6px;">
+          <label style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); font-weight: 700;">Filtrar por Nome</label>
+          <select id="filter-name" onchange="renderLogsTable()" style="background: var(--code); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font-family: inherit; font-size: 0.9rem; outline: none; cursor: pointer; width: 100%;">
+            <option value="">Todos os Nomes</option>
+          </select>
+        </div>
+        <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 6px;">
+          <label style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); font-weight: 700;">Filtrar por Telefone</label>
+          <select id="filter-phone" onchange="renderLogsTable()" style="background: var(--code); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font-family: inherit; font-size: 0.9rem; outline: none; cursor: pointer; width: 100%;">
+            <option value="">Todos os Telefones</option>
+          </select>
+        </div>
+        <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 6px;">
+          <label style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); font-weight: 700;">Filtrar por Dia</label>
+          <select id="filter-day" onchange="renderLogsTable()" style="background: var(--code); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font-family: inherit; font-size: 0.9rem; outline: none; cursor: pointer; width: 100%;">
+            <option value="">Todos os Dias</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="tbl-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Destinatário</th>
+              <th style="min-width: 80px;">Dia</th>
+              <th style="text-align: center; min-width: 90px;">D-1</th>
+              <th style="text-align: center; min-width: 90px;">Daily</th>
+              <th style="text-align: center; min-width: 90px;">Hour</th>
+              <th style="text-align: center; min-width: 90px;">Hídrico</th>
+              <th style="text-align: center; min-width: 90px;">Market</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px">Buscando logs de envio no banco de dados...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /tab-dashboard -->
+
+  <!-- ABA 2: ENDPOINTS -->
+  <div id="tab-api" class="tabcontent">
+    <div class="api-grid" id="api-grid"></div>
+  </div>
+
+  <!-- ABA 3: COLIN INTERATIVO -->
+  <div id="tab-colin" class="tabcontent">
+    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:65vh; color:var(--muted); text-align:center; gap:24px;">
+      <div class="colin-avatar-wrap">
+        <img src="images/colin_avatar.png" alt="Colin Agent" class="colin-avatar">
+        <div class="colin-pulse"></div>
+      </div>
+      <h2 style="font-family:'Outfit',sans-serif; font-size:2.4rem; color:var(--text); font-weight:900; letter-spacing:-0.5px;">Monitoramento: Agente Colin</h2>
+      <div style="background:var(--sub); border:1px solid var(--border); padding:24px 32px; border-radius:14px; max-width:640px; box-shadow:0 8px 30px rgba(0,0,0,0.1);">
+        <p style="font-size:1.15rem; line-height:1.7; color:var(--text); font-weight:700;">🚧 Este módulo de auditoria está em construção.</p>
+        <p style="font-size:1rem; line-height:1.6; color:var(--muted); margin-top:12px;">Ele será exclusivo para <strong>leitura e acompanhamento</strong>. Aqui você poderá monitorar em tempo real as <strong>mensagens recebidas</strong> pelo agente, as <strong>ferramentas (tools)</strong> que ele está utilizando para tomar decisões e as <strong>queries executadas</strong> diretamente no banco de dados.</p>
+      </div>
+    </div>
+  </div>
+
 </div><!-- /wrap -->
 
 <!-- Modal Payload -->
