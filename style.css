@@ -191,7 +191,7 @@ body.light .ticker-wrap { background: rgba(0,0,0,0.03); }
 /* REPORT BODY */
 .card-body { display: flex; gap: 16px; align-items: stretch; }
 .imgbox {
-  width: 48%; height: 350px; flex-shrink: 0;
+  width: 48%; height: 450px; flex-shrink: 0;
   background: var(--sub); border: 1px solid var(--border); border-radius: 10px;
   overflow: hidden; display: block;
 }
@@ -199,7 +199,7 @@ body.light .ticker-wrap { background: rgba(0,0,0,0.03); }
 
 .msgbox {
   flex: 1;
-  height: 350px;
+  height: 450px;
   background: var(--code);
   border: 1px solid var(--border);
   border-radius: 10px;
