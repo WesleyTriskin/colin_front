@@ -1872,6 +1872,24 @@ async function fetchInteractions() {
   listContainer.innerHTML = '<div style="padding:20px; text-align:center; color:var(--muted);">Buscando logs...</div>';
   
   try {
+    try {
+      const cr = await fetch(`/api/contacts?farm_key=${activeColinFarm}`);
+      if (cr.ok) {
+         const cData = await cr.json();
+         window.colinContactsMap = {};
+         if(Array.isArray(cData)) {
+            cData.forEach(c => {
+               if(c.phone_number) {
+                 const cleanP = c.phone_number.replace(/\D/g, '');
+                 window.colinContactsMap[cleanP] = c.contact_name;
+               }
+            });
+         }
+      }
+    } catch(ce) {
+      console.warn("Erro ao buscar contatos", ce);
+    }
+    
     const r = await fetch(BASE + '/chat/interactions?limit=300', {headers:{'X-Encrypted-Token':token}});
     if (!r.ok) throw new Error('API: ' + r.status);
     colinLogs = await r.json();
@@ -1948,7 +1966,9 @@ function renderColinSidebar() {
     const lastMsg = list[list.length-1];
     const previewMsg = textMsgs.length > 0 ? textMsgs[textMsgs.length-1] : lastMsg;
     
-    const name = (lastMsg.metadata && lastMsg.metadata.contact_name) ? lastMsg.metadata.contact_name : formatPhone(phone);
+    const cleanP = phone ? phone.replace(/\D/g, '') : '';
+    const dbName = (window.colinContactsMap && window.colinContactsMap[cleanP]) ? window.colinContactsMap[cleanP] : null;
+    const name = dbName ? dbName : ((lastMsg.metadata && lastMsg.metadata.contact_name) ? lastMsg.metadata.contact_name : formatPhone(phone));
     const avatar = getAvatarForUser(lastMsg.metadata);
     
     let preview = previewMsg.text || previewMsg.event_type;
