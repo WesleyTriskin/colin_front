@@ -334,15 +334,26 @@
 
   <!-- ABA 3: COLIN INTERATIVO -->
   <div id="tab-colin" class="tabcontent">
-    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:65vh; color:var(--muted); text-align:center; gap:24px;">
-      <div class="colin-avatar-wrap">
-        <img src="images/colin_avatar.png" alt="Colin Agent" class="colin-avatar">
-        <div class="colin-pulse"></div>
+    <div style="display:flex; flex-direction:column; align-items:center; padding: 24px; color:var(--muted); gap:24px;">
+      <div style="display: flex; align-items: center; gap: 16px; width: 100%; max-width: 900px;">
+        <div class="colin-avatar-wrap" style="width: 60px; height: 60px;">
+          <img src="images/colin_avatar.png" alt="Colin Agent" class="colin-avatar">
+          <div class="colin-pulse"></div>
+        </div>
+        <div>
+          <h2 style="font-family:'Outfit',sans-serif; font-size:1.8rem; color:var(--text); font-weight:900; margin: 0;">Monitoramento: Agente Colin</h2>
+          <p style="margin: 4px 0 0 0; font-size: 0.95rem;">Acompanhe em tempo real as decisões, ferramentas e queries do agente.</p>
+        </div>
       </div>
-      <h2 style="font-family:'Outfit',sans-serif; font-size:2.4rem; color:var(--text); font-weight:900; letter-spacing:-0.5px;">Monitoramento: Agente Colin</h2>
-      <div style="background:var(--sub); border:1px solid var(--border); padding:24px 32px; border-radius:14px; max-width:640px; box-shadow:0 8px 30px rgba(0,0,0,0.1);">
-        <p style="font-size:1.15rem; line-height:1.7; color:var(--text); font-weight:700;">🚧 Este módulo de auditoria está em construção.</p>
-        <p style="font-size:1rem; line-height:1.6; color:var(--muted); margin-top:12px;">Ele será exclusivo para <strong>leitura e acompanhamento</strong>. Aqui você poderá monitorar em tempo real as <strong>mensagens recebidas</strong> pelo agente, as <strong>ferramentas (tools)</strong> que ele está utilizando para tomar decisões e as <strong>queries executadas</strong> diretamente no banco de dados.</p>
+      
+      <div style="width: 100%; max-width: 900px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h3 style="color: var(--text); margin: 0; font-family:'Outfit',sans-serif;">Linha do Tempo de Interações</h3>
+          <button class="theme-btn" onclick="fetchInteractions()" style="font-size: 0.85rem; padding: 6px 12px; display: flex; align-items: center; gap: 6px;">🔄 Atualizar</button>
+        </div>
+        <div id="interactions-timeline" style="background: var(--sub); border: 1px solid var(--border); border-radius: 12px; padding: 20px; min-height: 400px; max-height: 60vh; overflow-y: auto; display: flex; flex-direction: column; gap: 16px;">
+          <div style="text-align: center; color: var(--muted); padding: 40px;">Selecione uma fazenda para carregar as interações...</div>
+        </div>
       </div>
     </div>
   </div>
@@ -1651,6 +1662,131 @@ function preloadAllFarmsData() {
       .catch(e => console.warn(`Erro no pre-load de alertas para ${f.key}:`, e));
   });
 }
+
+// --- TIMELINE DE INTERAÇÕES (COLIN) ---
+async function fetchInteractions() {
+  const token = TOKENS[farm];
+  const container = document.getElementById('interactions-timeline');
+  if (!container) return;
+  if (!token) {
+    container.innerHTML = `<div style="text-align: center; color: var(--red); padding: 40px;">Sem acesso (Token JWT ausente) para ${farm}.</div>`;
+    return;
+  }
+  
+  container.innerHTML = `<div style="text-align: center; color: var(--muted); padding: 40px;">Buscando interações... <br><span style="font-size:0.85rem">Isso pode levar alguns segundos dependendo do volume de logs.</span></div>`;
+  
+  try {
+    const r = await fetch(`${BASE}/chat/interactions?limit=150`, {headers:{'X-Encrypted-Token':token}});
+    if (!r.ok) throw new Error('Falha na API: ' + r.status);
+    const data = await r.json();
+    renderInteractions(data);
+  } catch (e) {
+    console.error(e);
+    container.innerHTML = `<div style="text-align: center; color: var(--red); padding: 40px;">Erro ao carregar interações: ${e.message}</div>`;
+  }
+}
+
+function renderInteractions(items) {
+  const container = document.getElementById('interactions-timeline');
+  if (!items || items.length === 0) {
+    container.innerHTML = `<div style="text-align: center; color: var(--muted); padding: 40px;">Nenhuma interação recente encontrada para o agente nesta fazenda.</div>`;
+    return;
+  }
+
+  // Agrupa os itens por request_id para formar blocos de conversa
+  const grouped = {};
+  items.forEach(item => {
+    const req = item.request_id || 'avulso';
+    if (!grouped[req]) grouped[req] = [];
+    grouped[req].push(item);
+  });
+
+  // Ordena os itens dentro de cada grupo por created_at ASC
+  Object.values(grouped).forEach(list => {
+    list.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+  });
+
+  // Ordena os grupos pela data do primeiro evento DESC
+  const sortedRequestIds = Object.keys(grouped).sort((a, b) => {
+    return new Date(grouped[b][0].created_at) - new Date(grouped[a][0].created_at);
+  });
+
+  let html = '';
+  
+  sortedRequestIds.forEach(reqId => {
+    const groupItems = grouped[reqId];
+    const firstItem = groupItems[0];
+    const dateStr = new Date(firstItem.created_at).toLocaleString('pt-BR');
+    const displayPhone = firstItem.phone ? formatPhone(firstItem.phone) : 'Sistema';
+    
+    html += `
+      <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px; padding: 16px; position: relative;">
+        <div style="font-size: 0.8rem; color: var(--muted); margin-bottom: 12px; display: flex; justify-content: space-between;">
+          <span><strong>Origem:</strong> ${displayPhone}</span>
+          <span>${dateStr}</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 12px; border-left: 2px solid var(--sub); padding-left: 16px; margin-left: 6px;">
+    `;
+    
+    groupItems.forEach(item => {
+      let icon = '💬';
+      let title = item.event_type;
+      let color = 'var(--text)';
+      let content = item.text ? parseWhatsApp(item.text) : '';
+      
+      if (item.event_type === 'message.received') {
+        icon = '📥'; title = 'Mensagem do Usuário'; color = 'var(--blue)';
+      } else if (item.event_type === 'interim.sent') {
+        icon = '⏳'; title = 'Mensagem de Espera (45s)'; color = 'var(--yellow)';
+      } else if (item.event_type === 'tool_call' || item.event_type === 'tool_call_detail' || item.tool_name) {
+        icon = '🛠️'; title = `Ferramenta: ${item.tool_name || item.event_type}`; color = 'var(--purple)';
+        const argsStr = typeof item.tool_args === 'object' ? JSON.stringify(item.tool_args, null, 2) : item.tool_args;
+        if (argsStr) content = `<pre style="font-size:0.75rem; background:rgba(0,0,0,0.2); padding:8px; border-radius:6px; margin:4px 0 0 0; overflow-x:auto;">${argsStr}</pre>`;
+      } else if (item.event_type === 'sql_fallback_activated' || item.is_fallback) {
+        icon = '🔍'; title = 'Fallback SQL Executado'; color = 'var(--orange)';
+        if (item.sql_query) content = `<pre style="font-size:0.75rem; background:rgba(0,0,0,0.2); padding:8px; border-radius:6px; margin:4px 0 0 0; overflow-x:auto;">${item.sql_query}</pre>`;
+      } else if (item.event_type === 'message.sent' || item.event_type === 'gateway.reply_received') {
+        icon = '🤖'; title = 'Resposta do Colin'; color = 'var(--green)';
+        if (item.elapsed_seconds) title += ` (${item.elapsed_seconds}s)`;
+      } else if (item.event_type === 'gateway.error' || item.event_type === 'sql_execution_failed') {
+        icon = '❌'; title = 'Erro'; color = 'var(--red)';
+      }
+      
+      html += `
+        <div style="position: relative;">
+          <div style="position: absolute; left: -26px; top: -2px; font-size: 1.1rem; background: var(--bg); border-radius: 50%; width: 20px; height: 20px; display: flex; justify-content: center; align-items: center;">${icon}</div>
+          <div style="font-weight: 700; font-size: 0.85rem; color: ${color}; margin-bottom: 4px;">${title}</div>
+          <div style="font-size: 0.95rem; color: var(--text); line-height: 1.4; word-wrap: break-word;">${content}</div>
+        </div>
+      `;
+    });
+    
+    html += `
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+// Intercepta a mudança de fazenda para atualizar também a timeline se estivermos na aba do Colin
+const originalSelectFarm = selectFarm;
+selectFarm = function(key, name, wallet, phone) {
+  originalSelectFarm(key, name, wallet, phone);
+  if (document.getElementById('tab-colin').classList.contains('active')) {
+    fetchInteractions();
+  }
+};
+
+// Intercepta switchTab para carregar na primeira vez que abre
+const originalSwitchTab = switchTab;
+switchTab = function(id) {
+  originalSwitchTab(id);
+  if (id === 'colin') {
+    fetchInteractions();
+  }
+};
 
 // Boot
 const savedTab = localStorage.getItem('active_tab') || 'overview';
