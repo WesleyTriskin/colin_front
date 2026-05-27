@@ -35,14 +35,14 @@ def get_contacts(farm_key: str = Query(None)):
         with engine.connect() as conn:
             if farm_key:
                 result = conn.execute(
-                    text("SELECT phone_number, contact_name, report_type, notes FROM colin.farm_contacts WHERE farm_key = :fk ORDER BY contact_name"),
+                    text("SELECT phone_number, contact_name, report_type, notes, photo_url FROM colin.farm_contacts WHERE farm_key = :fk ORDER BY contact_name"),
                     {"fk": farm_key}
                 )
             else:
                 result = conn.execute(
-                    text("SELECT phone_number, contact_name, report_type, notes FROM colin.farm_contacts ORDER BY contact_name")
+                    text("SELECT phone_number, contact_name, report_type, notes, photo_url FROM colin.farm_contacts ORDER BY contact_name")
                 )
-            contacts = [{"phone_number": r[0], "contact_name": r[1], "report_type": r[2], "notes": r[3]} for r in result]
+            contacts = [{"phone_number": r[0], "contact_name": r[1], "report_type": r[2], "notes": r[3], "photo_url": r[4] if len(r) > 4 else None} for r in result]
             return contacts
     except Exception as e:
         return {"error": str(e), "contacts": []}
