@@ -712,6 +712,9 @@ function switchTab(id){
     const btn = Array.from(document.querySelectorAll('.tab')).find(b => b.getAttribute('onclick').includes('colin'));
     if (btn) btn.classList.add('active');
     document.getElementById('tab-colin').classList.add('active');
+    if (colinLogs.length === 0) {
+      selectColinFarm('gjacana', 'Fazenda Jaçanã');
+    }
   }
 }
 
@@ -1872,6 +1875,10 @@ async function fetchInteractions() {
     const r = await fetch(BASE + '/chat/interactions?limit=300', {headers:{'X-Encrypted-Token':token}});
     if (!r.ok) throw new Error('API: ' + r.status);
     colinLogs = await r.json();
+    colinLogs = colinLogs.filter(log => {
+      const p = log.phone || '';
+      return p.replace(/\D/g, '').length > 5;
+    });
     renderColinSidebar();
     
     if (activeColinPhone) {
