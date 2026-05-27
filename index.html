@@ -1165,7 +1165,6 @@ function openMessage(phone, date, type, format) {
 const ENDPOINTS = [
   {section:'Sistema & Chat'},
   {name:'Root / Status',          path:'/'},
-  {name:'Auth – Users Me',        path:'/auth/users/me'},
   {name:'Chat Logs',              path:'/chat/logs'},
   {name:'Chat Contacts',          path:'/chat/contacts'},
   {section:'Commodities & Mercado'},
@@ -1302,17 +1301,17 @@ function buildEndpoints(force = false){
         let latText = ms+'ms';
 
         if(r.ok) {
-          statusClass = ms > 3000 ? 'checking' : ''; // checking (amarelo) ou normal (verde)
+          statusClass = ms > 5000 ? 'checking' : ''; // checking (amarelo) ou normal (verde)
         }
         
         if(led) led.className = 'led ' + statusClass;
         if(lat) {
           lat.innerText = latText;
-          if(ms > 3000) lat.style.color = 'var(--yellow)';
+          if(ms > 5000) lat.style.color = 'var(--yellow)';
         }
 
         // Registra lentidão extrema no Ticker, ou remove se o endpoint voltou a responder rápido
-        if(ms > 3000) {
+        if(ms > 5000) {
           const existing = slowEndpoints.find(s => s.name === ep.name);
           if(!existing) {
             slowEndpoints.push({name: ep.name, ms});
@@ -1368,7 +1367,7 @@ function backgroundHealthCheck() {
     fetch(`${BASE}${ep.path}${sep}limit=1`, {headers:{'X-Encrypted-Token':token}})
       .then(r => {
         const ms = Math.round(performance.now()-t0);
-        if(ms > 3000) {
+        if(ms > 5000) {
           const existing = slowEndpoints.find(s => s.name === ep.name);
           if(!existing) {
             slowEndpoints.push({name: ep.name, ms});
