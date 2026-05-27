@@ -515,7 +515,7 @@
       
       <div class="colin-chat-area">
         <div class="colin-chat-header" id="colin-chat-header">
-          <div class="colin-avatar-wrap" style="width: 40px; height: 40px; margin-right: 12px; border-radius:50%; overflow:hidden;">
+          <div class="colin-avatar-wrap" onclick="openAvatarModal(this.querySelector(\'img\').src)" style="width: 40px; height: 40px; margin-right: 12px; border-radius:50%; overflow:hidden; cursor:pointer;" title="Ver foto">
             <img src="images/colin_avatar.png" class="colin-avatar" style="width:100%; height:100%; object-fit:cover;">
           </div>
           <div>
@@ -563,6 +563,10 @@ const TOKENS = {
 const BASE = 'https://prx.triskin.tech/api_data/v1';
 let farm = 'gjacana';
 let allLogs = [];
+try {
+  const cachedAllLogs = localStorage.getItem('cached_allLogs');
+  if (cachedAllLogs) allLogs = JSON.parse(cachedAllLogs);
+} catch (e) {}
 
 const fmt = (d, key) => {
   const now = new Date();
@@ -1568,6 +1572,10 @@ function backgroundHealthCheck() {
 
 // Funções da Visão Geral (Overview)
 let farmAlertsCache = { gjacana: 0, fazenda_ws: 0, apoloni: 0, piccini: 0 };
+try {
+  const cachedAlerts = localStorage.getItem('cached_farmAlertsCache');
+  if (cachedAlerts) farmAlertsCache = JSON.parse(cachedAlerts);
+} catch (e) {}
 
 function updateOverviewDashboard() {
   let alertsCount = 0;
@@ -1805,6 +1813,20 @@ function preloadAllFarmsData() {
     const token = TOKENS[f.key];
     if (!token) return;
 
+    // Preload colin interactions in background
+    fetch(`${BASE}/chat/interactions?limit=100`, {headers:{'X-Encrypted-Token':token}})
+      .then(r => r.ok ? r.json() : [])
+      .then(logs => {
+          if (logs && logs.length) {
+              const filtered = logs.filter(log => {
+                  const p = log.phone || '';
+                  return p.replace(/\D/g, '').length > 5;
+              });
+              try { localStorage.setItem('colinLogs_' + f.key, JSON.stringify(filtered)); } catch(e){}
+          }
+      })
+      .catch(e => console.warn(`Erro pre-load interactions ${f.key}:`, e));
+
     // Fetch logs in parallel
     fetch(`${BASE}/chat/logs?limit=150`, {headers:{'X-Encrypted-Token':token}})
       .then(r => r.ok ? r.json() : [])
@@ -1813,7 +1835,7 @@ function preloadAllFarmsData() {
           logs.forEach(l => l.farm_key = f.key);
           logsCache[f.key] = logs;
           allLogs = allLogs.filter(l => l.farm_key !== f.key).concat(logs);
-          
+          try { localStorage.setItem('cached_allLogs', JSON.stringify(allLogs)); } catch(e){}
           // Incremental UI updates
           updateOverviewDashboard();
           if (f.key === farm) {
@@ -1836,6 +1858,7 @@ function preloadAllFarmsData() {
       .then(r => r.ok ? r.json() : [])
       .then(alerts => {
         farmAlertsCache[f.key] = alerts.length;
+        try { localStorage.setItem('cached_farmAlertsCache', JSON.stringify(farmAlertsCache)); } catch(e){}
         updateOverviewDashboard();
       })
       .catch(e => console.warn(`Erro no pre-load de alertas para ${f.key}:`, e));
@@ -1869,7 +1892,16 @@ async function fetchInteractions() {
     return;
   }
   
-  listContainer.innerHTML = '<div style="padding:20px; text-align:center; color:var(--muted);">Buscando logs...</div>';
+  const cachedLogsStr = localStorage.getItem('colinLogs_' + activeColinFarm);
+  if (cachedLogsStr) {
+      try {
+          colinLogs = JSON.parse(cachedLogsStr);
+          renderColinSidebar();
+          if (activeColinPhone) openColinChat(activeColinPhone);
+      } catch (e) {}
+  } else {
+      listContainer.innerHTML = '<div style="padding:20px; text-align:center; color:var(--muted);">Buscando logs...</div>';
+  }
   
   try {
     const r = await fetch(BASE + '/chat/interactions?limit=300', {headers:{'X-Encrypted-Token':token}});
@@ -1879,6 +1911,7 @@ async function fetchInteractions() {
       const p = log.phone || '';
       return p.replace(/\D/g, '').length > 5;
     });
+    try { localStorage.setItem('colinLogs_' + activeColinFarm, JSON.stringify(colinLogs)); } catch(e){}
     renderColinSidebar();
     
     if (!window.farmContactsCache) window.farmContactsCache = {};
@@ -1903,7 +1936,10 @@ async function fetchInteractions() {
                 if(c.phone_number) {
                   let cleanP = String(c.phone_number).replace(/\D/g, '');
                   if (cleanP.startsWith('55') && cleanP.length >= 12) cleanP = cleanP.substring(2);
-                  window.farmContactsCache[activeColinFarm][cleanP] = c.contact_name;
+                  window.farmContactsCache[activeColinFarm][cleanP] = {
+                      contact_name: c.contact_name,
+                      photo_url: c.photo_url || null
+                  };
                 }
              });
              renderColinSidebar();
@@ -2003,11 +2039,22 @@ function renderColinSidebar() {
     const cleanP = (cleanPRaw.startsWith('55') && cleanPRaw.length >= 12) ? cleanPRaw.substring(2) : cleanPRaw;
     
     let dbName = null;
+    let dbPhoto = null;
     if (window.farmContactsCache && window.farmContactsCache[activeColinFarm] && window.farmContactsCache[activeColinFarm][cleanP]) {
-        dbName = window.farmContactsCache[activeColinFarm][cleanP];
+        const cObj = window.farmContactsCache[activeColinFarm][cleanP];
+        if (typeof cObj === 'object') {
+            dbName = cObj.contact_name;
+            dbPhoto = cObj.photo_url;
+        } else {
+            dbName = cObj; // backward compatibility
+        }
     }
     const name = dbName ? dbName : ((lastMsg.metadata && lastMsg.metadata.contact_name) ? lastMsg.metadata.contact_name : formatPhone(phone));
-    const avatar = getAvatarForUser(name, lastMsg.metadata);
+    
+    let metaForAvatar = lastMsg.metadata ? { ...lastMsg.metadata } : {};
+    if (dbPhoto) metaForAvatar.photo_url = dbPhoto;
+    
+    const avatar = getAvatarForUser(name, metaForAvatar);
     
     let preview = previewMsg.text || previewMsg.event_type;
     if(preview.length > 35) preview = preview.substring(0,35) + '...';
@@ -2046,17 +2093,28 @@ function openColinChat(phone) {
   const cleanPRaw = phone ? phone.replace(/\D/g, '') : '';
   const cleanP = (cleanPRaw.startsWith('55') && cleanPRaw.length >= 12) ? cleanPRaw.substring(2) : cleanPRaw;
   let dbName = null;
+  let dbPhoto = null;
   if (window.farmContactsCache && window.farmContactsCache[activeColinFarm] && window.farmContactsCache[activeColinFarm][cleanP]) {
-      dbName = window.farmContactsCache[activeColinFarm][cleanP];
+      const cObj = window.farmContactsCache[activeColinFarm][cleanP];
+      if (typeof cObj === 'object') {
+          dbName = cObj.contact_name;
+          dbPhoto = cObj.photo_url;
+      } else {
+          dbName = cObj;
+      }
   }
 
   const lastMsg = items[items.length-1];
   const metadataName = (lastMsg && lastMsg.metadata && lastMsg.metadata.contact_name) ? lastMsg.metadata.contact_name : formatPhone(phone);
   const name = dbName ? dbName : metadataName;
-  const avatar = getAvatarForUser(name, lastMsg ? lastMsg.metadata : null);
+  
+  let metaForAvatar = lastMsg && lastMsg.metadata ? { ...lastMsg.metadata } : {};
+  if (dbPhoto) metaForAvatar.photo_url = dbPhoto;
+  
+  const avatar = getAvatarForUser(name, metaForAvatar);
   
   document.getElementById('colin-chat-header').innerHTML = `
-    <div class="colin-avatar-wrap" style="width: 40px; height: 40px; margin-right: 12px; border-radius:50%; overflow:hidden;">
+    <div class="colin-avatar-wrap" onclick="openAvatarModal(this.querySelector('img').src)" style="width: 40px; height: 40px; margin-right: 12px; border-radius:50%; overflow:hidden; cursor:pointer;" title="Ver foto">
       <img src="${avatar}" class="colin-avatar" style="width:100%; height:100%; object-fit:cover;">
     </div>
     <div>
@@ -2133,8 +2191,65 @@ toolsHtml = `<div class="colin-msg-tools-box" style="display:none; position:abso
   chatArea.scrollTop = chatArea.scrollHeight;
 }
 
-
-// Remove the old implementation to avoid duplicate JS
+function openAvatarModal(url) {
+  let modal = document.getElementById('avatar-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'avatar-modal';
+    modal.style.position = 'fixed';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.width = '100vw';
+    modal.style.height = '100vh';
+    modal.style.backgroundColor = 'rgba(11, 20, 26, 0.9)';
+    modal.style.zIndex = '99999';
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    modal.style.backdropFilter = 'blur(4px)';
+    modal.style.opacity = '0';
+    modal.style.transition = 'opacity 0.2s ease';
+    modal.style.cursor = 'zoom-out';
+    
+    // Add close logic
+    modal.onclick = function() {
+        this.style.opacity = '0';
+        setTimeout(() => { this.style.display = 'none'; }, 200);
+    };
+    
+    // Add image element
+    const img = document.createElement('img');
+    img.id = 'avatar-modal-img';
+    img.style.maxWidth = '90%';
+    img.style.maxHeight = '90%';
+    img.style.objectFit = 'contain';
+    img.style.boxShadow = '0 10px 25px rgba(0,0,0,0.5)';
+    img.style.transform = 'scale(0.9)';
+    img.style.transition = 'transform 0.2s ease';
+    
+    modal.appendChild(img);
+    document.body.appendChild(modal);
+  }
+  
+  const img = document.getElementById('avatar-modal-img');
+  img.src = url;
+  
+  if (url.startsWith('data:image/svg')) {
+      img.style.borderRadius = '50%';
+      img.style.width = '350px';
+      img.style.height = '350px';
+  } else {
+      img.style.borderRadius = '0';
+      img.style.width = '450px';
+      img.style.height = '450px';
+  }
+  
+  modal.style.display = 'flex';
+  setTimeout(() => {
+      modal.style.opacity = '1';
+      img.style.transform = 'scale(1)';
+  }, 10);
+}
 
 // Boot
 const savedTab = localStorage.getItem('active_tab') || 'overview';
