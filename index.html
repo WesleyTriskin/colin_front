@@ -1883,6 +1883,19 @@ async function fetchInteractions() {
   }
 }
 
+
+function getAvatarForUser(metadata) {
+  if (metadata && metadata.contact_name) {
+    const n = metadata.contact_name.toLowerCase();
+    if (n.includes('josé') || n.includes('jose')) return 'images/jose_junior.jpeg';
+    if (n.includes('leo')) return 'images/leo_prates.png';
+    if (n.includes('rafael')) return 'images/rafael.jpeg';
+    if (n.includes('rodrigo')) return 'images/rodrigo.jpeg';
+    if (n.includes('wesley')) return 'images/wesley.png';
+  }
+  return 'https://via.placeholder.com/150/202c33/e9edef?text=U';
+}
+
 function renderColinSidebar() {
   const sidebar = document.getElementById('colin-contacts-list');
   if (!colinLogs || colinLogs.length === 0) {
@@ -1914,6 +1927,8 @@ function renderColinSidebar() {
   sortedPhones.forEach(phone => {
     const list = chats[phone];
     const lastMsg = list[list.length-1];
+    const name = (lastMsg.metadata && lastMsg.metadata.contact_name) ? lastMsg.metadata.contact_name : formatPhone(phone);
+    const avatar = getAvatarForUser(lastMsg.metadata);
     
     let preview = lastMsg.text || lastMsg.event_type;
     if(preview.length > 35) preview = preview.substring(0,35) + '...';
@@ -1921,25 +1936,19 @@ function renderColinSidebar() {
     const activeClass = phone === activeColinPhone ? 'active' : '';
     
     html += `
-      <div class="colin-contact-item ${activeClass}" onclick="openColinChat('${phone}')" id="contact-${phone}">
-        <div style="font-weight: 700; color: var(--text); font-size: 0.95rem;">${formatPhone(phone)}</div>
-        <div style="font-size: 0.8rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${preview}</div>
+      <div class="colin-contact-item ${activeClass}" onclick="openColinChat('${phone}')" id="contact-${phone}" style="flex-direction:row; align-items:center; gap:12px;">
+        <div style="width:40px; height:40px; border-radius:50%; overflow:hidden; flex-shrink:0;">
+          <img src="${avatar}" style="width:100%; height:100%; object-fit:cover;">
+        </div>
+        <div style="flex:1; min-width:0;">
+          <div style="font-weight: 700; color: var(--text); font-size: 0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${name} ${name !== formatPhone(phone) ? '<span style="font-size:0.75rem; color:var(--muted); font-weight:normal;">' + formatPhone(phone) + '</span>' : ''}</div>
+          <div style="font-size: 0.8rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${preview}</div>
+        </div>
       </div>
     `;
   });
   
   sidebar.innerHTML = html;
-}
-
-function toggleTools(el) {
-  const box = el.nextElementSibling;
-  if(box.style.display === 'none') {
-    box.style.display = 'block';
-    el.innerText = '🔼 Ocultar processamento';
-  } else {
-    box.style.display = 'none';
-    el.innerText = '🔍 Ver processamento interno';
-  }
 }
 
 function openColinChat(phone) {
@@ -1953,13 +1962,17 @@ function openColinChat(phone) {
   const items = colinLogs.filter(i => (i.phone || 'Desconhecido') === phone);
   items.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
   
+  const lastMsg = items[items.length-1];
+  const name = (lastMsg && lastMsg.metadata && lastMsg.metadata.contact_name) ? lastMsg.metadata.contact_name : formatPhone(phone);
+  const avatar = getAvatarForUser(lastMsg ? lastMsg.metadata : null);
+  
   document.getElementById('colin-chat-header').innerHTML = `
     <div class="colin-avatar-wrap" style="width: 40px; height: 40px; margin-right: 12px; border-radius:50%; overflow:hidden;">
-      <img src="images/colin_avatar.png" class="colin-avatar" style="width:100%; height:100%; object-fit:cover;">
+      <img src="${avatar}" class="colin-avatar" style="width:100%; height:100%; object-fit:cover;">
     </div>
     <div>
-      <h3 style="margin: 0; font-size: 1.1rem; color: var(--text);">Colin — ${activeColinFarmName}</h3>
-      <span style="font-size: 0.8rem; color: var(--muted);">${formatPhone(phone)}</span>
+      <h3 style="margin: 0; font-size: 1.1rem; color: var(--text);">${name}</h3>
+      <span style="font-size: 0.8rem; color: var(--muted);">${name !== formatPhone(phone) ? formatPhone(phone) : 'Agente: Colin ' + activeColinFarmName}</span>
     </div>
   `;
   
@@ -1978,7 +1991,7 @@ function openColinChat(phone) {
   });
   
   items.forEach(it => {
-    if (it.event_type === 'message.sent') return; // Ignora para não duplicar com reply_received
+    if (it.event_type === 'message.sent') return; 
     
     if (['message.received', 'interim.sent', 'gateway.reply_received', 'gateway.error'].includes(it.event_type)) {
       
@@ -1987,15 +2000,21 @@ function openColinChat(phone) {
       const timeStr = new Date(it.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
       
       let toolsHtml = '';
+      let clickAttr = '';
+      let cursorStyle = '';
+      
       if (!isInbound && it.event_type === 'gateway.reply_received') {
         const tools = reqGroups[it.request_id]?.tools || [];
         if (tools.length > 0) {
-          toolsHtml = `<div class="colin-msg-tools-btn" onclick="toggleTools(this)">🔍 Ver processamento interno (${tools.length} passos)</div>
-                       <div class="colin-msg-tools-box" style="display:none;">`;
+          cursorStyle = 'cursor:pointer;';
+          clickAttr = 'onclick="const b = this.nextElementSibling; b.style.display = b.style.display===\'none\' ? \'block\' : \'none\';"';
+          
+          toolsHtml = `<div class="colin-msg-tools-box" style="display:none; position:absolute; top:100%; left:0; z-index:10; background:rgba(0,0,0,0.9); padding:12px; border-radius:8px; border-left:3px solid #34d399; box-shadow:0 4px 12px rgba(0,0,0,0.5); min-width:250px; max-width:400px; max-height:300px; overflow-y:auto; margin-top:4px;">`;
+          
           tools.forEach(t => {
             let tName = t.tool_name || t.event_type;
             let tArgs = t.tool_args ? (typeof t.tool_args === 'object' ? JSON.stringify(t.tool_args, null, 2) : t.tool_args) : (t.sql_query || '');
-            toolsHtml += `<div style="margin-bottom: 8px;"><strong>${tName}</strong><br><pre style="color:#a78bfa; font-size:0.75rem; background:rgba(0,0,0,0.2); padding:6px; border-radius:4px; margin-top:4px; white-space:pre-wrap;">${tArgs}</pre></div>`;
+            toolsHtml += `<div style="margin-bottom: 8px;"><strong>${tName}</strong><br><pre style="color:#a78bfa; font-size:0.75rem; background:rgba(255,255,255,0.05); padding:6px; border-radius:4px; margin-top:4px; white-space:pre-wrap;">${tArgs}</pre></div>`;
           });
           toolsHtml += `</div>`;
         }
@@ -2006,11 +2025,11 @@ function openColinChat(phone) {
 
       html += `
         <div class="colin-msg-row ${rowClass}">
-          <div class="colin-bubble">
+          <div style="position:relative; ${cursorStyle}" ${clickAttr} class="colin-bubble" title="${toolsHtml ? 'Clique para ver o processamento interno' : ''}">
             ${content}
-            ${toolsHtml}
             <span class="colin-msg-time">${timeStr} ${it.elapsed_seconds ? '('+it.elapsed_seconds+'s)' : ''}</span>
           </div>
+          ${toolsHtml}
         </div>
       `;
     }
@@ -2021,6 +2040,7 @@ function openColinChat(phone) {
   chatArea.innerHTML = html;
   chatArea.scrollTop = chatArea.scrollHeight;
 }
+
 
 // Remove the old implementation to avoid duplicate JS
 
