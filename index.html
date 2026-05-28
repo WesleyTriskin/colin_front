@@ -14,6 +14,22 @@
   font-weight: 500; white-space: nowrap; line-height: 1.5; display: flex; flex-direction: column; gap: 6px;
 }
 .custom-tooltip:hover .tooltip-text { visibility: visible; opacity: 1; }
+
+body.critical-error::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border: 10px solid var(--red, #ef4444);
+  pointer-events: none;
+  z-index: 999999;
+  animation: critical-pulse 2s infinite;
+}
+
+@keyframes critical-pulse {
+  0% { border-color: rgba(239, 68, 68, 1); }
+  50% { border-color: rgba(239, 68, 68, 0.3); }
+  100% { border-color: rgba(239, 68, 68, 1); }
+}
 </style>
 </head>
 <body class="light">
@@ -867,9 +883,21 @@ function updateTicker() {
     msgs.push(`<span class="ticker-item danger">🚫 O número principal da Fazenda WS está BANIDO.</span>`);
   }
 
+  let airflowDown = false;
   slowEndpoints.forEach(ep => {
-    msgs.push(`<span class="ticker-item danger">🐢 Endpoint ${ep.name} demorando (${ep.ms}ms)</span>`);
+    if (ep.ms === -1) {
+      msgs.push(`<span class="ticker-item danger">🔴 Endpoint ${ep.name} está FORA DO AR ou ERRO.</span>`);
+      if (ep.name.includes('Airflow')) airflowDown = true;
+    } else {
+      msgs.push(`<span class="ticker-item danger">🐢 Endpoint ${ep.name} demorando (${ep.ms}ms)</span>`);
+    }
   });
+
+  if (airflowDown) {
+    document.body.classList.add('critical-error');
+  } else {
+    document.body.classList.remove('critical-error');
+  }
 
   if (msgs.length === 0) msgs.push(`<span class="ticker-item info">✅ Todos os sistemas e endpoints operacionais.</span>`);
   
@@ -1469,6 +1497,10 @@ const ENDPOINTS = [
   {name:'Harvest',                path:'/production/harvest'},
   {name:'Profit View',            path:'/production/profit/view'},
   {name:'Rentabilidade Dashboard',path:'/production/rentabilidade-dash'},
+  {section:'Infraestrutura Interna'},
+  {name:'Airflow Status',         path:'/infra/ping?target=http://172.21.0.149:8080/health'},
+  {name:'Agentes 147',            path:'/infra/ping?target=https://prx.triskin.tech/api_agents_new/docs'},
+  {name:'Agentes 150',            path:'/infra/ping?target=https://prx.triskin.tech/api_data/docs'},
 ];
 
 async function showPayload(path){
@@ -1477,10 +1509,24 @@ async function showPayload(path){
   document.getElementById('modal').classList.add('open');
   try {
     const token = TOKENS[farm] || TOKENS['gjacana'];
-    const sep = path.includes('?') ? '&' : '?';
-    const r = await fetch(`${BASE}${path}${sep}limit=2`,{headers:{'X-Encrypted-Token':token}});
-    const d = await r.json();
-    document.getElementById('modal-body').innerText = JSON.stringify(d,null,2);
+    let url, headers, fetchOpts = {};
+    if(path.startsWith('http')) {
+      url = path;
+      headers = {};
+      fetchOpts = { mode: 'no-cors' };
+    } else {
+      const sep = path.includes('?') ? '&' : '?';
+      url = `${BASE}${path}${sep}limit=2`;
+      headers = {'X-Encrypted-Token':token};
+    }
+    const r = await fetch(url, {headers, ...fetchOpts});
+    if (r.type === 'opaque') {
+      document.getElementById('modal-body').innerText = "Resposta opaca (no-cors). O serviço respondeu, mas o navegador bloqueou a leitura do corpo da resposta (CORS).";
+      return;
+    }
+    let d;
+    try { d = await r.json(); } catch(err) { d = await r.text(); }
+    document.getElementById('modal-body').innerText = typeof d === 'string' ? d : JSON.stringify(d,null,2);
   } catch(e){
     document.getElementById('modal-body').innerText = 'Erro: '+e.message;
   }
@@ -1570,8 +1616,17 @@ function buildEndpoints(force = false){
     if(!ep.path) return;
     const token = TOKENS[farm] || TOKENS['gjacana'];
     const t0 = performance.now();
-    const sep = ep.path.includes('?') ? '&' : '?';
-    fetch(`${BASE}${ep.path}${sep}limit=1`,{headers:{'X-Encrypted-Token':token}})
+    let url, headers, fetchOpts = {};
+    if(ep.path.startsWith('http')) {
+      url = ep.path;
+      headers = {};
+      fetchOpts = { mode: 'no-cors' };
+    } else {
+      const sep = ep.path.includes('?') ? '&' : '?';
+      url = `${BASE}${ep.path}${sep}limit=1`;
+      headers = {'X-Encrypted-Token':token};
+    }
+    fetch(url, {headers, ...fetchOpts})
       .then(r => {
         const ms = Math.round(performance.now()-t0);
         const led = document.getElementById('led-'+i);
@@ -1590,12 +1645,13 @@ function buildEndpoints(force = false){
         }
 
         // Registra lentidão extrema no Ticker, ou remove se o endpoint voltou a responder rápido
-        if(ms > 5000) {
+        const isError = (r.type === 'opaque') ? false : !r.ok;
+        if(ms > 5000 || isError) {
           const existing = slowEndpoints.find(s => s.name === ep.name);
           if(!existing) {
-            slowEndpoints.push({name: ep.name, ms});
+            slowEndpoints.push({name: ep.name, ms: isError ? -1 : ms});
           } else {
-            existing.ms = ms;
+            existing.ms = isError ? -1 : ms;
           }
           updateTicker();
         } else {
@@ -1614,6 +1670,14 @@ function buildEndpoints(force = false){
         const lat = document.getElementById('lat-'+i);
         if(lat) lat.innerText = 'err';
         cacheResults.push({ index: i, status: 'down', latency: 'err' });
+
+        const existing = slowEndpoints.find(s => s.name === ep.name);
+        if(!existing) {
+          slowEndpoints.push({name: ep.name, ms: -1});
+        } else {
+          existing.ms = -1;
+        }
+        updateTicker();
       })
       .finally(() => {
         completed++;
@@ -1642,16 +1706,26 @@ function backgroundHealthCheck() {
     if(!ep.path) return;
     const token = TOKENS['gjacana'];
     const t0 = performance.now();
-    const sep = ep.path.includes('?') ? '&' : '?';
-    fetch(`${BASE}${ep.path}${sep}limit=1`, {headers:{'X-Encrypted-Token':token}})
+    let url, headers, fetchOpts = {};
+    if(ep.path.startsWith('http')) {
+      url = ep.path;
+      headers = {};
+      fetchOpts = { mode: 'no-cors' };
+    } else {
+      const sep = ep.path.includes('?') ? '&' : '?';
+      url = `${BASE}${ep.path}${sep}limit=1`;
+      headers = {'X-Encrypted-Token':token};
+    }
+    fetch(url, {headers, ...fetchOpts})
       .then(r => {
         const ms = Math.round(performance.now()-t0);
-        if(ms > 5000) {
+        const isError = (r.type === 'opaque') ? false : !r.ok;
+        if(ms > 5000 || isError) {
           const existing = slowEndpoints.find(s => s.name === ep.name);
           if(!existing) {
-            slowEndpoints.push({name: ep.name, ms});
+            slowEndpoints.push({name: ep.name, ms: isError ? -1 : ms});
           } else {
-            existing.ms = ms;
+            existing.ms = isError ? -1 : ms;
           }
           updateTicker();
         } else {
@@ -1661,7 +1735,15 @@ function backgroundHealthCheck() {
             updateTicker();
           }
         }
-      }).catch(()=>{});
+      }).catch(()=>{
+        const existing = slowEndpoints.find(s => s.name === ep.name);
+        if(!existing) {
+          slowEndpoints.push({name: ep.name, ms: -1});
+        } else {
+          existing.ms = -1;
+        }
+        updateTicker();
+      });
   });
 }
 
