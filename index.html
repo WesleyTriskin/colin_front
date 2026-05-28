@@ -3,7 +3,18 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel DataAgrin</title>
-<link rel="stylesheet" href="style.css?v=3">
+<link rel="stylesheet" href="style.css?v=4">
+<style>
+.custom-tooltip { position: relative; cursor: help; }
+.custom-tooltip .tooltip-text {
+  visibility: hidden; background-color: var(--panel); color: var(--text); text-align: left;
+  border-radius: 8px; padding: 12px; position: absolute; z-index: 1000; bottom: 120%;
+  left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.3s;
+  border: 1px solid var(--border); box-shadow: 0 10px 25px rgba(0,0,0,0.5); font-size: 0.85rem;
+  font-weight: 500; white-space: nowrap; line-height: 1.5; display: flex; flex-direction: column; gap: 6px;
+}
+.custom-tooltip:hover .tooltip-text { visibility: visible; opacity: 1; }
+</style>
 </head>
 <body class="light">
 <div class="wrap">
@@ -107,46 +118,116 @@
 
       <!-- Card 3: Colin IA - Interativo -->
       <div class="overview-card purple-theme" style="padding: 0; overflow: hidden; position: relative;">
-        <div class="construction-image-wrapper" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 0; border: none;">
-          <img src="images/colin_avatar.png" alt="Colin IA" class="construction-img" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: blur(1.5px) brightness(0.55);">
-          <div class="construction-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(26, 34, 56, 0.45); padding: 24px; box-sizing: border-box; text-align: center;">
-            <div class="card-header" style="position: absolute; top: 20px; left: 24px; right: 24px; border: none; display: flex; justify-content: space-between; align-items: center; width: calc(100% - 48px); padding: 0;">
-              <span class="card-title" style="color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-weight: 800;">3. Colin IA - Interativo</span>
-              <span class="badge-construction" style="background: rgba(255, 255, 255, 0.15); color: #fff; border: 1px solid rgba(255, 255, 255, 0.25); text-shadow: none; font-size: 0.7rem; letter-spacing: 0.5px; font-weight: 800; padding: 4px 8px; border-radius: 6px;">EM CONSTRUÇÃO</span>
+        <div class="construction-image-wrapper" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 0; border: none; z-index: 1;">
+          <img src="images/colin_avatar.png" alt="Colin IA" class="construction-img" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; filter: blur(4px) brightness(0.25);">
+          <div class="construction-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(17, 25, 40, 0.7); padding: 24px; box-sizing: border-box;"></div>
+        </div>
+
+        <div style="position: relative; z-index: 2; padding: 20px; display: flex; flex-direction: column; gap: 16px; height: 100%; box-sizing: border-box;">
+            <div class="card-header" style="border: none; display: flex; justify-content: space-between; align-items: center; padding: 0;">
+              <span class="card-title" style="color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-weight: 800; font-size: 1.25rem;">3. Desempenho da IA (Colin)</span>
+              <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: var(--green); border: 1px solid rgba(16, 185, 129, 0.3); font-size: 0.8rem; padding: 4px 8px;">ATIVO</span>
             </div>
-            <span class="construction-icon" style="font-size: 2.5rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">🛠️</span>
-            <span class="construction-text" style="font-size: 1.4rem; color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,0.6); margin-top: 10px; font-weight: 900; font-family: 'Outfit', sans-serif;">Nova Aba Interativa</span>
-            <span class="construction-sub" style="font-size: 0.85rem; color: #e2e8f0; text-shadow: 0 1px 3px rgba(0,0,0,0.6); max-width: 260px; margin: 0 auto; line-height: 1.4;">Acompanhe a evolução do Colin nas próximas atualizações.</span>
-            <a href="#" class="view-all-link" onclick="switchTab('colin'); return false;" style="position: absolute; bottom: 20px; left: 24px; right: 24px; margin: 0; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.4); display: flex; justify-content: flex-end; align-items: center; text-decoration: none; width: calc(100% - 48px);">Acessar protótipo da IA <span style="margin-left: 6px;">➔</span></a>
-          </div>
+
+            <!-- Metricas Globais da IA -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+               <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px; backdrop-filter: blur(5px);">
+                  <div style="font-size: 0.75rem; color: #cbd5e1; font-weight: 700; text-transform: uppercase;">Atendimentos Ativos</div>
+                  <div style="font-size: 1.8rem; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 8px; margin-top: 4px;" id="ia-active-chats">
+                     0
+                     <span style="font-size: 0.8rem; background: rgba(59,130,246,0.2); color: #60a5fa; padding: 2px 6px; border-radius: 4px; font-weight: 700;">24h</span>
+                  </div>
+               </div>
+               
+               <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px; backdrop-filter: blur(5px);">
+                  <div style="font-size: 0.75rem; color: #cbd5e1; font-weight: 700; text-transform: uppercase;">Tempo Médio Resp.</div>
+                  <div style="font-size: 1.8rem; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 8px; margin-top: 4px;" id="ia-avg-response">
+                     0.0s
+                     <span style="font-size: 0.8rem; color: var(--green);">⚡</span>
+                  </div>
+               </div>
+            </div>
+
+            <div style="flex-grow: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 8px; backdrop-filter: blur(5px);">
+                <div style="font-size: 0.85rem; color: #fff; font-weight: 800;">Decisão Cognitiva (Uso de Ferramentas vs SQL)</div>
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 6px;">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; font-weight: 700; margin-bottom: 4px;">
+                            <span>Tools Nativas (Rápido)</span>
+                            <span id="ia-tools-pct" style="color: #60a5fa;">0%</span>
+                        </div>
+                        <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                            <div id="ia-tools-bar" style="width: 0%; height: 100%; background: #3b82f6; transition: width 0.5s;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e1; font-weight: 700; margin-bottom: 4px;">
+                            <span>Fallback SQL (Profundo)</span>
+                            <span id="ia-sql-pct" style="color: var(--yellow);">0%</span>
+                        </div>
+                        <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                            <div id="ia-sql-bar" style="width: 0%; height: 100%; background: var(--yellow); transition: width 0.5s;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <a href="#" class="view-all-link" onclick="switchTab('colin'); return false;" style="margin: 0; color: #60a5fa; text-shadow: 0 1px 3px rgba(0,0,0,0.4); display: flex; justify-content: flex-end; align-items: center; text-decoration: none; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px; font-size: 0.85rem;">Ver interações em tempo real <span style="margin-left: 6px;">➔</span></a>
         </div>
       </div>
 
       <!-- Right: Grid of Small Metrics Cards (Spans 1 column, aligns perfectly with Card 3) -->
-      <div style="grid-column: span 1; display: grid; grid-template-rows: 110px 96px; gap: 16px; height: 222px; box-sizing: border-box;">
+      <div style="grid-column: span 1; display: grid; grid-template-rows: auto 96px; gap: 16px; box-sizing: border-box;">
         
         <!-- Canais Ativos -->
         <div class="small-overview-card" style="padding: 10px 16px; display: flex; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 10px; height: 100%; box-sizing: border-box;">
           <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
             <div class="small-card-icon blue-bg" style="width: 24px; height: 24px; font-size: 0.9rem; border-radius: 6px; margin: 0; display: flex; align-items: center; justify-content: center;">📞</div>
-            <span class="card-title" style="font-size: 0.95rem;">Canais Ativos</span>
+            <span class="card-title" style="font-size: 1.1rem;">Canais Ativos</span>
           </div>
           <div class="channels-status-list">
-            <div class="channel-status-item">
-              <span class="status-dot-mini success" id="status-mini-gjacana"></span>
-              <span class="channel-name-mini">Jaçanã</span>
+            <div class="channel-status-item" style="padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                  <span class="status-dot-mini success" id="status-mini-gjacana" style="width: 12px; height: 12px;"></span>
+                  <span class="channel-name-mini" style="font-size: 1.05rem;">Fazenda Jaçanã</span>
+              </div>
+              <div style="display: flex; gap: 8px; font-size: 0.8rem;">
+                  <span class="badge" style="background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border); padding: 2px 8px;">Carteira: 5683</span>
+                  <span class="badge" style="background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border); padding: 2px 8px;">+55 11 96306-5709</span>
+              </div>
             </div>
-            <div class="channel-status-item">
-              <span class="status-dot-mini success" id="status-mini-apoloni"></span>
-              <span class="channel-name-mini">Apoloni</span>
+            
+            <div class="channel-status-item" style="padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                  <span class="status-dot-mini success" id="status-mini-fazenda_ws" style="width: 12px; height: 12px;"></span>
+                  <span class="channel-name-mini" style="font-size: 1.05rem;">Fazenda WS</span>
+              </div>
+              <div style="display: flex; gap: 8px; font-size: 0.8rem;">
+                  <span class="badge" style="background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border); padding: 2px 8px;">Carteira: 5702</span>
+                  <span class="badge" style="background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border); padding: 2px 8px;">+55 11 96267-8385</span>
+              </div>
             </div>
-            <div class="channel-status-item">
-              <span class="status-dot-mini success" id="status-mini-piccini"></span>
-              <span class="channel-name-mini">Piccini</span>
+
+            <div class="channel-status-item" style="padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                  <span class="status-dot-mini success" id="status-mini-apoloni" style="width: 12px; height: 12px;"></span>
+                  <span class="channel-name-mini" style="font-size: 1.05rem;">Grupo Apoloni</span>
+              </div>
+              <div style="display: flex; gap: 8px; font-size: 0.8rem;">
+                  <span class="badge" style="background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border); padding: 2px 8px;">Carteira: 6153</span>
+                  <span class="badge" style="background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border); padding: 2px 8px;">+55 44 3101-1106</span>
+              </div>
             </div>
-            <div class="channel-status-item">
-              <span class="status-dot-mini success" id="status-mini-fazenda_ws"></span>
-              <span class="channel-name-mini">Fazenda WS</span>
+
+            <div class="channel-status-item" style="padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                  <span class="status-dot-mini success" id="status-mini-piccini" style="width: 12px; height: 12px;"></span>
+                  <span class="channel-name-mini" style="font-size: 1.05rem;">Grupo Piccini</span>
+              </div>
+              <div style="display: flex; gap: 8px; font-size: 0.8rem;">
+                  <span class="badge" style="background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border); padding: 2px 8px;">Carteira: 6084</span>
+                  <span class="badge" style="background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border); padding: 2px 8px;">+55 66 3184-0130</span>
+              </div>
             </div>
           </div>
         </div>
@@ -550,8 +631,8 @@
 const FARMS_DATA = [
   { key: 'gjacana', name: 'Fazenda Jaçanã', wallet: '5683', phone: '5511963065709' },
   { key: 'fazenda_ws', name: 'Fazenda WS', wallet: '5702', phone: '5511962678385' },
-  { key: 'apoloni', name: 'Apoloni', wallet: '6153', phone: '554431011106' },
-  { key: 'piccini', name: 'Piccini', wallet: '6084', phone: '556631840130' }
+  { key: 'apoloni', name: 'Grupo Apoloni', wallet: '6153', phone: '554431011106' },
+  { key: 'piccini', name: 'Grupo Piccini', wallet: '6084', phone: '556631840130' }
 ];
 
 const TOKENS = {
@@ -1797,6 +1878,76 @@ function updateOverviewDashboard() {
   
   const clientBarsEl = document.getElementById('overview-client-bars');
   if (clientBarsEl) clientBarsEl.innerHTML = clientBarsHtml;
+
+  // -------- IA Metrics Calculations --------
+  let totalIaChats = 0;
+  let responseTimes = [];
+  let toolsCount = 0;
+  let sqlCount = 0;
+  let farmBreakdown = '';
+  
+  FARMS_DATA.forEach(f => {
+      try {
+          const colinStr = localStorage.getItem('colinLogs_' + f.key);
+          if (colinStr) {
+              const logs = JSON.parse(colinStr);
+              const uniquePhonesIA = new Set();
+              const nowTime = new Date().getTime();
+              logs.forEach(l => {
+                 const t = new Date(l.created_at).getTime();
+                 if (nowTime - t < 24 * 60 * 60 * 1000) {
+                    if (l.phone) uniquePhonesIA.add(l.phone);
+                 }
+                 if (l.event_type === 'gateway.reply_received' && l.elapsed_seconds) {
+                    responseTimes.push(parseFloat(l.elapsed_seconds));
+                 }
+                 
+                 const tName = l.tool_name || (l.metadata && l.metadata.tool_name) || '';
+                 const isSql = tName === 'sql_execution' || l.event_type === 'sql_fallback_activated';
+                 const isTool = l.event_type === 'tool_call' || l.event_type === 'tool_call_detail' || tName !== '';
+                 
+                 if (isSql) {
+                     sqlCount++;
+                 } else if (isTool) {
+                     toolsCount++;
+                 }
+              });
+              totalIaChats += uniquePhonesIA.size;
+              if (uniquePhonesIA.size > 0) {
+                  farmBreakdown += `<div style="display:flex; justify-content:space-between; gap:16px;"><span>${f.name}:</span> <span style="font-weight:900; color:var(--blue);">${uniquePhonesIA.size}</span></div>`;
+              }
+          }
+      } catch(e){}
+  });
+
+  const avgResp = responseTimes.length > 0 ? (responseTimes.reduce((a,b)=>a+b,0) / responseTimes.length).toFixed(1) : '0.0';
+  const totalDecisions = toolsCount + sqlCount;
+  let toolsPct = 0; let sqlPct = 0;
+  if (totalDecisions > 0) {
+      toolsPct = Math.round((toolsCount / totalDecisions) * 100);
+      sqlPct = Math.round((sqlCount / totalDecisions) * 100);
+  }
+
+  const iaChatsEl = document.getElementById('ia-active-chats');
+  if (iaChatsEl) {
+      iaChatsEl.innerHTML = `${totalIaChats} <span style="font-size: 0.8rem; background: rgba(59,130,246,0.2); color: #60a5fa; padding: 2px 6px; border-radius: 4px; font-weight: 700;">24h</span>
+      <div class="tooltip-text">${farmBreakdown || 'Nenhum atendimento'}</div>`;
+      iaChatsEl.classList.add('custom-tooltip');
+      iaChatsEl.removeAttribute('title');
+  }
+  
+  const iaAvgEl = document.getElementById('ia-avg-response');
+  if (iaAvgEl) iaAvgEl.innerHTML = `${avgResp}s <span style="font-size: 0.8rem; color: var(--green);">⚡</span>`;
+
+  const iaToolsPctEl = document.getElementById('ia-tools-pct');
+  const iaToolsBarEl = document.getElementById('ia-tools-bar');
+  if (iaToolsPctEl) iaToolsPctEl.innerText = `${toolsPct}%`;
+  if (iaToolsBarEl) iaToolsBarEl.style.width = `${toolsPct}%`;
+
+  const iaSqlPctEl = document.getElementById('ia-sql-pct');
+  const iaSqlBarEl = document.getElementById('ia-sql-bar');
+  if (iaSqlPctEl) iaSqlPctEl.innerText = `${sqlPct}%`;
+  if (iaSqlBarEl) iaSqlBarEl.style.width = `${sqlPct}%`;
 }
 
 function getEndpointAlerts() {
@@ -1835,12 +1986,14 @@ function preloadAllFarmsData() {
           window.colinFirstFetchDone[f.key] = true;
           if (logs && logs.length) {
               const filtered = logs.filter(log => {
+                  const isToolOrSql = log.event_type && (log.event_type.includes('tool') || log.event_type.includes('sql'));
+                  if (isToolOrSql) return true;
                   const p = log.phone || '';
                   return p.replace(/\D/g, '').length > 5;
               });
               
               filtered.forEach(log => {
-                 const logId = log.id || (log.created_at + log.phone);
+                 const logId = log.id || (log.created_at + (log.phone || log.event_type));
                  seenColinMsgIds.add(logId);
               });
               try { localStorage.setItem('colinLogs_' + f.key, JSON.stringify(filtered)); } catch(e){}

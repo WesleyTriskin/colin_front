@@ -733,7 +733,7 @@ body.light .api-card:hover {
 }
 
 .recent-title {
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--muted);
@@ -1045,9 +1045,9 @@ body.light .api-card:hover {
 }
 
 .channels-status-list {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   margin-top: 4px;
   width: 100%;
 }
@@ -1055,16 +1055,16 @@ body.light .api-card:hover {
 .channel-status-item {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
   background: var(--sub);
   border: 1px solid var(--border);
-  padding: 4px 8px;
-  border-radius: 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
 }
 
 .status-dot-mini {
-  width: 6px;
-  height: 6px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
 }
 .status-dot-mini.success { background: var(--green); }
@@ -1072,7 +1072,42 @@ body.light .api-card:hover {
 .status-dot-mini.danger { background: var(--red); }
 
 .channel-name-mini {
-  font-size: 0.75rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--text);
+}
+
+.custom-tooltip {
+  position: relative;
+  cursor: help;
+}
+
+.custom-tooltip .tooltip-text {
+  visibility: hidden;
+  background-color: var(--panel);
+  color: var(--text);
+  text-align: left;
+  border-radius: 8px;
+  padding: 12px;
+  position: absolute;
+  z-index: 1000;
+  bottom: 120%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.custom-tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
 }
