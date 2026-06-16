@@ -4,6 +4,8 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin - DataAgrin</title>
 <link rel="stylesheet" href="style.css?v=3">
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
 <style>
   body { padding: 40px; background: var(--bg); display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
   .admin-wrap { width: 100%; max-width: 1600px; background: var(--panel); border: 1px solid var(--border); border-radius: 18px; padding: 32px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
@@ -29,6 +31,15 @@
   table { width: 100%; border-collapse: collapse; margin-top: 20px; }
   th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); color: var(--text); }
   th { font-weight: bold; color: var(--muted); }
+  
+  .ts-control { background: var(--bg) !important; border: 1px solid var(--border) !important; border-radius: 6px !important; color: var(--text) !important; padding: 8px !important; }
+  .ts-dropdown { background: var(--panel) !important; border: 1px solid var(--border) !important; color: var(--text) !important; border-radius: 6px; }
+  .ts-dropdown .option { padding: 8px; cursor: pointer; color: var(--text); }
+  .ts-dropdown .option:hover, .ts-dropdown .active { background: var(--primary) !important; color: #fff !important; }
+  .ts-control input { color: var(--text) !important; }
+  .ts-wrapper.multi .ts-control > div { background: var(--primary) !important; color: #fff !important; border-radius: 4px; border:none; padding: 2px 6px; }
+  .ts-wrapper.plugin-remove_button .item .remove { border-left: 1px solid rgba(255,255,255,0.2); }
+  .ts-wrapper { min-width: 160px; }
 </style>
 </head>
 <body class="dark">
@@ -75,8 +86,8 @@
             <td><input type="text" id="f_name" required placeholder="Nome (ex: Jaçanã)" style="width:160px; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);"></td>
             <td><input type="text" id="f_phone" placeholder="(11) 90000-0000" oninput="maskPhone(this)" style="width:140px; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);"></td>
             <td><em>Salvar para editar status</em></td>
-            <td>
-              <button class="btn-submit" onclick="saveFarm(event)" style="padding:6px 12px; margin-right:4px;">Salvar</button>
+            <td style="display:flex; gap:8px;">
+              <button class="btn-submit" onclick="saveFarm(event)" style="padding:6px 12px;">Salvar</button>
               <button class="btn-delete" style="background:#555;" onclick="document.getElementById('new-farm-container').style.display='none';">Cancelar</button>
             </td>
           </tr>
@@ -118,14 +129,9 @@
 
     <div style="margin-bottom:15px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
       <input type="text" id="filter_name" placeholder="Filtrar Nome..." onkeyup="loadContacts()" style="padding:8px; border-radius:6px; background:var(--bg); border:1px solid var(--border); color:var(--text); width: 150px;">
-      <input type="text" id="filter_phone" list="existing-phones" placeholder="Filtrar Telefone..." oninput="loadContacts()" style="padding:8px; border-radius:6px; background:var(--bg); border:1px solid var(--border); color:var(--text); width: 150px;">
-      <datalist id="existing-phones"></datalist>
-      <select id="filter_farm" onchange="loadContacts()" style="padding:8px; border-radius:6px; background:var(--bg); color:var(--text); border:1px solid var(--border);">
-        <option value="">Todas as Fazendas</option>
-      </select>
-      <select id="filter_report" onchange="loadContacts()" style="padding:8px; border-radius:6px; background:var(--bg); color:var(--text); border:1px solid var(--border);">
-        <option value="">Todos os Relatórios</option>
-      </select>
+      <select id="filter_phone" onchange="loadContacts()" placeholder="Filtrar Telefone..."><option value="">Todos os Telefones</option></select>
+      <select id="filter_farm" onchange="loadContacts()" placeholder="Todas as Fazendas"><option value="">Todas as Fazendas</option></select>
+      <select id="filter_report" onchange="loadContacts()" placeholder="Todos os Relatórios"><option value="">Todos os Relatórios</option></select>
       <button onclick="clearContactFilters()" class="btn-submit" style="background:#555; padding:8px 12px;">Limpar Filtros</button>
     </div>
     <div style="overflow-x: auto;">
@@ -139,11 +145,20 @@
   </div>
 </div>
 
+<!-- Modal Genérico de Alerta -->
+<div id="alert-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center;">
+  <div style="background:var(--panel); padding:30px; border-radius:12px; max-width:400px; border:1px solid var(--border); text-align:center;">
+    <h3 id="alert-modal-title" style="margin-top:0; color:var(--primary); font-size:1.5rem;">Atenção</h3>
+    <p id="alert-modal-msg" style="color:var(--text); font-size:1.2rem; line-height:1.5;"></p>
+    <button class="btn-submit" onclick="closeAlertModal()" style="margin-top:20px; font-size:1.1rem; padding:10px 30px;">OK</button>
+  </div>
+</div>
+
 <!-- Modal Confirmação Múltiplas Fazendas -->
 <div id="confirm-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center;">
   <div style="background:var(--panel); padding:30px; border-radius:12px; max-width:400px; border:1px solid var(--border);">
-    <h3 style="margin-top:0; color:var(--primary);">Adicionar para TODAS as Fazendas</h3>
-    <p style="color:var(--text); font-size:0.95rem;">Tem certeza que quer acrescentar este contato para <strong>todas</strong> as fazendas? É crítico que um cliente não receba dados de outro.</p>
+    <h3 style="margin-top:0; color:var(--primary); font-size:1.5rem;">Adicionar para TODAS as Fazendas</h3>
+    <p style="color:var(--text); font-size:1.1rem; line-height:1.5;">Tem certeza que quer acrescentar este contato para <strong>todas</strong> as fazendas? É crítico que um cliente não receba dados de outro.</p>
     <label style="display:flex; align-items:center; gap:10px; margin-top:20px; cursor:pointer; color:var(--text);">
       <input type="checkbox" id="confirm-all-checkbox" style="width:20px; height:20px; accent-color:var(--primary);" onchange="document.getElementById('btn-confirm-all').disabled = !this.checked">
       Li o aviso e quero prosseguir
@@ -159,6 +174,7 @@
 const API_URL = 'https://prx.triskin.tech/api_data/v1';
 let farmsList = [];
 let currentContacts = [];
+let tsFilterFarm, tsFilterPhone, tsFilterReport, tsCFarm;
 const ALL_REPORTS = ['d1', 'daily', 'hour', 'margin', 'market', 'idle', 'productivity', 'revenue', 'top_rates', 'irrigacao', 'interativo'];
 const REPORT_LABELS = {
   'd1': 'D1',
@@ -188,8 +204,19 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') {
     document.getElementById('new-contact-container').style.display = 'none';
     document.getElementById('new-farm-container').style.display = 'none';
+    closeConfirmModal();
+    closeAlertModal();
   }
 });
+
+function showModal(title, msg) {
+  document.getElementById('alert-modal-title').innerText = title;
+  document.getElementById('alert-modal-msg').innerText = msg;
+  document.getElementById('alert-modal').style.display = 'flex';
+}
+function closeAlertModal() {
+  document.getElementById('alert-modal').style.display = 'none';
+}
 
 const FARM_NAME_OVERRIDES = {
   'gjacana': 'Jaçanã',
@@ -233,6 +260,7 @@ async function initAdminPanel() {
   ALL_REPORTS.forEach(r => {
     filterRep.innerHTML += `<option value="${r}">${REPORT_LABELS[r]}</option>`;
   });
+  tsFilterReport = new TomSelect("#filter_report", { create: false, placeholder: "Todos os Relatórios" });
   await loadFarms();
 }
 
@@ -244,10 +272,10 @@ async function setStatus(farmKey, phone, status) {
       body: JSON.stringify({ farm_key: farmKey, phone_number: phone, status: status })
     });
     const data = await res.json();
-    if(!data.success) alert("Erro ao salvar: " + data.error);
+    if(!data.success) showModal("Erro", "Erro ao salvar: " + data.error);
     else initAdminPanel();
   } catch(e) {
-    alert("Erro de conexão.");
+    showModal("Erro", "Erro de conexão.");
   }
 }
 
@@ -306,10 +334,10 @@ function editFarm(key, name, phone) {
 }
 
 function updateFarmsSelects() {
-  const opts = '<option value="">Selecione...</option>' + farmsList.map(f => `<option value="${f.farm_key}">${f.display_name}</option>`).join('');
-  // document.getElementById('c_farm').innerHTML = opts; // Removed since c_farm might be recreated
   const filterOpts = '<option value="">Todas as Fazendas</option>' + farmsList.map(f => `<option value="${f.farm_key}">${f.display_name}</option>`).join('');
   document.getElementById('filter_farm').innerHTML = filterOpts;
+  if(tsFilterFarm) { tsFilterFarm.destroy(); }
+  tsFilterFarm = new TomSelect("#filter_farm", { create: false, placeholder: "Todas as Fazendas" });
 }
 
 async function saveFarm(e) {
@@ -334,14 +362,14 @@ async function saveFarm(e) {
     });
     const data = await res.json();
     if(data.success) {
-      alert("Fazenda cadastrada/atualizada!");
+      showModal("Sucesso", "Fazenda cadastrada/atualizada!");
       document.getElementById('f_key').value = '';
       document.getElementById('f_name').value = '';
       document.getElementById('f_phone').value = '';
       document.getElementById('new-farm-container').style.display = 'none';
       loadFarms();
-    } else alert("Erro: " + data.error);
-  } catch(e) { alert("Erro de rede."); }
+    } else showModal("Erro", "Erro: " + data.error);
+  } catch(e) { showModal("Erro", "Erro de rede."); }
 }
 
 async function deleteFarm(farmKey) {
@@ -354,17 +382,17 @@ async function deleteFarm(farmKey) {
     });
     const data = await res.json();
     if(data.success) { loadFarms(); }
-    else alert("Erro: " + data.error);
-  } catch(e) { alert("Erro de rede."); }
+    else showModal("Erro", "Erro: " + data.error);
+  } catch(e) { showModal("Erro", "Erro de rede."); }
 }
 
 // ---------------- CONTACTS CRUD ----------------
 
 function clearContactFilters() {
   document.getElementById('filter_name').value = '';
-  document.getElementById('filter_phone').value = '';
-  document.getElementById('filter_farm').value = '';
-  document.getElementById('filter_report').value = '';
+  if(tsFilterPhone) tsFilterPhone.setValue('');
+  if(tsFilterFarm) tsFilterFarm.setValue('');
+  if(tsFilterReport) tsFilterReport.setValue('');
   loadContacts();
 }
 
@@ -442,11 +470,11 @@ async function toggleReport(farmKey, phone, reportName, isChecked, contactName, 
       }
       renderContactsTable(document.getElementById('filter_farm').value);
     } else {
-      alert("Erro ao salvar relatório: " + data.error);
+      showModal("Erro", "Erro ao salvar relatório: " + data.error);
       loadContacts(); // reload to revert checkbox
     }
   } catch(e) { 
-    alert("Erro de rede."); 
+    showModal("Erro", "Erro de rede."); 
     loadContacts(); 
   }
 }
@@ -454,8 +482,8 @@ async function toggleReport(farmKey, phone, reportName, isChecked, contactName, 
 function renderContactsTable(selectedFarm) {
   // Filters
   const fName = document.getElementById('filter_name').value.toLowerCase();
-  const fPhone = document.getElementById('filter_phone').value.replace(/\D/g, '');
-  const fRep = document.getElementById('filter_report').value;
+  const fPhone = tsFilterPhone ? tsFilterPhone.getValue().replace(/\D/g, '') : '';
+  const fRep = tsFilterReport ? tsFilterReport.getValue() : '';
 
   const filtered = currentContacts.filter(c => {
     if (selectedFarm && c.farm_key !== selectedFarm) return false;
@@ -477,24 +505,39 @@ function renderContactsTable(selectedFarm) {
   document.getElementById('contacts-thead').innerHTML = theadHtml;
   document.getElementById('new-contact-thead').innerHTML = theadHtml;
 
-  // Update datalist for phones
+  // Update TomSelect for phones
   const uniquePhones = [...new Set(currentContacts.map(c => c.phone_number))];
-  document.getElementById('existing-phones').innerHTML = uniquePhones.map(p => `<option value="${formatPhone(p)}">`).join('');
+  const phoneSelect = document.getElementById('filter_phone');
+  let currentPhoneVal = tsFilterPhone ? tsFilterPhone.getValue() : '';
+  if(tsFilterPhone) tsFilterPhone.destroy();
+  phoneSelect.innerHTML = '<option value="">Todos os Telefones</option>' + uniquePhones.map(p => `<option value="${formatPhone(p)}">${formatPhone(p)}</option>`).join('');
+  tsFilterPhone = new TomSelect("#filter_phone", { create: true, placeholder: "Filtrar Telefone..." });
+  if(currentPhoneVal) tsFilterPhone.setValue(currentPhoneVal, true);
 
-  // Render New Contact Tbody
-  const opts = '<option value="todas">Todas as Fazendas</option>' + farmsList.map(f => `<option value="${f.farm_key}">${f.display_name}</option>`).join('');
-  let newContactRowHtml = `<tr>
-    <td><input type="text" id="c_name" required placeholder="Nome" style="width:120px; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);"></td>
-    <td><input type="text" id="c_phone" required placeholder="(11) 90000-0000" oninput="maskPhone(this)" style="width:140px; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);"></td>
-    <td><select id="c_farm" required style="width:160px; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);">${opts}</select></td>`;
-  ALL_REPORTS.forEach(r => {
-    newContactRowHtml += `<td class="checkbox-wrapper"><input type="checkbox" id="c_rep_${r}" value="${r}"></td>`;
-  });
-  newContactRowHtml += `<td>
-      <button class="btn-submit" onclick="saveNewContact()" style="padding:6px 12px; margin-right:4px;">Salvar</button>
-      <button class="btn-delete" style="background:#555;" onclick="document.getElementById('new-contact-container').style.display='none';">Cancelar</button>
-    </td></tr>`;
-  document.getElementById('new-contact-tbody').innerHTML = newContactRowHtml;
+  // Render New Contact Tbody ONLY if empty to preserve TomSelect instance
+  if(document.getElementById('new-contact-tbody').innerHTML.trim() === '') {
+    const opts = '<option value="todas">Todas as Fazendas</option>' + farmsList.map(f => `<option value="${f.farm_key}">${f.display_name}</option>`).join('');
+    let newContactRowHtml = `<tr>
+      <td><input type="text" id="c_name" required placeholder="Nome" style="width:120px; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);"></td>
+      <td><input type="text" id="c_phone" required placeholder="(11) 90000-0000" oninput="maskPhone(this)" style="width:140px; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);"></td>
+      <td style="min-width:200px;"><select id="c_farm" required multiple placeholder="Selecione as fazendas...">${opts}</select></td>`;
+    ALL_REPORTS.forEach(r => {
+      newContactRowHtml += `<td class="checkbox-wrapper"><input type="checkbox" id="c_rep_${r}" value="${r}"></td>`;
+    });
+    newContactRowHtml += `<td style="display:flex; gap:8px;">
+        <button class="btn-submit" onclick="saveNewContact()" style="padding:6px 12px;">Salvar</button>
+        <button class="btn-delete" style="background:#555;" onclick="document.getElementById('new-contact-container').style.display='none';">Cancelar</button>
+      </td></tr>`;
+    document.getElementById('new-contact-tbody').innerHTML = newContactRowHtml;
+    tsCFarm = new TomSelect("#c_farm", { plugins: ['remove_button'], create: false });
+  } else {
+    // If it exists, we just need to update the options in c_farm
+    if(tsCFarm) {
+       tsCFarm.clearOptions();
+       tsCFarm.addOption({value: 'todas', text: 'Todas as Fazendas'});
+       farmsList.forEach(f => tsCFarm.addOption({value: f.farm_key, text: f.display_name}));
+    }
+  }
 
   // Render Tbody
   document.getElementById('contacts-table-body').innerHTML = filtered.map(c => {
@@ -525,7 +568,11 @@ function renderContactsTable(selectedFarm) {
 
 function editContact(farmKey, phone, name, type, notes) {
   document.getElementById('new-contact-container').style.display = 'block';
-  if(farmKey && farmKey !== 'undefined') document.getElementById('c_farm').value = farmKey;
+  if(farmKey && farmKey !== 'undefined') {
+    if(tsCFarm) {
+       tsCFarm.setValue([farmKey]);
+    }
+  }
   
   // Apply mask to phone
   let v = phone.replace(/\D/g, '');
@@ -548,10 +595,11 @@ function editContact(farmKey, phone, name, type, notes) {
 async function saveNewContact() {
   const nameEl = document.getElementById('c_name');
   const phoneEl = document.getElementById('c_phone');
-  const farmEl = document.getElementById('c_farm');
   
-  if(!nameEl.value || !phoneEl.value || !farmEl.value) {
-    alert("Preencha Nome, Telefone e Fazenda!");
+  let selectedFarms = tsCFarm ? tsCFarm.items : [];
+  
+  if(!nameEl.value || !phoneEl.value || selectedFarms.length === 0) {
+    showModal("Atenção", "Preencha Nome, Telefone e ao menos uma Fazenda!");
     return;
   }
   
@@ -570,7 +618,7 @@ async function saveNewContact() {
   // Check duplicate phone
   const existing = currentContacts.find(c => c.phone_number === inputPhone);
   if (existing) {
-    alert(`Esse telefone já está cadastrado para o contato "${existing.contact_name}". Por favor, edite-o na tabela abaixo.`);
+    showModal("Atenção", `Esse telefone já está cadastrado para o contato "${existing.contact_name}". Por favor, edite-o na tabela abaixo.`);
     return;
   }
   
@@ -581,7 +629,7 @@ async function saveNewContact() {
     notes: ''
   };
   
-  if (farmEl.value === 'todas') {
+  if (selectedFarms.includes('todas')) {
     window.pendingAllPayload = basePayload;
     document.getElementById('confirm-all-checkbox').checked = false;
     document.getElementById('btn-confirm-all').disabled = true;
@@ -589,7 +637,25 @@ async function saveNewContact() {
     return;
   }
   
-  await executeSaveContact({ ...basePayload, farm_key: farmEl.value });
+  let hasError = false;
+  for (const fKey of selectedFarms) {
+     try {
+       await executeSaveContactSilent({ ...basePayload, farm_key: fKey });
+     } catch(e) { hasError = true; }
+  }
+  
+  if(hasError) showModal("Aviso", "Algumas operações falharam.");
+  else showModal("Sucesso", "Contatos cadastrados/atualizados com sucesso!");
+  
+  document.getElementById('c_name').value = '';
+  document.getElementById('c_phone').value = '';
+  if(tsCFarm) tsCFarm.clear();
+  ALL_REPORTS.forEach(r => {
+    const cb = document.getElementById(`c_rep_${r}`);
+    if(cb) cb.checked = false;
+  });
+  document.getElementById('new-contact-container').style.display = 'none';
+  loadContacts();
 }
 
 function closeConfirmModal() {
@@ -614,12 +680,12 @@ async function confirmSaveAll() {
      } catch(e) { hasError = true; }
   }
   
-  if(hasError) alert("Algumas inserções falharam.");
-  else alert("Contatos adicionados em massa com sucesso!");
+  if(hasError) showModal("Erro", "Algumas inserções falharam.");
+  else showModal("Sucesso", "Contatos adicionados em massa com sucesso!");
   
   document.getElementById('c_name').value = '';
   document.getElementById('c_phone').value = '';
-  document.getElementById('c_farm').value = '';
+  if(tsCFarm) tsCFarm.clear();
   ALL_REPORTS.forEach(r => {
     const cb = document.getElementById(`c_rep_${r}`);
     if(cb) cb.checked = false;
@@ -628,45 +694,22 @@ async function confirmSaveAll() {
   loadContacts();
 }
 
-async function executeSaveContact(payload) {
-  try {
-    const res = await fetch(API_URL + '/farms/contacts', {
-      method: 'POST',
+async function executeSaveContactSilent(payload) {
+  const res = await fetch(API_URL + '/farms/contacts', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json();
+  if(!data.success) {
+    const resPut = await fetch(API_URL + '/farms/contacts', {
+      method: 'PUT',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(payload)
     });
-    const data = await res.json();
-    if(data.success) {
-      alert("Contato salvo com sucesso!");
-      document.getElementById('c_name').value = '';
-      document.getElementById('c_phone').value = '';
-      document.getElementById('c_farm').value = '';
-      ALL_REPORTS.forEach(r => {
-        const cb = document.getElementById(`c_rep_${r}`);
-        if(cb) cb.checked = false;
-      });
-      document.getElementById('new-contact-container').style.display = 'none';
-      loadContacts();
-    } else {
-      // Tenta PUT
-      const resPut = await fetch(API_URL + '/farms/contacts', {
-        method: 'PUT',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(payload)
-      });
-      const dataPut = await resPut.json();
-      if(dataPut.success) {
-        alert("Contato atualizado!");
-        document.getElementById('c_name').value = '';
-        document.getElementById('c_phone').value = '';
-        document.getElementById('c_farm').value = '';
-        document.getElementById('new-contact-container').style.display = 'none';
-        loadContacts();
-      } else {
-        alert("Erro ao salvar: " + data.error);
-      }
-    }
-  } catch(e) { alert("Erro de rede."); }
+    const dataPut = await resPut.json();
+    if(!dataPut.success) {
+      throw new Error(dataPut.error);
 }
 
 async function deleteContact(farmKey, phone) {
@@ -683,8 +726,8 @@ async function deleteContact(farmKey, phone) {
     });
     const data = await res.json();
     if(data.success) loadContacts();
-    else alert("Erro: " + data.error);
-  } catch(e) { alert("Erro de rede."); }
+    else showModal("Erro", "Erro: " + data.error);
+  } catch(e) { showModal("Erro", "Erro de rede."); }
 }
 
 // Init
