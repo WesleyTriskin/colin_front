@@ -32,14 +32,14 @@
   th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); color: var(--text); }
   th { font-weight: bold; color: var(--muted); }
   
-  .ts-control { background: var(--bg) !important; border: 1px solid var(--border) !important; border-radius: 6px !important; color: var(--text) !important; padding: 8px !important; }
-  .ts-dropdown { background: var(--panel) !important; border: 1px solid var(--border) !important; color: var(--text) !important; border-radius: 6px; }
-  .ts-dropdown .option { padding: 8px; cursor: pointer; color: var(--text); }
+  .ts-control { background: var(--bg) !important; border: 1px solid var(--border) !important; border-radius: 8px !important; color: var(--text) !important; padding: 10px 12px !important; font-family: inherit; font-size: 0.9rem; }
+  .ts-dropdown { background: var(--panel) !important; border: 1px solid var(--border) !important; color: var(--text) !important; border-radius: 8px; box-shadow: 0 6px 16px rgba(0,0,0,0.2); }
+  .ts-dropdown .option { padding: 10px 12px; cursor: pointer; color: var(--text); white-space: nowrap; font-size: 0.9rem; }
   .ts-dropdown .option:hover, .ts-dropdown .active { background: var(--primary) !important; color: #fff !important; }
-  .ts-control input { color: var(--text) !important; }
-  .ts-wrapper.multi .ts-control > div { background: var(--primary) !important; color: #fff !important; border-radius: 4px; border:none; padding: 2px 6px; }
-  .ts-wrapper.plugin-remove_button .item .remove { border-left: 1px solid rgba(255,255,255,0.2); }
-  .ts-wrapper { min-width: 160px; }
+  .ts-control input { color: var(--text) !important; font-family: inherit; font-size: 0.9rem; }
+  .ts-wrapper.multi .ts-control > div { background: var(--primary) !important; color: #fff !important; border-radius: 6px; border:none; padding: 4px 8px; margin: 2px; }
+  .ts-wrapper.plugin-remove_button .item .remove { border-left: 1px solid rgba(255,255,255,0.2); padding: 0 6px; }
+  .ts-wrapper { min-width: 200px; }
 </style>
 </head>
 <body class="dark">
@@ -128,7 +128,7 @@
     </div>
 
     <div style="margin-bottom:15px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-      <input type="text" id="filter_name" placeholder="Filtrar Nome..." onkeyup="loadContacts()" style="padding:8px; border-radius:6px; background:var(--bg); border:1px solid var(--border); color:var(--text); width: 150px;">
+      <select id="filter_name" onchange="loadContacts()" placeholder="Filtrar Nome..."><option value="">Todos os Nomes</option></select>
       <select id="filter_phone" onchange="loadContacts()" placeholder="Filtrar Telefone..."><option value="">Todos os Telefones</option></select>
       <select id="filter_farm" onchange="loadContacts()" placeholder="Todas as Fazendas"><option value="">Todas as Fazendas</option></select>
       <select id="filter_report" onchange="loadContacts()" placeholder="Todos os Relatórios"><option value="">Todos os Relatórios</option></select>
@@ -174,7 +174,7 @@
 const API_URL = 'https://prx.triskin.tech/api_data/v1';
 let farmsList = [];
 let currentContacts = [];
-let tsFilterFarm, tsFilterPhone, tsFilterReport, tsCFarm;
+let tsFilterFarm, tsFilterPhone, tsFilterReport, tsCFarm, tsFilterName;
 const ALL_REPORTS = ['d1', 'daily', 'hour', 'margin', 'market', 'idle', 'productivity', 'revenue', 'top_rates', 'irrigacao', 'interativo'];
 const REPORT_LABELS = {
   'd1': 'D1',
@@ -389,7 +389,7 @@ async function deleteFarm(farmKey) {
 // ---------------- CONTACTS CRUD ----------------
 
 function clearContactFilters() {
-  document.getElementById('filter_name').value = '';
+  if(tsFilterName) tsFilterName.setValue('');
   if(tsFilterPhone) tsFilterPhone.setValue('');
   if(tsFilterFarm) tsFilterFarm.setValue('');
   if(tsFilterReport) tsFilterReport.setValue('');
@@ -481,7 +481,7 @@ async function toggleReport(farmKey, phone, reportName, isChecked, contactName, 
 
 function renderContactsTable(selectedFarm) {
   // Filters
-  const fName = document.getElementById('filter_name').value.toLowerCase();
+  const fName = tsFilterName ? tsFilterName.getValue().toLowerCase() : '';
   const fPhone = tsFilterPhone ? tsFilterPhone.getValue().replace(/\D/g, '') : '';
   const fRep = tsFilterReport ? tsFilterReport.getValue() : '';
 
@@ -504,6 +504,15 @@ function renderContactsTable(selectedFarm) {
   theadHtml += `<th>Ações</th></tr>`;
   document.getElementById('contacts-thead').innerHTML = theadHtml;
   document.getElementById('new-contact-thead').innerHTML = theadHtml;
+
+  // Update TomSelect for names
+  const uniqueNames = [...new Set(currentContacts.map(c => c.contact_name))].sort((a,b) => a.localeCompare(b));
+  const nameSelect = document.getElementById('filter_name');
+  let currentNameVal = tsFilterName ? tsFilterName.getValue() : '';
+  if(tsFilterName) tsFilterName.destroy();
+  nameSelect.innerHTML = '<option value="">Todos os Nomes</option>' + uniqueNames.map(n => `<option value="${n}">${n}</option>`).join('');
+  tsFilterName = new TomSelect("#filter_name", { create: true, placeholder: "Filtrar Nome..." });
+  if(currentNameVal) tsFilterName.setValue(currentNameVal, true);
 
   // Update TomSelect for phones
   const uniquePhones = [...new Set(currentContacts.map(c => c.phone_number))];
