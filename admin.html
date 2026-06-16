@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="style.css?v=3">
 <style>
   body { padding: 40px; background: var(--bg); display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
-  .admin-wrap { width: 100%; max-width: 1000px; background: var(--panel); border: 1px solid var(--border); border-radius: 18px; padding: 32px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+  .admin-wrap { width: 100%; max-width: 1600px; background: var(--panel); border: 1px solid var(--border); border-radius: 18px; padding: 32px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
   .farm-card { background: var(--bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 16px; }
   .farm-name { font-weight: 800; font-size: 1.2rem; color: var(--text); font-family: 'Outfit', sans-serif; }
   .farm-info { color: var(--muted); font-size: 0.95rem; margin-top: 6px; }
@@ -46,18 +46,14 @@
   </div>
 
   <div class="tabs">
-    <div class="tab active" onclick="switchTab('status')">Status (Básico)</div>
-    <div class="tab" onclick="switchTab('farms')">Fazendas (CRUD)</div>
-    <div class="tab" onclick="switchTab('contacts')">Contatos (CRUD)</div>
-  </div>
-
-  <!-- ABA: Status -->
-  <div id="tab-status" class="tab-content active">
-    <div id="admin-list">Carregando...</div>
+    <div class="tab active" onclick="switchTab('farms')">Fazendas</div>
+    <div class="tab" onclick="switchTab('contacts')">Contatos</div>
   </div>
 
   <!-- ABA: Fazendas -->
-  <div id="tab-farms" class="tab-content">
+  <div id="tab-farms" class="tab-content active">
+    <div id="admin-list" style="margin-bottom: 30px;">Carregando...</div>
+    
     <h3>Nova Fazenda</h3>
     <form id="farmForm" onsubmit="saveFarm(event)" style="background:var(--bg); padding:20px; border-radius:12px; border:1px solid var(--border);">
       <div style="display:flex; gap:15px; flex-wrap:wrap;">
@@ -122,8 +118,8 @@
             <input type="text" id="c_name" required placeholder="João">
           </div>
           <div class="form-group" style="flex:1; min-width:200px;">
-            <label>Telefone (WhatsApp)</label>
-            <input type="text" id="c_phone" required placeholder="5511900000000">
+            <label>Telefone (WhatsApp c/ DDD)</label>
+            <input type="text" id="c_phone" required placeholder="11900000000">
           </div>
         </div>
         <div style="display:flex; gap:15px; flex-wrap:wrap;">
@@ -177,9 +173,9 @@ function formatPhone(phone) {
   if (!phone) return 'Sem número';
   let p = phone.toString().replace(/\D/g, '');
   if (p.startsWith('55') && p.length > 11) p = p.substring(2);
-  if (p.length === 11) return `(${p.substring(0,2)}) ${p.substring(2,7)}-${p.substring(7)}`;
-  if (p.length === 10) return `(${p.substring(0,2)}) ${p.substring(2,6)}-${p.substring(6)}`;
-  return phone;
+  if (p.length === 11) return `+55 (${p.substring(0,2)}) ${p.substring(2,7)}-${p.substring(7)}`;
+  if (p.length === 10) return `+55 (${p.substring(0,2)}) ${p.substring(2,6)}-${p.substring(6)}`;
+  return `+${phone}`;
 }
 
 // ---------------- STATUS PANEL ----------------
@@ -305,6 +301,18 @@ async function deleteFarm(farmKey) {
 
 let currentContacts = [];
 const ALL_REPORTS = ['d1', 'daily', 'hour', 'margin', 'market', 'idle', 'productivity', 'revenue', 'top_rates', 'irrigacao'];
+const REPORT_LABELS = {
+  'd1': 'D1',
+  'daily': 'Daily',
+  'hour': 'Hour',
+  'margin': 'Margem',
+  'market': 'Notícias',
+  'idle': 'Ociosidade',
+  'productivity': 'Produtividade',
+  'revenue': 'Faturamento',
+  'top_rates': 'Top Rates',
+  'irrigacao': 'Irrigação'
+};
 
 async function loadContacts() {
   const fk = document.getElementById('filter_farm').value;
@@ -382,7 +390,7 @@ function renderContactsTable(selectedFarm) {
     <th>Telefone</th>
     <th>Fazenda</th>`;
   ALL_REPORTS.forEach(r => {
-    theadHtml += `<th style="text-align:center; text-transform:capitalize;">${r}</th>`;
+    theadHtml += `<th style="text-align:center;">${REPORT_LABELS[r]}</th>`;
   });
   theadHtml += `<th>Ações</th></tr>`;
   document.getElementById('contacts-thead').innerHTML = theadHtml;
@@ -425,9 +433,14 @@ function editContact(farmKey, phone, name, type, notes) {
 
 async function saveContact(e) {
   e.preventDefault();
+  let inputPhone = document.getElementById('c_phone').value.replace(/\D/g, '');
+  if (inputPhone.length > 0 && !inputPhone.startsWith('55')) {
+    inputPhone = '55' + inputPhone;
+  }
+  
   const payload = {
     farm_key: document.getElementById('c_farm').value,
-    phone_number: document.getElementById('c_phone').value,
+    phone_number: inputPhone,
     contact_name: document.getElementById('c_name').value,
     report_type: document.getElementById('c_report').value,
     notes: document.getElementById('c_notes').value,
