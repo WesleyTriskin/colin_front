@@ -57,7 +57,8 @@
       <button class="btn-submit" onclick="document.getElementById('new-farm-container').style.display='block'">+ Nova Fazenda</button>
     </div>
     
-    <div id="new-farm-container" style="display:none; margin-bottom: 20px; overflow-x: auto; background:var(--panel); border:1px solid var(--border); border-radius:12px; padding: 10px;">
+    <div id="new-farm-container" style="display:none; margin-bottom: 20px; overflow-x: auto; background:rgba(41, 128, 185, 0.1); border:2px solid var(--primary); border-radius:12px; padding: 15px;">
+      <h4 style="margin: 0 0 10px 0; color: var(--text);">➕ Nova Fazenda</h4>
       <table style="font-size: 0.85rem; margin:0;">
         <thead>
           <tr>
@@ -105,7 +106,8 @@
       <button class="btn-submit" onclick="document.getElementById('new-contact-container').style.display='block'">+ Novo Contato</button>
     </div>
     
-    <div id="new-contact-container" style="display:none; margin-bottom: 20px; overflow-x: auto; background:var(--panel); border:1px solid var(--border); border-radius:12px; padding: 10px;">
+    <div id="new-contact-container" style="display:none; margin-bottom: 20px; overflow-x: auto; background:rgba(41, 128, 185, 0.1); border:2px solid var(--primary); border-radius:12px; padding: 15px;">
+      <h4 style="margin: 0 0 10px 0; color: var(--text);">➕ Novo Contato</h4>
       <table style="font-size: 0.85rem; margin:0;">
         <thead id="new-contact-thead">
         </thead>
@@ -116,7 +118,8 @@
 
     <div style="margin-bottom:15px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
       <input type="text" id="filter_name" placeholder="Filtrar Nome..." onkeyup="loadContacts()" style="padding:8px; border-radius:6px; background:var(--bg); border:1px solid var(--border); color:var(--text); width: 150px;">
-      <input type="text" id="filter_phone" placeholder="Filtrar Telefone..." onkeyup="loadContacts()" style="padding:8px; border-radius:6px; background:var(--bg); border:1px solid var(--border); color:var(--text); width: 150px;">
+      <input type="text" id="filter_phone" list="existing-phones" placeholder="Filtrar Telefone..." oninput="loadContacts()" style="padding:8px; border-radius:6px; background:var(--bg); border:1px solid var(--border); color:var(--text); width: 150px;">
+      <datalist id="existing-phones"></datalist>
       <select id="filter_farm" onchange="loadContacts()" style="padding:8px; border-radius:6px; background:var(--bg); color:var(--text); border:1px solid var(--border);">
         <option value="">Todas as Fazendas</option>
       </select>
@@ -164,6 +167,13 @@ function switchTab(tabId) {
   if(tabId === 'farms') loadFarms();
   if(tabId === 'contacts') loadContacts();
 }
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    document.getElementById('new-contact-container').style.display = 'none';
+    document.getElementById('new-farm-container').style.display = 'none';
+  }
+});
 
 const FARM_NAME_OVERRIDES = {
   'gjacana': 'Jaçanã',
@@ -451,8 +461,12 @@ function renderContactsTable(selectedFarm) {
   document.getElementById('contacts-thead').innerHTML = theadHtml;
   document.getElementById('new-contact-thead').innerHTML = theadHtml;
 
+  // Update datalist for phones
+  const uniquePhones = [...new Set(currentContacts.map(c => c.phone_number))];
+  document.getElementById('existing-phones').innerHTML = uniquePhones.map(p => `<option value="${formatPhone(p)}">`).join('');
+
   // Render New Contact Tbody
-  const opts = '<option value="">Selecione...</option>' + farmsList.map(f => `<option value="${f.farm_key}">${f.display_name}</option>`).join('');
+  const opts = '<option value="todas">Todas as Fazendas</option>' + farmsList.map(f => `<option value="${f.farm_key}">${f.display_name}</option>`).join('');
   let newContactRowHtml = `<tr>
     <td><input type="text" id="c_name" required placeholder="Nome" style="width:120px; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);"></td>
     <td><input type="text" id="c_phone" required placeholder="(11) 90000-0000" oninput="maskPhone(this)" style="width:140px; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);"></td>
@@ -537,13 +551,44 @@ async function saveNewContact() {
   });
   const reportTypeStr = selectedReports.length === ALL_REPORTS.length ? 'all' : selectedReports.join(',');
   
-  const payload = {
-    farm_key: farmEl.value,
+  const basePayload = {
     phone_number: inputPhone,
     contact_name: nameEl.value,
     report_type: reportTypeStr,
     notes: ''
   };
+  
+  if (farmEl.value === 'todas') {
+    if(!confirm("Tem certeza que quer acrescentar para TODAS as fazendas? É importante que um não receba dados do outro.")) return;
+    
+    let hasError = false;
+    for (const f of farmsList) {
+       const payload = { ...basePayload, farm_key: f.farm_key };
+       try {
+         await fetch(API_URL + '/farms/contacts', {
+           method: 'POST',
+           headers: {'Content-Type': 'application/json'},
+           body: JSON.stringify(payload)
+         });
+       } catch(e) { hasError = true; }
+    }
+    
+    if(hasError) alert("Algumas inserções falharam.");
+    else alert("Contatos adicionados em massa com sucesso!");
+    
+    nameEl.value = '';
+    phoneEl.value = '';
+    farmEl.value = '';
+    ALL_REPORTS.forEach(r => {
+      const cb = document.getElementById(`c_rep_${r}`);
+      if(cb) cb.checked = false;
+    });
+    document.getElementById('new-contact-container').style.display = 'none';
+    loadContacts();
+    return;
+  }
+  
+  const payload = { ...basePayload, farm_key: farmEl.value };
   
   try {
     const res = await fetch(API_URL + '/farms/contacts', {
@@ -561,6 +606,7 @@ async function saveNewContact() {
         const cb = document.getElementById(`c_rep_${r}`);
         if(cb) cb.checked = false;
       });
+      document.getElementById('new-contact-container').style.display = 'none';
       loadContacts();
     } else {
       // Tenta PUT
@@ -575,6 +621,7 @@ async function saveNewContact() {
         nameEl.value = '';
         phoneEl.value = '';
         farmEl.value = '';
+        document.getElementById('new-contact-container').style.display = 'none';
         loadContacts();
       } else {
         alert("Erro ao salvar: " + data.error);
