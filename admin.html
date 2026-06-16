@@ -476,7 +476,10 @@ async function loadContacts() {
     const res = await fetch(API_URL + '/farms/contacts');
     if(res.ok) {
       const data = await res.json();
-      const rawContacts = data.contacts || [];
+      let rawContacts = data.contacts || [];
+      const farmPhones = farmsList.map(f => f.phone_number);
+      rawContacts = rawContacts.filter(c => !farmPhones.includes(c.phone_number));
+      
       const grouped = {};
       rawContacts.forEach(c => {
         const key = c.phone_number + '_' + c.farm_key;
