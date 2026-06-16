@@ -54,6 +54,7 @@ body.critical-error::after {
         <div class="leg-item"><span class="status-dot none"></span> Sem Número</div>
       </div>
       <div class="topbar-actions" style="display: flex; align-items: center; gap: 12px;">
+        <button class="theme-btn" id="btn-clear-cache" onclick="hardReload()" style="align-items: center; gap: 8px; font-family:'Outfit',sans-serif; white-space: nowrap; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.5); color: #ef4444;" title="Limpa o cache e força a reconexão com a API (Útil ao trocar de VPN)">🔁 Limpar Cache</button>
         <button class="theme-btn" id="btn-test-api" onclick="forceCheckEndpoints()" style="display: none; align-items: center; gap: 8px; font-family:'Outfit',sans-serif; white-space: nowrap;">🔄 Testar Endpoints</button>
         <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">🌙 Modo Escuro</button>
       </div>
@@ -1699,7 +1700,11 @@ function forceCheckEndpoints() {
   buildEndpoints(true);
 }
 
-
+function hardReload() {
+  localStorage.removeItem('cached_allLogs');
+  localStorage.removeItem('cached_farmAlertsCache');
+  window.location.href = window.location.pathname + '?refresh=' + new Date().getTime();
+}
 
 function backgroundHealthCheck() {
   ENDPOINTS.forEach(ep => {
