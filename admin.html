@@ -37,8 +37,13 @@
   .ts-dropdown .option { padding: 10px 12px; cursor: pointer; color: var(--text); white-space: nowrap; font-size: 0.9rem; }
   .ts-dropdown .option:hover, .ts-dropdown .active { background: var(--primary) !important; color: #fff !important; }
   .ts-control input { color: var(--text) !important; font-family: inherit; font-size: 0.9rem; }
-  .ts-wrapper.multi .ts-control > div { background: var(--primary) !important; color: #fff !important; border-radius: 6px; border:none; padding: 4px 8px; margin: 2px; }
-  .ts-wrapper.plugin-remove_button .item .remove { border-left: 1px solid rgba(255,255,255,0.2); padding: 0 6px; }
+  .ts-wrapper.multi .ts-control { display: flex; flex-wrap: nowrap; overflow-x: auto; max-height: 42px; padding-right: 30px !important; }
+  .ts-wrapper.multi .ts-control::-webkit-scrollbar { height: 4px; }
+  .ts-wrapper.multi .ts-control::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+  .ts-wrapper.multi .ts-control > div { background: var(--primary) !important; color: #fff !important; border-radius: 6px; border:none; padding: 4px 8px; margin: 2px; white-space: nowrap; }
+  .ts-wrapper.plugin-remove_button .item .remove { border-left: 1px solid rgba(255,255,255,0.2); padding: 0 6px; margin-left: 6px; }
+  .ts-wrapper.plugin-clear_button .clear-button { color: var(--text) !important; font-size: 18px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; z-index: 10; opacity: 0.7; }
+  .ts-wrapper.plugin-clear_button .clear-button:hover { opacity: 1; color: #ff6b6b !important; }
   .ts-wrapper { min-width: 200px; }
 </style>
 </head>
@@ -255,12 +260,12 @@ function maskPhone(input) {
 }
 
 async function initAdminPanel() {
-  tsFilterReport = new TomSelect("#filter_report", { plugins: ['remove_button', 'clear_button'], create: false, placeholder: "Todos os Relatórios" });
+  tsFilterReport = new TomSelect("#filter_report", { plugins: ['remove_button', 'clear_button'], create: false, placeholder: "Todos os Relatórios", hideSelected: true });
   ALL_REPORTS.forEach(r => tsFilterReport.addOption({value: r, text: REPORT_LABELS[r]}));
 
-  tsFilterFarm = new TomSelect("#filter_farm", { plugins: ['remove_button', 'clear_button'], create: false, placeholder: "Todas as Fazendas" });
-  tsFilterPhone = new TomSelect("#filter_phone", { plugins: ['remove_button', 'clear_button'], create: true, placeholder: "Filtrar Telefone..." });
-  tsFilterName = new TomSelect("#filter_name", { plugins: ['remove_button', 'clear_button'], create: true, placeholder: "Filtrar Nome..." });
+  tsFilterFarm = new TomSelect("#filter_farm", { plugins: ['remove_button', 'clear_button'], create: false, placeholder: "Todas as Fazendas", hideSelected: true });
+  tsFilterPhone = new TomSelect("#filter_phone", { plugins: ['remove_button', 'clear_button'], create: true, placeholder: "Filtrar Telefone...", hideSelected: true });
+  tsFilterName = new TomSelect("#filter_name", { plugins: ['remove_button', 'clear_button'], create: true, placeholder: "Filtrar Nome...", hideSelected: true });
 
   await loadFarms();
   await loadContacts();
@@ -476,10 +481,10 @@ async function toggleReport(farmKey, phone, reportName, isChecked, contactName, 
 }
 
 function getFilteredContacts(excludeFilter = null) {
-  const fNames = tsFilterName ? (Array.isArray(tsFilterName.getValue()) ? tsFilterName.getValue() : [tsFilterName.getValue()]).filter(Boolean) : [];
-  const fPhones = tsFilterPhone ? (Array.isArray(tsFilterPhone.getValue()) ? tsFilterPhone.getValue() : [tsFilterPhone.getValue()]).filter(Boolean).map(p => p.replace(/\D/g, '')) : [];
-  const fReps = tsFilterReport ? (Array.isArray(tsFilterReport.getValue()) ? tsFilterReport.getValue() : [tsFilterReport.getValue()]).filter(Boolean) : [];
-  const fFarms = tsFilterFarm ? (Array.isArray(tsFilterFarm.getValue()) ? tsFilterFarm.getValue() : [tsFilterFarm.getValue()]).filter(Boolean) : [];
+  const fNames = tsFilterName ? tsFilterName.items : [];
+  const fPhones = tsFilterPhone ? tsFilterPhone.items.map(p => p.replace(/\D/g, '')) : [];
+  const fReps = tsFilterReport ? tsFilterReport.items : [];
+  const fFarms = tsFilterFarm ? tsFilterFarm.items : [];
 
   return currentContacts.filter(c => {
     if (excludeFilter !== 'farm' && fFarms.length > 0 && !fFarms.includes(c.farm_key)) return false;
@@ -496,7 +501,11 @@ function getFilteredContacts(excludeFilter = null) {
   });
 }
 
+let isUpdatingTable = false;
+
 function renderContactsTable() {
+  if (isUpdatingTable) return;
+  isUpdatingTable = true;
   const filtered = getFilteredContacts();
 
   // Render Thead
@@ -511,39 +520,35 @@ function renderContactsTable() {
   document.getElementById('contacts-thead').innerHTML = theadHtml;
   document.getElementById('new-contact-thead').innerHTML = theadHtml;
 
+  // Helper to safely update TomSelect options
+  const updateTS = (ts, newOptions) => {
+    if(!ts) return;
+    const currentVal = ts.items.slice(); // copy array
+    ts.clearOptions();
+    newOptions.forEach(opt => ts.addOption(opt));
+    // Ensure selected values remain even if they no longer match the filter
+    currentVal.forEach(v => {
+      if (!newOptions.some(o => o.value === v)) {
+        ts.addOption({value: v, text: v});
+      }
+    });
+    ts.setValue(currentVal, true);
+  };
+
   // Update TomSelect for names
   const namesContacts = getFilteredContacts('name');
   const uniqueNames = [...new Set(namesContacts.map(c => c.contact_name))].sort((a,b) => a.localeCompare(b));
-  if(tsFilterName) {
-    const currentNameVal = tsFilterName.getValue();
-    tsFilterName.clearOptions();
-    uniqueNames.forEach(n => tsFilterName.addOption({value: n, text: n}));
-    tsFilterName.setValue(currentNameVal, true);
-  }
+  updateTS(tsFilterName, uniqueNames.map(n => ({value: n, text: n})));
 
   // Update TomSelect for phones
   const phonesContacts = getFilteredContacts('phone');
   const uniquePhones = [...new Set(phonesContacts.map(c => c.phone_number))];
-  if(tsFilterPhone) {
-    const currentPhoneVal = tsFilterPhone.getValue();
-    tsFilterPhone.clearOptions();
-    uniquePhones.forEach(p => tsFilterPhone.addOption({value: formatPhone(p), text: formatPhone(p)}));
-    tsFilterPhone.setValue(currentPhoneVal, true);
-  }
+  updateTS(tsFilterPhone, uniquePhones.map(p => ({value: formatPhone(p), text: formatPhone(p)})));
   
   // Update TomSelect for farms
   const farmsContacts = getFilteredContacts('farm');
   const uniqueFarms = [...new Set(farmsContacts.map(c => c.farm_key))];
-  if(tsFilterFarm) {
-    const currentFarmVal = tsFilterFarm.getValue();
-    tsFilterFarm.clearOptions();
-    farmsList.forEach(f => {
-       if (uniqueFarms.includes(f.farm_key)) {
-         tsFilterFarm.addOption({value: f.farm_key, text: f.display_name});
-       }
-    });
-    tsFilterFarm.setValue(currentFarmVal, true);
-  }
+  updateTS(tsFilterFarm, farmsList.filter(f => uniqueFarms.includes(f.farm_key)).map(f => ({value: f.farm_key, text: f.display_name})));
 
   // Render New Contact Tbody ONLY if empty to preserve TomSelect instance
   if(document.getElementById('new-contact-tbody').innerHTML.trim() === '') {
@@ -560,13 +565,15 @@ function renderContactsTable() {
         <button class="btn-delete" style="background:#555;" onclick="document.getElementById('new-contact-container').style.display='none';">Cancelar</button>
       </td></tr>`;
     document.getElementById('new-contact-tbody').innerHTML = newContactRowHtml;
-    tsCFarm = new TomSelect("#c_farm", { plugins: ['remove_button'], create: false });
+    tsCFarm = new TomSelect("#c_farm", { plugins: ['remove_button'], create: false, hideSelected: true });
   } else {
     // If it exists, we just need to update the options in c_farm
     if(tsCFarm) {
+       const currentVal = tsCFarm.items.slice();
        tsCFarm.clearOptions();
        tsCFarm.addOption({value: 'todas', text: 'Todas as Fazendas'});
        farmsList.forEach(f => tsCFarm.addOption({value: f.farm_key, text: f.display_name}));
+       tsCFarm.setValue(currentVal, true);
     }
   }
 
@@ -595,6 +602,8 @@ function renderContactsTable() {
     </tr>`;
     return rowHtml;
   }).join('');
+  
+  isUpdatingTable = false;
 }
 
 function editContact(farmKey, phone, name, type, notes) {
