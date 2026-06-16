@@ -32,17 +32,17 @@
   th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); color: var(--text); }
   th { font-weight: bold; color: var(--muted); }
   
-  .ts-control { background: var(--bg) !important; border: 1px solid var(--border) !important; border-radius: 8px !important; color: var(--text) !important; padding: 10px 12px !important; font-family: inherit; font-size: 0.9rem; }
+  .ts-control { background: var(--bg) !important; border: 1px solid var(--border) !important; border-radius: 8px !important; color: var(--text) !important; padding: 10px 12px !important; font-family: inherit; font-size: 0.9rem; padding-right: 35px !important; }
   .ts-dropdown { background: var(--panel) !important; border: 1px solid var(--border) !important; color: var(--text) !important; border-radius: 8px; box-shadow: 0 6px 16px rgba(0,0,0,0.2); }
   .ts-dropdown .option { padding: 10px 12px; cursor: pointer; color: var(--text); white-space: nowrap; font-size: 0.9rem; }
   .ts-dropdown .option:hover, .ts-dropdown .active { background: var(--primary) !important; color: #fff !important; }
   .ts-control input { color: var(--text) !important; font-family: inherit; font-size: 0.9rem; }
-  .ts-wrapper.multi .ts-control { display: flex; flex-wrap: nowrap; overflow-x: auto; max-height: 42px; padding-right: 30px !important; }
+  .ts-wrapper.multi .ts-control { display: flex; flex-wrap: nowrap; overflow-x: auto; max-height: 42px; }
   .ts-wrapper.multi .ts-control::-webkit-scrollbar { height: 4px; }
   .ts-wrapper.multi .ts-control::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
-  .ts-wrapper.multi .ts-control > div { background: var(--primary) !important; color: #fff !important; border-radius: 6px; border:none; padding: 4px 8px; margin: 2px; white-space: nowrap; }
+  .ts-wrapper.multi .ts-control > div.item { background: var(--primary) !important; color: #fff !important; border-radius: 6px; border:none; padding: 4px 8px; margin: 2px; white-space: nowrap; }
   .ts-wrapper.plugin-remove_button .item .remove { border-left: 1px solid rgba(255,255,255,0.2); padding: 0 6px; margin-left: 6px; }
-  .ts-wrapper.plugin-clear_button .clear-button { color: var(--text) !important; font-size: 18px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; z-index: 10; opacity: 0.7; }
+  .ts-wrapper.plugin-clear_button .clear-button { background: transparent !important; color: var(--text) !important; font-size: 20px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; z-index: 10; opacity: 0.5; width: auto !important; height: auto !important; border: none !important; padding: 0 !important; margin: 0 !important; }
   .ts-wrapper.plugin-clear_button .clear-button:hover { opacity: 1; color: #ff6b6b !important; }
   .ts-wrapper { min-width: 200px; }
 </style>
@@ -133,8 +133,8 @@
     </div>
 
     <div style="margin-bottom:15px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-      <select id="filter_name" multiple onchange="renderContactsTable()" placeholder="Filtrar Nome..."></select>
-      <select id="filter_phone" multiple onchange="renderContactsTable()" placeholder="Filtrar Telefone..."></select>
+      <select id="filter_name" multiple onchange="renderContactsTable()" placeholder="Todos os Nomes"></select>
+      <select id="filter_phone" multiple onchange="renderContactsTable()" placeholder="Todos os Telefones"></select>
       <select id="filter_farm" multiple onchange="renderContactsTable()" placeholder="Todas as Fazendas"></select>
       <select id="filter_report" multiple onchange="renderContactsTable()" placeholder="Todos os Relatórios"></select>
       <button onclick="clearContactFilters()" class="btn-submit" style="background:#555; padding:8px 12px;">Limpar Filtros</button>
@@ -264,8 +264,8 @@ async function initAdminPanel() {
   ALL_REPORTS.forEach(r => tsFilterReport.addOption({value: r, text: REPORT_LABELS[r]}));
 
   tsFilterFarm = new TomSelect("#filter_farm", { plugins: ['remove_button', 'clear_button'], create: false, placeholder: "Todas as Fazendas", hideSelected: true });
-  tsFilterPhone = new TomSelect("#filter_phone", { plugins: ['remove_button', 'clear_button'], create: true, placeholder: "Filtrar Telefone...", hideSelected: true });
-  tsFilterName = new TomSelect("#filter_name", { plugins: ['remove_button', 'clear_button'], create: true, placeholder: "Filtrar Nome...", hideSelected: true });
+  tsFilterPhone = new TomSelect("#filter_phone", { plugins: ['remove_button', 'clear_button'], create: true, placeholder: "Todos os Telefones", hideSelected: true });
+  tsFilterName = new TomSelect("#filter_name", { plugins: ['remove_button', 'clear_button'], create: true, placeholder: "Todos os Nomes", hideSelected: true });
 
   await loadFarms();
   await loadContacts();
