@@ -710,6 +710,8 @@ async function executeSaveContactSilent(payload) {
     const dataPut = await resPut.json();
     if(!dataPut.success) {
       throw new Error(dataPut.error);
+    }
+  }
 }
 
 async function deleteContact(farmKey, phone) {
