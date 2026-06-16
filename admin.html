@@ -8,7 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
 <style>
   body { padding: 40px; background: var(--bg); display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
-  .admin-wrap { width: 100%; max-width: 1600px; background: var(--panel); border: 1px solid var(--border); border-radius: 18px; padding: 32px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+  .admin-wrap { width: 100%; max-width: 98%; background: var(--panel); border: 1px solid var(--border); border-radius: 18px; padding: 32px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
   .farm-card { background: var(--bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 16px; }
   .farm-name { font-weight: 800; font-size: 1.2rem; color: var(--text); font-family: 'Outfit', sans-serif; }
   .farm-info { color: var(--muted); font-size: 0.95rem; margin-top: 6px; }
@@ -30,7 +30,7 @@
   
   table { width: 100%; border-collapse: collapse; margin-top: 20px; }
   th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); color: var(--text); }
-  th { font-weight: bold; color: var(--muted); }
+  th { font-weight: bold; color: var(--muted); white-space: nowrap; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
   
   .ts-control { background: var(--bg) !important; border: 1px solid var(--border) !important; border-radius: 8px !important; color: var(--text) !important; padding: 10px 12px !important; font-family: inherit; font-size: 0.9rem; padding-right: 35px !important; }
   .ts-dropdown { background: var(--panel) !important; border: 1px solid var(--border) !important; color: var(--text) !important; border-radius: 8px; box-shadow: 0 6px 16px rgba(0,0,0,0.2); }
@@ -57,6 +57,13 @@
     right: 40px; /* space for clear button */
   }
   .ts-wrapper.multi.has-items.focus .ts-control::before { opacity: 0.3; }
+  
+  /* FORCE HIDE NATIVE PLACEHOLDER TO PREVENT OVERLAP */
+  .ts-wrapper.multi.has-items .ts-control input::placeholder {
+    color: transparent !important;
+    opacity: 0 !important;
+  }
+
   .ts-wrapper.plugin-clear_button .clear-button { background: transparent !important; color: var(--text) !important; font-size: 20px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; z-index: 10; opacity: 0.5; width: auto !important; height: auto !important; border: none !important; padding: 0 !important; margin: 0 !important; }
   .ts-wrapper.plugin-clear_button .clear-button:hover { opacity: 1; color: #ff6b6b !important; }
   .ts-wrapper { min-width: 200px; }
@@ -141,7 +148,7 @@
       <button class="btn-submit" onclick="document.getElementById('new-contact-container').style.display='block'">+ Novo Contato</button>
     </div>
     
-    <div id="new-contact-container" style="display:none; margin-top: 20px; margin-bottom: 20px; overflow-x: auto; background:rgba(41, 128, 185, 0.1); border:2px solid var(--primary); border-radius:12px; padding: 15px;">
+    <div id="new-contact-container" style="display:none; margin-top: 20px; margin-bottom: 20px; background:rgba(41, 128, 185, 0.1); border:2px solid var(--primary); border-radius:12px; padding: 15px;">
       <h4 style="margin: 0 0 10px 0; color: var(--text);">➕ Novo Contato</h4>
       <table style="font-size: 0.85rem; margin:0;">
         <thead id="new-contact-thead">
