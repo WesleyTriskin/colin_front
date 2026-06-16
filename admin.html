@@ -128,10 +128,10 @@
     </div>
 
     <div style="margin-bottom:15px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-      <select id="filter_name" onchange="loadContacts()" placeholder="Filtrar Nome..."><option value="">Todos os Nomes</option></select>
-      <select id="filter_phone" onchange="loadContacts()" placeholder="Filtrar Telefone..."><option value="">Todos os Telefones</option></select>
-      <select id="filter_farm" onchange="loadContacts()" placeholder="Todas as Fazendas"><option value="">Todas as Fazendas</option></select>
-      <select id="filter_report" onchange="loadContacts()" placeholder="Todos os Relatórios"><option value="">Todos os Relatórios</option></select>
+      <select id="filter_name" multiple onchange="renderContactsTable()" placeholder="Filtrar Nome..."></select>
+      <select id="filter_phone" multiple onchange="renderContactsTable()" placeholder="Filtrar Telefone..."></select>
+      <select id="filter_farm" multiple onchange="renderContactsTable()" placeholder="Todas as Fazendas"></select>
+      <select id="filter_report" multiple onchange="renderContactsTable()" placeholder="Todos os Relatórios"></select>
       <button onclick="clearContactFilters()" class="btn-submit" style="background:#555; padding:8px 12px;">Limpar Filtros</button>
     </div>
     <div style="overflow-x: auto;">
@@ -255,13 +255,15 @@ function maskPhone(input) {
 }
 
 async function initAdminPanel() {
-  // Populate reports dropdown
-  const filterRep = document.getElementById('filter_report');
-  ALL_REPORTS.forEach(r => {
-    filterRep.innerHTML += `<option value="${r}">${REPORT_LABELS[r]}</option>`;
-  });
-  tsFilterReport = new TomSelect("#filter_report", { create: false, placeholder: "Todos os Relatórios" });
+  tsFilterReport = new TomSelect("#filter_report", { plugins: ['remove_button', 'clear_button'], create: false, placeholder: "Todos os Relatórios" });
+  ALL_REPORTS.forEach(r => tsFilterReport.addOption({value: r, text: REPORT_LABELS[r]}));
+
+  tsFilterFarm = new TomSelect("#filter_farm", { plugins: ['remove_button', 'clear_button'], create: false, placeholder: "Todas as Fazendas" });
+  tsFilterPhone = new TomSelect("#filter_phone", { plugins: ['remove_button', 'clear_button'], create: true, placeholder: "Filtrar Telefone..." });
+  tsFilterName = new TomSelect("#filter_name", { plugins: ['remove_button', 'clear_button'], create: true, placeholder: "Filtrar Nome..." });
+
   await loadFarms();
+  await loadContacts();
 }
 
 async function setStatus(farmKey, phone, status) {
@@ -334,10 +336,7 @@ function editFarm(key, name, phone) {
 }
 
 function updateFarmsSelects() {
-  const filterOpts = '<option value="">Todas as Fazendas</option>' + farmsList.map(f => `<option value="${f.farm_key}">${f.display_name}</option>`).join('');
-  document.getElementById('filter_farm').innerHTML = filterOpts;
-  if(tsFilterFarm) { tsFilterFarm.destroy(); }
-  tsFilterFarm = new TomSelect("#filter_farm", { create: false, placeholder: "Todas as Fazendas" });
+  // Select options are dynamically updated in renderContactsTable
 }
 
 async function saveFarm(e) {
@@ -389,19 +388,16 @@ async function deleteFarm(farmKey) {
 // ---------------- CONTACTS CRUD ----------------
 
 function clearContactFilters() {
-  if(tsFilterName) tsFilterName.setValue('');
-  if(tsFilterPhone) tsFilterPhone.setValue('');
-  if(tsFilterFarm) tsFilterFarm.setValue('');
-  if(tsFilterReport) tsFilterReport.setValue('');
-  loadContacts();
+  if(tsFilterName) tsFilterName.setValue([], true);
+  if(tsFilterPhone) tsFilterPhone.setValue([], true);
+  if(tsFilterFarm) tsFilterFarm.setValue([], true);
+  if(tsFilterReport) tsFilterReport.setValue([], true);
+  renderContactsTable();
 }
 
 async function loadContacts() {
-  const fk = document.getElementById('filter_farm').value;
-  let url = API_URL + '/farms/contacts';
-  if(fk) url += '?farm_key=' + fk;
   try {
-    const res = await fetch(url);
+    const res = await fetch(API_URL + '/farms/contacts');
     if(res.ok) {
       const data = await res.json();
       const rawContacts = data.contacts || [];
@@ -419,7 +415,7 @@ async function loadContacts() {
         }
       });
       currentContacts = Object.values(grouped);
-      renderContactsTable(fk);
+      renderContactsTable();
     }
   } catch(e) { console.error(e); }
 }
@@ -468,7 +464,7 @@ async function toggleReport(farmKey, phone, reportName, isChecked, contactName, 
       if(contact) {
         contact.report_type = newReportType;
       }
-      renderContactsTable(document.getElementById('filter_farm').value);
+      renderContactsTable();
     } else {
       showModal("Erro", "Erro ao salvar relatório: " + data.error);
       loadContacts(); // reload to revert checkbox
@@ -479,19 +475,29 @@ async function toggleReport(farmKey, phone, reportName, isChecked, contactName, 
   }
 }
 
-function renderContactsTable(selectedFarm) {
-  // Filters
-  const fName = tsFilterName ? tsFilterName.getValue().toLowerCase() : '';
-  const fPhone = tsFilterPhone ? tsFilterPhone.getValue().replace(/\D/g, '') : '';
-  const fRep = tsFilterReport ? tsFilterReport.getValue() : '';
+function getFilteredContacts(excludeFilter = null) {
+  const fNames = tsFilterName ? (Array.isArray(tsFilterName.getValue()) ? tsFilterName.getValue() : [tsFilterName.getValue()]).filter(Boolean) : [];
+  const fPhones = tsFilterPhone ? (Array.isArray(tsFilterPhone.getValue()) ? tsFilterPhone.getValue() : [tsFilterPhone.getValue()]).filter(Boolean).map(p => p.replace(/\D/g, '')) : [];
+  const fReps = tsFilterReport ? (Array.isArray(tsFilterReport.getValue()) ? tsFilterReport.getValue() : [tsFilterReport.getValue()]).filter(Boolean) : [];
+  const fFarms = tsFilterFarm ? (Array.isArray(tsFilterFarm.getValue()) ? tsFilterFarm.getValue() : [tsFilterFarm.getValue()]).filter(Boolean) : [];
 
-  const filtered = currentContacts.filter(c => {
-    if (selectedFarm && c.farm_key !== selectedFarm) return false;
-    if (fName && !c.contact_name.toLowerCase().includes(fName)) return false;
-    if (fPhone && !c.phone_number.includes(fPhone)) return false;
-    if (fRep && !hasReport(c.report_type, fRep)) return false;
+  return currentContacts.filter(c => {
+    if (excludeFilter !== 'farm' && fFarms.length > 0 && !fFarms.includes(c.farm_key)) return false;
+    if (excludeFilter !== 'name' && fNames.length > 0) {
+      if (!fNames.some(n => c.contact_name.toLowerCase().includes(n.toLowerCase()))) return false;
+    }
+    if (excludeFilter !== 'phone' && fPhones.length > 0) {
+      if (!fPhones.some(p => c.phone_number.includes(p))) return false;
+    }
+    if (excludeFilter !== 'report' && fReps.length > 0) {
+      if (!fReps.some(r => hasReport(c.report_type, r))) return false;
+    }
     return true;
   });
+}
+
+function renderContactsTable() {
+  const filtered = getFilteredContacts();
 
   // Render Thead
   let theadHtml = `<tr>
@@ -506,22 +512,38 @@ function renderContactsTable(selectedFarm) {
   document.getElementById('new-contact-thead').innerHTML = theadHtml;
 
   // Update TomSelect for names
-  const uniqueNames = [...new Set(currentContacts.map(c => c.contact_name))].sort((a,b) => a.localeCompare(b));
-  const nameSelect = document.getElementById('filter_name');
-  let currentNameVal = tsFilterName ? tsFilterName.getValue() : '';
-  if(tsFilterName) tsFilterName.destroy();
-  nameSelect.innerHTML = '<option value="">Todos os Nomes</option>' + uniqueNames.map(n => `<option value="${n}">${n}</option>`).join('');
-  tsFilterName = new TomSelect("#filter_name", { create: true, placeholder: "Filtrar Nome..." });
-  if(currentNameVal) tsFilterName.setValue(currentNameVal, true);
+  const namesContacts = getFilteredContacts('name');
+  const uniqueNames = [...new Set(namesContacts.map(c => c.contact_name))].sort((a,b) => a.localeCompare(b));
+  if(tsFilterName) {
+    const currentNameVal = tsFilterName.getValue();
+    tsFilterName.clearOptions();
+    uniqueNames.forEach(n => tsFilterName.addOption({value: n, text: n}));
+    tsFilterName.setValue(currentNameVal, true);
+  }
 
   // Update TomSelect for phones
-  const uniquePhones = [...new Set(currentContacts.map(c => c.phone_number))];
-  const phoneSelect = document.getElementById('filter_phone');
-  let currentPhoneVal = tsFilterPhone ? tsFilterPhone.getValue() : '';
-  if(tsFilterPhone) tsFilterPhone.destroy();
-  phoneSelect.innerHTML = '<option value="">Todos os Telefones</option>' + uniquePhones.map(p => `<option value="${formatPhone(p)}">${formatPhone(p)}</option>`).join('');
-  tsFilterPhone = new TomSelect("#filter_phone", { create: true, placeholder: "Filtrar Telefone..." });
-  if(currentPhoneVal) tsFilterPhone.setValue(currentPhoneVal, true);
+  const phonesContacts = getFilteredContacts('phone');
+  const uniquePhones = [...new Set(phonesContacts.map(c => c.phone_number))];
+  if(tsFilterPhone) {
+    const currentPhoneVal = tsFilterPhone.getValue();
+    tsFilterPhone.clearOptions();
+    uniquePhones.forEach(p => tsFilterPhone.addOption({value: formatPhone(p), text: formatPhone(p)}));
+    tsFilterPhone.setValue(currentPhoneVal, true);
+  }
+  
+  // Update TomSelect for farms
+  const farmsContacts = getFilteredContacts('farm');
+  const uniqueFarms = [...new Set(farmsContacts.map(c => c.farm_key))];
+  if(tsFilterFarm) {
+    const currentFarmVal = tsFilterFarm.getValue();
+    tsFilterFarm.clearOptions();
+    farmsList.forEach(f => {
+       if (uniqueFarms.includes(f.farm_key)) {
+         tsFilterFarm.addOption({value: f.farm_key, text: f.display_name});
+       }
+    });
+    tsFilterFarm.setValue(currentFarmVal, true);
+  }
 
   // Render New Contact Tbody ONLY if empty to preserve TomSelect instance
   if(document.getElementById('new-contact-tbody').innerHTML.trim() === '') {
@@ -550,7 +572,7 @@ function renderContactsTable(selectedFarm) {
 
   // Render Tbody
   document.getElementById('contacts-table-body').innerHTML = filtered.map(c => {
-    let fk = c.farm_key || selectedFarm || 'N/D';
+    let fk = c.farm_key || 'N/D';
     fk = formatFarmName(fk, fk);
     let rowHtml = `
     <tr>
