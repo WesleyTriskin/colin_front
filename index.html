@@ -1701,9 +1701,12 @@ function forceCheckEndpoints() {
 }
 
 function hardReload() {
-  localStorage.removeItem('cached_allLogs');
-  localStorage.removeItem('cached_farmAlertsCache');
-  window.location.href = window.location.pathname + '?refresh=' + new Date().getTime();
+  const url = 'chrome://net-internals/#dns';
+  navigator.clipboard.writeText(url).then(() => {
+    alert("Como o Google Chrome bloqueia que sites limpem a rede automaticamente, copiamos o comando para você!\n\nPASSO A PASSO:\n1. Abra uma nova aba (+)\n2. Cole (Ctrl+V) o endereço que já está copiado e dê Enter.\n3. Clique no botão 'Clear host cache'.\n4. Volte aqui e atualize a página.");
+  }).catch(() => {
+    alert("Copie este endereço: chrome://net-internals/#dns\nCole em uma nova aba e clique em 'Clear host cache'.");
+  });
 }
 
 function backgroundHealthCheck() {
