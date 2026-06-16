@@ -106,37 +106,13 @@
       <button class="btn-submit" onclick="document.getElementById('new-contact-container').style.display='block'">+ Novo Contato</button>
     </div>
     
-    <div id="new-contact-container" style="display:none; margin-bottom: 20px;">
-      <form id="contactForm" onsubmit="saveContact(event)" style="background:var(--bg); padding:20px; border-radius:12px; border:1px solid var(--border);">
-        <div style="display:flex; gap:15px; flex-wrap:wrap;">
-          <div class="form-group" style="flex:1; min-width:200px;">
-            <label>Fazenda</label>
-            <select id="c_farm" required></select>
-          </div>
-          <div class="form-group" style="flex:1; min-width:200px;">
-            <label>Nome do Contato</label>
-            <input type="text" id="c_name" required placeholder="João">
-          </div>
-          <div class="form-group" style="flex:1; min-width:200px;">
-            <label>Telefone (WhatsApp c/ DDD)</label>
-            <input type="text" id="c_phone" required placeholder="11900000000">
-          </div>
-        </div>
-        <div style="display:flex; gap:15px; flex-wrap:wrap;">
-          <div class="form-group" style="flex:1; min-width:200px;">
-            <label>Tipo de Relatório</label>
-            <input type="text" id="c_report" value="all">
-          </div>
-          <div class="form-group" style="flex:2; min-width:200px;">
-            <label>Notas</label>
-            <input type="text" id="c_notes" placeholder="Observações">
-          </div>
-        </div>
-        <div style="display:flex; gap:10px;">
-          <button type="submit" class="btn-submit">Salvar Contato</button>
-          <button type="button" class="btn-delete" style="background:#555;" onclick="document.getElementById('new-contact-container').style.display='none'; document.getElementById('contactForm').reset();">Cancelar</button>
-        </div>
-      </form>
+    <div id="new-contact-container" style="display:none; margin-bottom: 20px; overflow-x: auto; background:var(--panel); border:1px solid var(--border); border-radius:12px; padding: 10px;">
+      <table style="font-size: 0.85rem; margin:0;">
+        <thead id="new-contact-thead">
+        </thead>
+        <tbody id="new-contact-tbody">
+        </tbody>
+      </table>
     </div>
 
     <div style="margin-bottom:15px;">
@@ -176,6 +152,18 @@ function formatPhone(phone) {
   if (p.length === 11) return `+55 (${p.substring(0,2)}) ${p.substring(2,7)}-${p.substring(7)}`;
   if (p.length === 10) return `+55 (${p.substring(0,2)}) ${p.substring(2,6)}-${p.substring(6)}`;
   return `+${phone}`;
+}
+
+function maskPhone(input) {
+  let v = input.value.replace(/\D/g, '');
+  if (v.length > 11) v = v.substring(0, 11);
+  if (v.length > 2) {
+    v = '(' + v.substring(0,2) + ') ' + v.substring(2);
+  }
+  if (v.length > 10) {
+    v = v.substring(0,10) + '-' + v.substring(10);
+  }
+  input.value = v;
 }
 
 // ---------------- STATUS PANEL ----------------
@@ -253,7 +241,7 @@ function renderFarmsTable() {
 
 function updateFarmsSelects() {
   const opts = '<option value="">Selecione...</option>' + farmsList.map(f => `<option value="${f.farm_key}">${f.display_name}</option>`).join('');
-  document.getElementById('c_farm').innerHTML = opts;
+  // document.getElementById('c_farm').innerHTML = opts; // Removed since c_farm might be recreated
   const filterOpts = '<option value="">Todas as Fazendas</option>' + farmsList.map(f => `<option value="${f.farm_key}">${f.display_name}</option>`).join('');
   document.getElementById('filter_farm').innerHTML = filterOpts;
 }
@@ -322,7 +310,21 @@ async function loadContacts() {
     const res = await fetch(url);
     if(res.ok) {
       const data = await res.json();
-      currentContacts = data.contacts || [];
+      const rawContacts = data.contacts || [];
+      const grouped = {};
+      rawContacts.forEach(c => {
+        const key = c.phone_number + '_' + c.farm_key;
+        if(!grouped[key]) {
+          grouped[key] = { ...c };
+        } else {
+          if (c.report_type !== 'all' && grouped[key].report_type !== 'all') {
+             grouped[key].report_type += ',' + c.report_type;
+          } else if (c.report_type === 'all') {
+             grouped[key].report_type = 'all';
+          }
+        }
+      });
+      currentContacts = Object.values(grouped);
       renderContactsTable(fk);
     }
   } catch(e) { console.error(e); }
@@ -394,6 +396,22 @@ function renderContactsTable(selectedFarm) {
   });
   theadHtml += `<th>Ações</th></tr>`;
   document.getElementById('contacts-thead').innerHTML = theadHtml;
+  document.getElementById('new-contact-thead').innerHTML = theadHtml;
+
+  // Render New Contact Tbody
+  const opts = '<option value="">Selecione...</option>' + farmsList.map(f => `<option value="${f.farm_key}">${f.display_name}</option>`).join('');
+  let newContactRowHtml = `<tr>
+    <td><input type="text" id="c_name" required placeholder="Nome" style="width:120px; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);"></td>
+    <td><input type="text" id="c_phone" required placeholder="(11) 90000-0000" oninput="maskPhone(this)" style="width:140px; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);"></td>
+    <td><select id="c_farm" required style="width:130px; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);">${opts}</select></td>`;
+  ALL_REPORTS.forEach(r => {
+    newContactRowHtml += `<td class="checkbox-wrapper"><input type="checkbox" id="c_rep_${r}" value="${r}"></td>`;
+  });
+  newContactRowHtml += `<td>
+      <button class="btn-submit" onclick="saveNewContact()" style="padding:6px 12px; margin-right:4px;">Salvar</button>
+      <button class="btn-delete" style="background:#555;" onclick="document.getElementById('new-contact-container').style.display='none';">Cancelar</button>
+    </td></tr>`;
+  document.getElementById('new-contact-tbody').innerHTML = newContactRowHtml;
 
   // Render Tbody
   document.getElementById('contacts-table-body').innerHTML = currentContacts.map(c => {
@@ -401,7 +419,7 @@ function renderContactsTable(selectedFarm) {
     let rowHtml = `
     <tr>
       <td style="font-weight:bold;">${c.contact_name}</td>
-      <td>${c.phone_number}</td>
+      <td>${formatPhone(c.phone_number)}</td>
       <td>${fk}</td>`;
     
     ALL_REPORTS.forEach(r => {
@@ -424,29 +442,55 @@ function renderContactsTable(selectedFarm) {
 function editContact(farmKey, phone, name, type, notes) {
   document.getElementById('new-contact-container').style.display = 'block';
   if(farmKey && farmKey !== 'undefined') document.getElementById('c_farm').value = farmKey;
-  document.getElementById('c_phone').value = phone;
+  
+  // Apply mask to phone
+  let v = phone.replace(/\D/g, '');
+  if (v.startsWith('55') && v.length > 11) v = v.substring(2);
+  if(v.length > 2) v = '(' + v.substring(0,2) + ') ' + v.substring(2);
+  if(v.length > 10) v = v.substring(0,10) + '-' + v.substring(10);
+  
+  document.getElementById('c_phone').value = v;
   document.getElementById('c_name').value = name;
-  document.getElementById('c_report').value = type;
-  document.getElementById('c_notes').value = notes;
+  
+  // Set checkboxes
+  ALL_REPORTS.forEach(r => {
+    const cb = document.getElementById(`c_rep_${r}`);
+    if (cb) cb.checked = hasReport(type, r);
+  });
+  
   window.scrollTo(0,0);
 }
 
-async function saveContact(e) {
-  e.preventDefault();
-  let inputPhone = document.getElementById('c_phone').value.replace(/\D/g, '');
+async function saveNewContact() {
+  const nameEl = document.getElementById('c_name');
+  const phoneEl = document.getElementById('c_phone');
+  const farmEl = document.getElementById('c_farm');
+  
+  if(!nameEl.value || !phoneEl.value || !farmEl.value) {
+    alert("Preencha Nome, Telefone e Fazenda!");
+    return;
+  }
+  
+  let inputPhone = phoneEl.value.replace(/\D/g, '');
   if (inputPhone.length > 0 && !inputPhone.startsWith('55')) {
     inputPhone = '55' + inputPhone;
   }
   
+  let selectedReports = [];
+  ALL_REPORTS.forEach(r => {
+    const cb = document.getElementById(`c_rep_${r}`);
+    if (cb && cb.checked) selectedReports.push(r);
+  });
+  const reportTypeStr = selectedReports.length === ALL_REPORTS.length ? 'all' : selectedReports.join(',');
+  
   const payload = {
-    farm_key: document.getElementById('c_farm').value,
+    farm_key: farmEl.value,
     phone_number: inputPhone,
-    contact_name: document.getElementById('c_name').value,
-    report_type: document.getElementById('c_report').value,
-    notes: document.getElementById('c_notes').value,
+    contact_name: nameEl.value,
+    report_type: reportTypeStr,
+    notes: ''
   };
-  // Tenta PUT primeiro, se falhar ou não, tenta POST (ideal era ver se existe)
-  // Como simplificação, usamos POST
+  
   try {
     const res = await fetch(API_URL + '/farms/contacts', {
       method: 'POST',
@@ -456,7 +500,13 @@ async function saveContact(e) {
     const data = await res.json();
     if(data.success) {
       alert("Contato salvo com sucesso!");
-      document.getElementById('contactForm').reset();
+      nameEl.value = '';
+      phoneEl.value = '';
+      farmEl.value = '';
+      ALL_REPORTS.forEach(r => {
+        const cb = document.getElementById(`c_rep_${r}`);
+        if(cb) cb.checked = false;
+      });
       loadContacts();
     } else {
       // Tenta PUT
@@ -468,7 +518,9 @@ async function saveContact(e) {
       const dataPut = await resPut.json();
       if(dataPut.success) {
         alert("Contato atualizado!");
-        document.getElementById('contactForm').reset();
+        nameEl.value = '';
+        phoneEl.value = '';
+        farmEl.value = '';
         loadContacts();
       } else {
         alert("Erro ao salvar: " + data.error);
