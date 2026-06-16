@@ -685,14 +685,14 @@ function renderContactsTable() {
     ALL_REPORTS.forEach(r => {
       const checked = hasReport(c.report_type, r) ? 'checked' : '';
       rowHtml += `<td class="checkbox-wrapper">
-        <input type="checkbox" ${checked} onchange="toggleReport('${fk}', '${c.phone_number}', '${r}', this.checked, '${c.contact_name}', '${c.notes || ''}', '${c.report_type}')">
+        <input type="checkbox" ${checked} onchange="toggleReport('${c.farm_key || ''}', '${c.phone_number}', '${r}', this.checked, '${c.contact_name}', '${c.notes || ''}', '${c.report_type}')">
       </td>`;
     });
       
     rowHtml += `
       <td>
-        <button class="btn-delete" style="background:var(--primary);" onclick="editContact('${fk}', '${c.phone_number}', '${c.contact_name}', '${c.report_type}', '${c.notes || ''}')">Editar</button>
-        <button class="btn-delete" onclick="deleteContact('${fk}', '${c.phone_number}')">Excluir</button>
+        <button class="btn-delete" style="background:var(--primary);" onclick="editContact('${c.farm_key || ''}', '${c.phone_number}', '${c.contact_name}', '${c.report_type}', '${c.notes || ''}')">Editar</button>
+        <button class="btn-delete" onclick="deleteContact('${c.farm_key || ''}', '${c.phone_number}')">Excluir</button>
       </td>
     </tr>`;
     return rowHtml;
