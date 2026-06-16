@@ -54,7 +54,6 @@ body.critical-error::after {
         <div class="leg-item"><span class="status-dot none"></span> Sem Número</div>
       </div>
       <div class="topbar-actions" style="display: flex; align-items: center; gap: 12px;">
-        <button class="theme-btn" id="btn-clear-cache" onclick="hardReload()" style="align-items: center; gap: 8px; font-family:'Outfit',sans-serif; white-space: nowrap; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.5); color: #ef4444;" title="Limpa o cache e força a reconexão com a API (Útil ao trocar de VPN)">🔁 Limpar Cache</button>
         <button class="theme-btn" id="btn-test-api" onclick="forceCheckEndpoints()" style="display: none; align-items: center; gap: 8px; font-family:'Outfit',sans-serif; white-space: nowrap;">🔄 Testar Endpoints</button>
         <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">🌙 Modo Escuro</button>
       </div>
@@ -1700,14 +1699,7 @@ function forceCheckEndpoints() {
   buildEndpoints(true);
 }
 
-function hardReload() {
-  const url = 'chrome://net-internals/#dns';
-  navigator.clipboard.writeText(url).then(() => {
-    alert("Como o Google Chrome bloqueia que sites limpem a rede automaticamente, copiamos o comando para você!\n\nPASSO A PASSO:\n1. Abra uma nova aba (+)\n2. Cole (Ctrl+V) o endereço que já está copiado e dê Enter.\n3. Clique no botão 'Clear host cache'.\n4. Volte aqui e atualize a página.");
-  }).catch(() => {
-    alert("Copie este endereço: chrome://net-internals/#dns\nCole em uma nova aba e clique em 'Clear host cache'.");
-  });
-}
+
 
 function backgroundHealthCheck() {
   ENDPOINTS.forEach(ep => {
