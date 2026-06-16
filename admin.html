@@ -57,7 +57,7 @@
       <button class="btn-submit" onclick="document.getElementById('new-farm-container').style.display='block'">+ Nova Fazenda</button>
     </div>
     
-    <div id="new-farm-container" style="display:none; margin-bottom: 20px; overflow-x: auto; background:rgba(41, 128, 185, 0.1); border:2px solid var(--primary); border-radius:12px; padding: 15px;">
+    <div id="new-farm-container" style="display:none; margin-top: 20px; margin-bottom: 20px; overflow-x: auto; background:rgba(41, 128, 185, 0.1); border:2px solid var(--primary); border-radius:12px; padding: 15px;">
       <h4 style="margin: 0 0 10px 0; color: var(--text);">➕ Nova Fazenda</h4>
       <table style="font-size: 0.85rem; margin:0;">
         <thead>
@@ -106,7 +106,7 @@
       <button class="btn-submit" onclick="document.getElementById('new-contact-container').style.display='block'">+ Novo Contato</button>
     </div>
     
-    <div id="new-contact-container" style="display:none; margin-bottom: 20px; overflow-x: auto; background:rgba(41, 128, 185, 0.1); border:2px solid var(--primary); border-radius:12px; padding: 15px;">
+    <div id="new-contact-container" style="display:none; margin-top: 20px; margin-bottom: 20px; overflow-x: auto; background:rgba(41, 128, 185, 0.1); border:2px solid var(--primary); border-radius:12px; padding: 15px;">
       <h4 style="margin: 0 0 10px 0; color: var(--text);">➕ Novo Contato</h4>
       <table style="font-size: 0.85rem; margin:0;">
         <thead id="new-contact-thead">
@@ -135,6 +135,22 @@
         <tbody id="contacts-table-body">
         </tbody>
       </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Confirmação Múltiplas Fazendas -->
+<div id="confirm-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center;">
+  <div style="background:var(--panel); padding:30px; border-radius:12px; max-width:400px; border:1px solid var(--border);">
+    <h3 style="margin-top:0; color:var(--primary);">Adicionar para TODAS as Fazendas</h3>
+    <p style="color:var(--text); font-size:0.95rem;">Tem certeza que quer acrescentar este contato para <strong>todas</strong> as fazendas? É crítico que um cliente não receba dados de outro.</p>
+    <label style="display:flex; align-items:center; gap:10px; margin-top:20px; cursor:pointer; color:var(--text);">
+      <input type="checkbox" id="confirm-all-checkbox" style="width:20px; height:20px; accent-color:var(--primary);" onchange="document.getElementById('btn-confirm-all').disabled = !this.checked">
+      Li o aviso e quero prosseguir
+    </label>
+    <div style="display:flex; gap:10px; margin-top:20px; justify-content:flex-end;">
+      <button class="btn-delete" style="background:#555;" onclick="closeConfirmModal()">Cancelar</button>
+      <button id="btn-confirm-all" class="btn-submit" disabled onclick="confirmSaveAll()">OK</button>
     </div>
   </div>
 </div>
@@ -470,7 +486,7 @@ function renderContactsTable(selectedFarm) {
   let newContactRowHtml = `<tr>
     <td><input type="text" id="c_name" required placeholder="Nome" style="width:120px; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);"></td>
     <td><input type="text" id="c_phone" required placeholder="(11) 90000-0000" oninput="maskPhone(this)" style="width:140px; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);"></td>
-    <td><select id="c_farm" required style="width:130px; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);">${opts}</select></td>`;
+    <td><select id="c_farm" required style="width:160px; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);">${opts}</select></td>`;
   ALL_REPORTS.forEach(r => {
     newContactRowHtml += `<td class="checkbox-wrapper"><input type="checkbox" id="c_rep_${r}" value="${r}"></td>`;
   });
@@ -551,6 +567,13 @@ async function saveNewContact() {
   });
   const reportTypeStr = selectedReports.length === ALL_REPORTS.length ? 'all' : selectedReports.join(',');
   
+  // Check duplicate phone
+  const existing = currentContacts.find(c => c.phone_number === inputPhone);
+  if (existing) {
+    alert(`Esse telefone já está cadastrado para o contato "${existing.contact_name}". Por favor, edite-o na tabela abaixo.`);
+    return;
+  }
+  
   const basePayload = {
     phone_number: inputPhone,
     contact_name: nameEl.value,
@@ -559,37 +582,53 @@ async function saveNewContact() {
   };
   
   if (farmEl.value === 'todas') {
-    if(!confirm("Tem certeza que quer acrescentar para TODAS as fazendas? É importante que um não receba dados do outro.")) return;
-    
-    let hasError = false;
-    for (const f of farmsList) {
-       const payload = { ...basePayload, farm_key: f.farm_key };
-       try {
-         await fetch(API_URL + '/farms/contacts', {
-           method: 'POST',
-           headers: {'Content-Type': 'application/json'},
-           body: JSON.stringify(payload)
-         });
-       } catch(e) { hasError = true; }
-    }
-    
-    if(hasError) alert("Algumas inserções falharam.");
-    else alert("Contatos adicionados em massa com sucesso!");
-    
-    nameEl.value = '';
-    phoneEl.value = '';
-    farmEl.value = '';
-    ALL_REPORTS.forEach(r => {
-      const cb = document.getElementById(`c_rep_${r}`);
-      if(cb) cb.checked = false;
-    });
-    document.getElementById('new-contact-container').style.display = 'none';
-    loadContacts();
+    window.pendingAllPayload = basePayload;
+    document.getElementById('confirm-all-checkbox').checked = false;
+    document.getElementById('btn-confirm-all').disabled = true;
+    document.getElementById('confirm-modal').style.display = 'flex';
     return;
   }
   
-  const payload = { ...basePayload, farm_key: farmEl.value };
+  await executeSaveContact({ ...basePayload, farm_key: farmEl.value });
+}
+
+function closeConfirmModal() {
+  document.getElementById('confirm-modal').style.display = 'none';
+  window.pendingAllPayload = null;
+}
+
+async function confirmSaveAll() {
+  closeConfirmModal();
+  const basePayload = window.pendingAllPayload;
+  if (!basePayload) return;
   
+  let hasError = false;
+  for (const f of farmsList) {
+     const payload = { ...basePayload, farm_key: f.farm_key };
+     try {
+       await fetch(API_URL + '/farms/contacts', {
+         method: 'POST',
+         headers: {'Content-Type': 'application/json'},
+         body: JSON.stringify(payload)
+       });
+     } catch(e) { hasError = true; }
+  }
+  
+  if(hasError) alert("Algumas inserções falharam.");
+  else alert("Contatos adicionados em massa com sucesso!");
+  
+  document.getElementById('c_name').value = '';
+  document.getElementById('c_phone').value = '';
+  document.getElementById('c_farm').value = '';
+  ALL_REPORTS.forEach(r => {
+    const cb = document.getElementById(`c_rep_${r}`);
+    if(cb) cb.checked = false;
+  });
+  document.getElementById('new-contact-container').style.display = 'none';
+  loadContacts();
+}
+
+async function executeSaveContact(payload) {
   try {
     const res = await fetch(API_URL + '/farms/contacts', {
       method: 'POST',
@@ -599,9 +638,9 @@ async function saveNewContact() {
     const data = await res.json();
     if(data.success) {
       alert("Contato salvo com sucesso!");
-      nameEl.value = '';
-      phoneEl.value = '';
-      farmEl.value = '';
+      document.getElementById('c_name').value = '';
+      document.getElementById('c_phone').value = '';
+      document.getElementById('c_farm').value = '';
       ALL_REPORTS.forEach(r => {
         const cb = document.getElementById(`c_rep_${r}`);
         if(cb) cb.checked = false;
@@ -618,9 +657,9 @@ async function saveNewContact() {
       const dataPut = await resPut.json();
       if(dataPut.success) {
         alert("Contato atualizado!");
-        nameEl.value = '';
-        phoneEl.value = '';
-        farmEl.value = '';
+        document.getElementById('c_name').value = '';
+        document.getElementById('c_phone').value = '';
+        document.getElementById('c_farm').value = '';
         document.getElementById('new-contact-container').style.display = 'none';
         loadContacts();
       } else {
