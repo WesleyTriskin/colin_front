@@ -145,6 +145,21 @@ function switchTab(tabId) {
   if(tabId === 'contacts') loadContacts();
 }
 
+const FARM_NAME_OVERRIDES = {
+  'gjacana': 'Jaçanã',
+  'g_jacana': 'Jaçanã',
+  'apoloni': 'Boa Sorte',
+  'ws': 'Wilson Sierra',
+  'fazenda_ws': 'Wilson Sierra',
+  'pitini': 'Pitini'
+};
+
+function formatFarmName(key, currentName) {
+  const k = key.toLowerCase();
+  if (FARM_NAME_OVERRIDES[k]) return FARM_NAME_OVERRIDES[k];
+  return currentName;
+}
+
 function formatPhone(phone) {
   if (!phone) return 'Sem número';
   let p = phone.toString().replace(/\D/g, '');
@@ -216,7 +231,10 @@ async function loadFarms() {
     const res = await fetch(API_URL + '/farms/overview');
     if(res.ok) {
       const data = await res.json();
-      farmsList = data.farms || [];
+      farmsList = (data.farms || []).map(f => {
+        f.display_name = formatFarmName(f.farm_key, f.display_name);
+        return f;
+      });
       renderFarmsTable();
       updateFarmsSelects();
     }
@@ -288,7 +306,7 @@ async function deleteFarm(farmKey) {
 // ---------------- CONTACTS CRUD ----------------
 
 let currentContacts = [];
-const ALL_REPORTS = ['d1', 'daily', 'hour', 'margin', 'market', 'idle', 'productivity', 'revenue', 'top_rates', 'irrigacao'];
+const ALL_REPORTS = ['d1', 'daily', 'hour', 'margin', 'market', 'idle', 'productivity', 'revenue', 'top_rates', 'irrigacao', 'interativo'];
 const REPORT_LABELS = {
   'd1': 'D1',
   'daily': 'Daily',
@@ -299,7 +317,8 @@ const REPORT_LABELS = {
   'productivity': 'Produtividade',
   'revenue': 'Faturamento',
   'top_rates': 'Top Rates',
-  'irrigacao': 'Irrigação'
+  'irrigacao': 'Irrigação',
+  'interativo': 'Interativo'
 };
 
 async function loadContacts() {
@@ -415,7 +434,8 @@ function renderContactsTable(selectedFarm) {
 
   // Render Tbody
   document.getElementById('contacts-table-body').innerHTML = currentContacts.map(c => {
-    const fk = c.farm_key || selectedFarm || 'N/D';
+    let fk = c.farm_key || selectedFarm || 'N/D';
+    fk = formatFarmName(fk, fk);
     let rowHtml = `
     <tr>
       <td style="font-weight:bold;">${c.contact_name}</td>
