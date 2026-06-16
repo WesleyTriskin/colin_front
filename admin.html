@@ -2,40 +2,170 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Status - DataAgrin</title>
+<title>Admin - DataAgrin</title>
 <link rel="stylesheet" href="style.css?v=3">
 <style>
   body { padding: 40px; background: var(--bg); display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
-  .admin-wrap { width: 100%; max-width: 800px; background: var(--panel); border: 1px solid var(--border); border-radius: 18px; padding: 32px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+  .admin-wrap { width: 100%; max-width: 1000px; background: var(--panel); border: 1px solid var(--border); border-radius: 18px; padding: 32px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
   .farm-card { background: var(--bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 16px; }
   .farm-name { font-weight: 800; font-size: 1.2rem; color: var(--text); font-family: 'Outfit', sans-serif; }
   .farm-info { color: var(--muted); font-size: 0.95rem; margin-top: 6px; }
+  
+  .tabs { display: flex; gap: 10px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+  .tab { padding: 8px 16px; cursor: pointer; border-radius: 8px; font-weight: 600; color: var(--muted); transition: 0.3s; }
+  .tab.active { background: var(--primary); color: #fff; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  .form-group { margin-bottom: 15px; }
+  .form-group label { display: block; margin-bottom: 5px; color: var(--text); font-size: 0.9rem; }
+  .form-group input, .form-group select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
+  .btn-submit { background: var(--primary); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+  .btn-delete { background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; }
+  
+  table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+  th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); color: var(--text); }
+  th { font-weight: bold; color: var(--muted); }
 </style>
 </head>
 <body class="dark">
 
 <div class="admin-wrap">
-  <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+  <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
     <div>
-      <h1 style="font-family:'Outfit',sans-serif; color:var(--text); font-size:2rem; margin:0;">Painel de Status</h1>
-      <p style="color:var(--muted); margin-top: 4px;">Gerenciamento interno de telefones das fazendas.</p>
+      <h1 style="font-family:'Outfit',sans-serif; color:var(--text); font-size:2rem; margin:0;">Painel de Administração</h1>
+      <p style="color:var(--muted); margin-top: 4px;">Gerenciamento de Fazendas e Contatos WhatsApp.</p>
     </div>
     <div style="display:flex; gap:12px;">
       <button class="theme-btn" onclick="window.location.href='/'">⬅ Voltar ao Painel</button>
       <button class="theme-btn" onclick="document.body.classList.toggle('light')">☀️ Tema</button>
     </div>
   </div>
-  
-  <div id="admin-list">Carregando...</div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('status')">Status (Básico)</div>
+    <div class="tab" onclick="switchTab('farms')">Fazendas (CRUD)</div>
+    <div class="tab" onclick="switchTab('contacts')">Contatos (CRUD)</div>
+  </div>
+
+  <!-- ABA: Status -->
+  <div id="tab-status" class="tab-content active">
+    <div id="admin-list">Carregando...</div>
+  </div>
+
+  <!-- ABA: Fazendas -->
+  <div id="tab-farms" class="tab-content">
+    <h3>Nova Fazenda</h3>
+    <form id="farmForm" onsubmit="saveFarm(event)" style="background:var(--bg); padding:20px; border-radius:12px; border:1px solid var(--border);">
+      <div style="display:flex; gap:15px; flex-wrap:wrap;">
+        <div class="form-group" style="flex:1; min-width:200px;">
+          <label>Chave da Fazenda (farm_key)</label>
+          <input type="text" id="f_key" required placeholder="ex: nova_fazenda">
+        </div>
+        <div class="form-group" style="flex:1; min-width:200px;">
+          <label>Nome de Exibição</label>
+          <input type="text" id="f_name" required placeholder="Fazenda Nova">
+        </div>
+      </div>
+      <div style="display:flex; gap:15px; flex-wrap:wrap;">
+        <div class="form-group" style="flex:1; min-width:200px;">
+          <label>DB Source (opcional)</label>
+          <input type="text" id="f_db" placeholder="ex: api_db">
+        </div>
+        <div class="form-group" style="flex:1; min-width:200px;">
+          <label>Schema Source (opcional)</label>
+          <input type="text" id="f_schema" placeholder="ex: public">
+        </div>
+        <div class="form-group" style="flex:1; min-width:200px;">
+          <label>Telefone</label>
+          <input type="text" id="f_phone" placeholder="5511900000000">
+        </div>
+      </div>
+      <button type="submit" class="btn-submit">Adicionar Fazenda</button>
+    </form>
+
+    <h3 style="margin-top:40px;">Fazendas Cadastradas</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Key</th>
+          <th>Nome</th>
+          <th>Telefone</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="farms-table-body">
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ABA: Contatos -->
+  <div id="tab-contacts" class="tab-content">
+    <h3>Novo Contato</h3>
+    <form id="contactForm" onsubmit="saveContact(event)" style="background:var(--bg); padding:20px; border-radius:12px; border:1px solid var(--border);">
+      <div style="display:flex; gap:15px; flex-wrap:wrap;">
+        <div class="form-group" style="flex:1; min-width:200px;">
+          <label>Fazenda</label>
+          <select id="c_farm" required></select>
+        </div>
+        <div class="form-group" style="flex:1; min-width:200px;">
+          <label>Nome do Contato</label>
+          <input type="text" id="c_name" required placeholder="João">
+        </div>
+        <div class="form-group" style="flex:1; min-width:200px;">
+          <label>Telefone (WhatsApp)</label>
+          <input type="text" id="c_phone" required placeholder="5511900000000">
+        </div>
+      </div>
+      <div style="display:flex; gap:15px; flex-wrap:wrap;">
+        <div class="form-group" style="flex:1; min-width:200px;">
+          <label>Tipo de Relatório</label>
+          <input type="text" id="c_report" value="all">
+        </div>
+        <div class="form-group" style="flex:2; min-width:200px;">
+          <label>Notas</label>
+          <input type="text" id="c_notes" placeholder="Observações">
+        </div>
+      </div>
+      <button type="submit" class="btn-submit">Adicionar / Atualizar Contato</button>
+    </form>
+
+    <h3 style="margin-top:40px;">Contatos Cadastrados</h3>
+    <div style="margin-bottom:15px;">
+      <select id="filter_farm" onchange="loadContacts()" style="padding:8px; border-radius:6px; background:var(--bg); color:var(--text); border:1px solid var(--border);">
+        <option value="">Todas as Fazendas</option>
+      </select>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Telefone</th>
+          <th>Fazenda</th>
+          <th>Relatório</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="contacts-table-body">
+      </tbody>
+    </table>
+  </div>
 </div>
 
 <script>
-const FARMS_DATA = [
-  { key: 'gjacana', name: 'Fazenda Jaçanã', wallet: '5683', phone: '5511963065709' },
-  { key: 'fazenda_ws', name: 'Fazenda WS', wallet: '5702', phone: '5511962678385' },
-  { key: 'apoloni', name: 'Apoloni', wallet: '6153', phone: '554431011106' },
-  { key: 'piccini', name: 'Piccini', wallet: '6084', phone: '556631840130' }
-];
+const API_URL = 'https://prx.triskin.tech/api_data/v1';
+let farmsList = [];
+
+function switchTab(tabId) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-' + tabId).classList.add('active');
+  
+  if(tabId === 'farms') loadFarms();
+  if(tabId === 'contacts') loadContacts();
+}
 
 function formatPhone(phone) {
   if (!phone) return 'Sem número';
@@ -46,74 +176,234 @@ function formatPhone(phone) {
   return phone;
 }
 
-function getFarmStatus(key) {
-  return localStorage.getItem('farm_status_' + key) || 'ok';
-}
+// ---------------- STATUS PANEL ----------------
 
 async function initAdminPanel() {
-  // Sincroniza do banco
-  try {
-    const res = await fetch('https://prx.triskin.tech/api_data/v1/farms/overview');
-    if(res.ok) {
-      const raw = await res.json();
-      const dbFarms = Array.isArray(raw) ? raw : (raw.farms || []);
-      dbFarms.forEach(f => {
-        if(f.status) localStorage.setItem('farm_status_' + f.farm_key, f.status);
-      });
-    }
-  } catch(e) {
-    console.error("Erro ao puxar dados", e);
-  }
-  renderAdminPanel();
+  await loadFarms();
+  renderStatusPanel();
 }
 
-function renderAdminPanel() {
-  const html = FARMS_DATA.map(f => {
-    const st = getFarmStatus(f.key);
+function renderStatusPanel() {
+  const html = farmsList.map(f => {
+    const st = f.status || 'ok';
     return `
       <div class="farm-card">
         <div>
-          <div class="farm-name">${f.name}</div>
-          <div class="farm-info">Carteira ${f.wallet} • ${formatPhone(f.phone)}</div>
+          <div class="farm-name">${f.display_name}</div>
+          <div class="farm-info">Key: ${f.farm_key} • ${formatPhone(f.phone_number)}</div>
         </div>
         <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-          <button class="sbtn ok ${st==='ok'?'on':''}" onclick="setStatus('${f.key}', '${f.phone}', 'ok')">🟢 OK</button>
-          <button class="sbtn inc ${st==='inc'?'on':''}" onclick="setStatus('${f.key}', '${f.phone}', 'inc')">🟡 Instável</button>
-          <button class="sbtn ban ${st==='ban'?'on':''}" onclick="setStatus('${f.key}', '${f.phone}', 'ban')">🔴 Banido</button>
-          <button class="sbtn none ${st==='none'?'on':''}" onclick="setStatus('${f.key}', '${f.phone}', 'none')">⚪ Sem Número</button>
+          <button class="sbtn ok ${st==='ok'?'on':''}" onclick="setStatus('${f.farm_key}', '${f.phone_number}', 'ok')">🟢 OK</button>
+          <button class="sbtn inc ${st==='inc'?'on':''}" onclick="setStatus('${f.farm_key}', '${f.phone_number}', 'inc')">🟡 Instável</button>
+          <button class="sbtn ban ${st==='ban'?'on':''}" onclick="setStatus('${f.farm_key}', '${f.phone_number}', 'ban')">🔴 Banido</button>
+          <button class="sbtn none ${st==='none'?'on':''}" onclick="setStatus('${f.farm_key}', '${f.phone_number}', 'none')">⚪ Sem Número</button>
         </div>
       </div>
     `;
   }).join('');
-  document.getElementById('admin-list').innerHTML = html;
+  document.getElementById('admin-list').innerHTML = html || 'Nenhuma fazenda encontrada.';
 }
 
 async function setStatus(farmKey, phone, status) {
-  // Atualiza UI temporariamente para visual rápido
-  localStorage.setItem('farm_status_' + farmKey, status);
-  renderAdminPanel();
-  
-  // Atualiza DB
   try {
-    const res = await fetch('https://prx.triskin.tech/api_data/v1/farms/status', {
+    const res = await fetch(API_URL + '/farms/status', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        farm_key: farmKey,
-        phone_number: phone,
-        status: status
-      })
+      body: JSON.stringify({ farm_key: farmKey, phone_number: phone, status: status })
     });
     const data = await res.json();
-    if(!data.success) {
-      alert("Erro ao salvar no banco: " + (data.error || data.detail || "Resposta inválida"));
-    }
+    if(!data.success) alert("Erro ao salvar: " + data.error);
+    else initAdminPanel();
   } catch(e) {
-    alert("Erro de conexão com a API.");
+    alert("Erro de conexão.");
   }
 }
 
-// Render initial
+// ---------------- FARMS CRUD ----------------
+
+async function loadFarms() {
+  try {
+    const res = await fetch(API_URL + '/farms/overview');
+    if(res.ok) {
+      const data = await res.json();
+      farmsList = data.farms || [];
+      renderFarmsTable();
+      updateFarmsSelects();
+    }
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+function renderFarmsTable() {
+  document.getElementById('farms-table-body').innerHTML = farmsList.map(f => `
+    <tr>
+      <td>${f.farm_key}</td>
+      <td>${f.display_name}</td>
+      <td>${formatPhone(f.phone_number)}</td>
+      <td>${f.status}</td>
+      <td>
+        <button class="btn-delete" onclick="deleteFarm('${f.farm_key}')">Excluir</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function updateFarmsSelects() {
+  const opts = '<option value="">Selecione...</option>' + farmsList.map(f => `<option value="${f.farm_key}">${f.display_name}</option>`).join('');
+  document.getElementById('c_farm').innerHTML = opts;
+  const filterOpts = '<option value="">Todas as Fazendas</option>' + farmsList.map(f => `<option value="${f.farm_key}">${f.display_name}</option>`).join('');
+  document.getElementById('filter_farm').innerHTML = filterOpts;
+}
+
+async function saveFarm(e) {
+  e.preventDefault();
+  const payload = {
+    farm_key: document.getElementById('f_key').value,
+    display_name: document.getElementById('f_name').value,
+    source_db_name: document.getElementById('f_db').value,
+    source_schema: document.getElementById('f_schema').value,
+    phone_number: document.getElementById('f_phone').value,
+  };
+  try {
+    const res = await fetch(API_URL + '/farms', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if(data.success) {
+      alert("Fazenda cadastrada!");
+      document.getElementById('farmForm').reset();
+      loadFarms();
+      renderStatusPanel();
+    } else alert("Erro: " + data.error);
+  } catch(e) { alert("Erro de rede."); }
+}
+
+async function deleteFarm(farmKey) {
+  if(!confirm(`Excluir fazenda ${farmKey}?`)) return;
+  try {
+    const res = await fetch(API_URL + '/farms', {
+      method: 'DELETE',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ farm_key: farmKey })
+    });
+    const data = await res.json();
+    if(data.success) { loadFarms(); renderStatusPanel(); }
+    else alert("Erro: " + data.error);
+  } catch(e) { alert("Erro de rede."); }
+}
+
+// ---------------- CONTACTS CRUD ----------------
+
+let currentContacts = [];
+
+async function loadContacts() {
+  const fk = document.getElementById('filter_farm').value;
+  let url = API_URL + '/farms/contacts';
+  if(fk) url += '?farm_key=' + fk;
+  try {
+    const res = await fetch(url);
+    if(res.ok) {
+      const data = await res.json();
+      currentContacts = data.contacts || [];
+      // attach farm_key to contacts since endpoint doesn't return it when querying all
+      // wait, the endpoint returns: phone_number, contact_name, report_type, notes
+      // Let's assume the endpoint now needs to return farm_key as well for "all"
+      // Since it might not, if fk is provided we know it, otherwise it might be blank
+      // I will just display them
+      renderContactsTable(fk);
+    }
+  } catch(e) { console.error(e); }
+}
+
+function renderContactsTable(selectedFarm) {
+  document.getElementById('contacts-table-body').innerHTML = currentContacts.map(c => {
+    const fk = c.farm_key || selectedFarm || 'N/D';
+    return `
+    <tr>
+      <td>${c.contact_name}</td>
+      <td>${c.phone_number}</td>
+      <td>${fk}</td>
+      <td>${c.report_type}</td>
+      <td>
+        <button class="btn-delete" style="background:var(--primary);" onclick="editContact('${fk}', '${c.phone_number}', '${c.contact_name}', '${c.report_type}', '${c.notes || ''}')">Editar</button>
+        <button class="btn-delete" onclick="deleteContact('${fk}', '${c.phone_number}')">Excluir</button>
+      </td>
+    </tr>
+  `}).join('');
+}
+
+function editContact(farmKey, phone, name, type, notes) {
+  if(farmKey && farmKey !== 'undefined') document.getElementById('c_farm').value = farmKey;
+  document.getElementById('c_phone').value = phone;
+  document.getElementById('c_name').value = name;
+  document.getElementById('c_report').value = type;
+  document.getElementById('c_notes').value = notes;
+  window.scrollTo(0,0);
+}
+
+async function saveContact(e) {
+  e.preventDefault();
+  const payload = {
+    farm_key: document.getElementById('c_farm').value,
+    phone_number: document.getElementById('c_phone').value,
+    contact_name: document.getElementById('c_name').value,
+    report_type: document.getElementById('c_report').value,
+    notes: document.getElementById('c_notes').value,
+  };
+  // Tenta PUT primeiro, se falhar ou não, tenta POST (ideal era ver se existe)
+  // Como simplificação, usamos POST
+  try {
+    const res = await fetch(API_URL + '/farms/contacts', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if(data.success) {
+      alert("Contato salvo com sucesso!");
+      document.getElementById('contactForm').reset();
+      loadContacts();
+    } else {
+      // Tenta PUT
+      const resPut = await fetch(API_URL + '/farms/contacts', {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+      });
+      const dataPut = await resPut.json();
+      if(dataPut.success) {
+        alert("Contato atualizado!");
+        document.getElementById('contactForm').reset();
+        loadContacts();
+      } else {
+        alert("Erro ao salvar: " + data.error);
+      }
+    }
+  } catch(e) { alert("Erro de rede."); }
+}
+
+async function deleteContact(farmKey, phone) {
+  if(!farmKey || farmKey === 'undefined') {
+    farmKey = prompt("Qual a farm_key deste contato?");
+    if(!farmKey) return;
+  }
+  if(!confirm(`Excluir contato ${phone}?`)) return;
+  try {
+    const res = await fetch(API_URL + '/farms/contacts', {
+      method: 'DELETE',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ farm_key: farmKey, phone_number: phone })
+    });
+    const data = await res.json();
+    if(data.success) loadContacts();
+    else alert("Erro: " + data.error);
+  } catch(e) { alert("Erro de rede."); }
+}
+
+// Init
 initAdminPanel();
 </script>
 
