@@ -38,9 +38,25 @@
   .ts-dropdown .option:hover, .ts-dropdown .active { background: var(--primary) !important; color: #fff !important; }
   .ts-control input { color: var(--text) !important; font-family: inherit; font-size: 0.9rem; }
   .ts-wrapper.multi .ts-control { display: flex; flex-wrap: nowrap; overflow: hidden; max-height: 42px; padding-right: 35px !important; }
-  .ts-wrapper.multi .ts-control > div.item { background: transparent !important; color: var(--text) !important; border: none; padding: 0; margin: 0 4px 0 0; white-space: nowrap; font-size: 0.9rem; }
-  .ts-wrapper.multi .ts-control > div.item::after { content: ","; }
-  .ts-wrapper.multi .ts-control > div.item:last-of-type::after { content: ""; }
+  
+  /* HIDE ALL TAGS */
+  .ts-wrapper.multi .ts-control > div.item { display: none !important; }
+  
+  /* SHOW CUSTOM TEXT ("1 selecionado", etc) */
+  .ts-wrapper.multi.has-items .ts-control::before {
+    content: attr(data-custom-placeholder);
+    color: var(--text);
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    right: 40px; /* space for clear button */
+  }
+  .ts-wrapper.multi.has-items.focus .ts-control::before { opacity: 0.3; }
   .ts-wrapper.plugin-clear_button .clear-button { background: transparent !important; color: var(--text) !important; font-size: 20px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; z-index: 10; opacity: 0.5; width: auto !important; height: auto !important; border: none !important; padding: 0 !important; margin: 0 !important; }
   .ts-wrapper.plugin-clear_button .clear-button:hover { opacity: 1; color: #ff6b6b !important; }
   .ts-wrapper { min-width: 200px; }
@@ -291,11 +307,29 @@ TomSelect.define('ctrl_click_multi', function() {
   });
 });
 
+TomSelect.define('custom_display', function() {
+  const self = this;
+  const updateDisplay = () => {
+    const items = self.items.filter(i => i !== 'all');
+    let text = '';
+    if (items.length === 1) {
+      const opt = self.options[items[0]];
+      text = opt ? opt.text : items[0];
+    } else if (items.length > 1) {
+      text = items.length + ' selecionados';
+    }
+    self.control.setAttribute('data-custom-placeholder', text);
+  };
+  self.on('change', updateDisplay);
+  self.on('item_add', updateDisplay);
+  self.on('item_remove', updateDisplay);
+});
+
 async function initAdminPanel() {
-  tsFilterReport = new TomSelect("#filter_report", { plugins: ['ctrl_click_multi', 'clear_button'], create: false, placeholder: "Todos os Relatórios", hideSelected: false });
-  tsFilterFarm = new TomSelect("#filter_farm", { plugins: ['ctrl_click_multi', 'clear_button'], create: false, placeholder: "Todas as Fazendas", hideSelected: false });
-  tsFilterPhone = new TomSelect("#filter_phone", { plugins: ['ctrl_click_multi', 'clear_button'], create: true, placeholder: "Todos os Telefones", hideSelected: false });
-  tsFilterName = new TomSelect("#filter_name", { plugins: ['ctrl_click_multi', 'clear_button'], create: true, placeholder: "Todos os Nomes", hideSelected: false });
+  tsFilterReport = new TomSelect("#filter_report", { plugins: ['ctrl_click_multi', 'custom_display', 'clear_button'], create: false, placeholder: "Todos os Relatórios", hideSelected: false });
+  tsFilterFarm = new TomSelect("#filter_farm", { plugins: ['ctrl_click_multi', 'custom_display', 'clear_button'], create: false, placeholder: "Todas as Fazendas", hideSelected: false });
+  tsFilterPhone = new TomSelect("#filter_phone", { plugins: ['ctrl_click_multi', 'custom_display', 'clear_button'], create: true, placeholder: "Todos os Telefones", hideSelected: false });
+  tsFilterName = new TomSelect("#filter_name", { plugins: ['ctrl_click_multi', 'custom_display', 'clear_button'], create: true, placeholder: "Todos os Nomes", hideSelected: false });
 
   await loadFarms();
   await loadContacts();
@@ -558,17 +592,32 @@ function renderContactsTable() {
   // Helper to safely update TomSelect options
   const updateTS = (ts, newOptions, defaultText) => {
     if(!ts) return;
-    const currentVal = ts.items.slice(); // copy array
+    const currentVal = ts.items.filter(i => i !== 'all'); // copy array
     ts.clearOptions();
-    ts.addOption({value: 'all', text: defaultText});
+    
+    // Add "Todos" ONLY if nothing else is selected
+    if (currentVal.length === 0) {
+      ts.addOption({value: 'all', text: defaultText});
+    }
+    
     newOptions.forEach(opt => ts.addOption(opt));
     // Ensure selected values remain even if they no longer match the filter
     currentVal.forEach(v => {
-      if (v !== 'all' && !newOptions.some(o => o.value === v)) {
+      if (!newOptions.some(o => o.value === v)) {
         ts.addOption({value: v, text: v});
       }
     });
     ts.setValue(currentVal, true);
+    
+    // Manually trigger custom_display logic if silent update
+    let text = '';
+    if (currentVal.length === 1) {
+      const opt = ts.options[currentVal[0]];
+      text = opt ? opt.text : currentVal[0];
+    } else if (currentVal.length > 1) {
+      text = currentVal.length + ' selecionados';
+    }
+    ts.control.setAttribute('data-custom-placeholder', text);
   };
 
   // Update TomSelect for names
