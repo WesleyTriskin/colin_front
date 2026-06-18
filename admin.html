@@ -351,7 +351,10 @@ async function setStatus(farmKey, phone, status) {
     });
     const data = await res.json();
     if(!data.success) showModal("Erro", "Erro ao salvar: " + data.error);
-    else loadFarms();
+    else {
+      localStorage.setItem('farm_status_' + farmKey, status);
+      loadFarms();
+    }
   } catch(e) {
     showModal("Erro", "Erro de conexão.");
   }
@@ -365,6 +368,7 @@ async function loadFarms() {
     if(res.ok) {
       const data = await res.json();
       farmsList = (data.farms || []).map(f => {
+        localStorage.setItem('farm_status_' + f.farm_key, f.status || 'ok');
         f.display_name = formatFarmName(f.farm_key, f.display_name);
         return f;
       });

@@ -1572,19 +1572,24 @@ function buildEndpoints(force = false){
   const cacheTimeKey = 'api_health_cache_time';
   const cacheData = localStorage.getItem(cacheKey);
   const cacheTime = localStorage.getItem(cacheTimeKey);
-  const isCacheValid = cacheData && cacheTime && (Date.now() - parseInt(cacheTime) < 30 * 60 * 1000);
+  const isCacheValid = cacheData && cacheTime && (Date.now() - parseInt(cacheTime) < 60 * 60 * 1000);
+
+  if(cacheData && !force) {
+    try {
+      const results = JSON.parse(cacheData);
+      results.forEach(res => {
+        const led = document.getElementById('led-'+res.index);
+        const lat = document.getElementById('lat-'+res.index);
+        if(led) led.className = 'led ' + res.status;
+        if(lat) {
+          lat.innerText = res.latency;
+          lat.style.color = res.latency.includes('ms') && parseInt(res.latency) > 3000 ? 'var(--yellow)' : '';
+        }
+      });
+    } catch(e){}
+  }
 
   if(isCacheValid && !force) {
-    const results = JSON.parse(cacheData);
-    results.forEach(res => {
-      const led = document.getElementById('led-'+res.index);
-      const lat = document.getElementById('lat-'+res.index);
-      if(led) led.className = 'led ' + res.status;
-      if(lat) {
-        lat.innerText = res.latency;
-        lat.style.color = res.latency.includes('ms') && parseInt(res.latency) > 3000 ? 'var(--yellow)' : '';
-      }
-    });
     updateOverviewDashboard();
     return;
   }
@@ -1598,14 +1603,16 @@ function buildEndpoints(force = false){
     btn.innerHTML = '⏳ Testando Endpoints...';
   }
 
-  // Prepara todos os leds como piscando (loading)
-  ENDPOINTS.forEach((ep, i) => {
-    if(ep.section) return;
-    const led = document.getElementById('led-'+i);
-    const lat = document.getElementById('lat-'+i);
-    if(led) led.className = 'led checking';
-    if(lat) lat.innerText = '...';
-  });
+  // Prepara todos os leds como piscando (loading) se não houver cache
+  if (!cacheData || force) {
+    ENDPOINTS.forEach((ep, i) => {
+      if(ep.section) return;
+      const led = document.getElementById('led-'+i);
+      const lat = document.getElementById('lat-'+i);
+      if(led) led.className = 'led checking';
+      if(lat) lat.innerText = '...';
+    });
+  }
 
   const cacheResults = [];
   let completed = 0;
@@ -2217,37 +2224,10 @@ async function fetchInteractions() {
     });
     try { localStorage.setItem('colinLogs_' + activeColinFarm, JSON.stringify(colinLogs)); } catch(e){}
     
-    window.colinFirstFetchDone = window.colinFirstFetchDone || {};
-    let isFirstFetch = !window.colinFirstFetchDone[activeColinFarm];
-    window.colinFirstFetchDone[activeColinFarm] = true;
-
-    let hasNewTargetMessage = false;
-    let latestTargetName = '';
-    let latestTargetMsg = '';
-    let latestTargetPhone = '';
-
     colinLogs.forEach(log => {
       const logId = log.id || (log.created_at + log.phone);
-      if (!seenColinMsgIds.has(logId)) {
-        if (!isFirstFetch && log.event_type === 'message.received') {
-          const contactName = (log.metadata && log.metadata.contact_name) ? log.metadata.contact_name : (log.phone || '');
-          const contactNameLower = contactName.toLowerCase();
-          
-          const isTarget = TARGET_CONTACTS.some(tc => contactNameLower.includes(tc.toLowerCase()) || (log.phone && log.phone.includes(tc)));
-          if (isTarget) {
-            hasNewTargetMessage = true;
-            latestTargetName = contactName;
-            latestTargetMsg = log.text || '';
-            latestTargetPhone = log.phone;
-          }
-        }
-        seenColinMsgIds.add(logId);
-      }
+      seenColinMsgIds.add(logId);
     });
-
-    if (hasNewTargetMessage) {
-      showColinAlert(latestTargetName, latestTargetMsg, activeColinFarmName, activeColinFarm, latestTargetPhone);
-    }
 
     renderColinSidebar();
     
@@ -2575,6 +2555,25 @@ function openAvatarModal(url) {
   }, 10);
 }
 
+function fetchFarmStatuses() {
+  fetch(BASE + '/farms/overview')
+    .then(r => r.ok ? r.json() : {farms: []})
+    .then(data => {
+      if(data.farms && data.farms.length > 0) {
+        data.farms.forEach(f => localStorage.setItem('farm_status_' + f.farm_key, f.status || 'ok'));
+        loadAllFarmDots();
+        updateOverviewDashboard();
+      }
+    }).catch(()=>{});
+}
+
+window.addEventListener('storage', function(e) {
+  if (e.key && e.key.startsWith('farm_status_')) {
+    loadAllFarmDots();
+    updateOverviewDashboard();
+  }
+});
+
 // Boot
 const savedTab = localStorage.getItem('active_tab') || 'overview';
 selectFarm('gjacana','Fazenda Jaçanã','5683','5511963065709');
@@ -2595,7 +2594,14 @@ function pollGlobalColinMessages() {
         logs.forEach(log => {
           const logId = log.id || (log.created_at + log.phone);
           if (window.colinFirstFetchDone && window.colinFirstFetchDone[f.key] && !seenColinMsgIds.has(logId)) {
-            if (log.event_type === 'message.received') {
+            let isRecent = false;
+            const msgTimeStr = log.created_at || log.sent_at;
+            if (msgTimeStr) {
+                const msgTime = new Date(msgTimeStr).getTime();
+                if (!isNaN(msgTime)) isRecent = Math.abs(Date.now() - msgTime) < 5 * 60 * 1000;
+            }
+            
+            if (log.event_type === 'message.received' && isRecent) {
               const contactName = (log.metadata && log.metadata.contact_name) ? log.metadata.contact_name : (log.phone || '');
               const isTarget = TARGET_CONTACTS.some(tc => contactName.toLowerCase().includes(tc.toLowerCase()) || (log.phone && log.phone.includes(tc)));
               if (isTarget) {
@@ -2617,7 +2623,9 @@ function pollGlobalColinMessages() {
 // Atrasa a primeira verificação de background por 4 segundos após carregar
 setTimeout(() => {
   backgroundHealthCheck();
+  fetchFarmStatuses();
   setInterval(backgroundHealthCheck, 15 * 60 * 1000);
+  setInterval(fetchFarmStatuses, 60 * 1000);
   setInterval(pollGlobalColinMessages, 10000);
 }, 4000);
 async function openAgentToolsModal(reqId) {
