@@ -413,10 +413,15 @@ body.critical-error::after {
               <th style="text-align: center; min-width: 90px;">Hour</th>
               <th style="text-align: center; min-width: 90px;">Hídrico</th>
               <th style="text-align: center; min-width: 90px;">Market</th>
+              <th style="text-align: center; min-width: 90px;">Produtividade</th>
+              <th style="text-align: center; min-width: 90px;">Receita</th>
+              <th style="text-align: center; min-width: 90px;">Margem</th>
+              <th style="text-align: center; min-width: 90px;">Top Rates</th>
+              <th style="text-align: center; min-width: 90px;">Máquinas Ociosas</th>
             </tr>
           </thead>
           <tbody id="tbody">
-            <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px">Buscando logs de envio no banco de dados...</td></tr>
+            <tr><td colspan="12" style="text-align:center;color:var(--muted);padding:30px">Buscando logs de envio no banco de dados...</td></tr>
           </tbody>
         </table>
       </div>
@@ -1266,7 +1271,7 @@ function renderLogsTable() {
   });
 
   if (rows.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px">Nenhum log de disparo atende aos filtros selecionados.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;color:var(--muted);padding:30px">Nenhum log de disparo atende aos filtros selecionados.</td></tr>`;
     return;
   }
 
@@ -1277,23 +1282,23 @@ function renderLogsTable() {
     const name = r.name;
 
     const getColContent = (type) => {
-      if (type === 'Market') {
-        const hasMarket = r.logs.some(l => l.message_type === 'text' && getReportType(l.message_content) === 'Market');
+      if (type === 'market') {
+        const hasMarket = r.logs.some(l => l.message_type === 'text' && (l.report_type === 'market' || getReportType(l.message_content) === 'Market'));
         if (!hasMarket) return '<span style="color:var(--muted)">—</span>';
         return `<div style="display:flex; flex-direction:column; gap:4px; align-items:center;">
-          <button class="btn-view-msg" style="width:100%; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:700; background:rgba(59,130,246,0.15); color:var(--blue); cursor:pointer;" onclick="openMessage('${phone}', '${day}', 'Market', 'text')">💬 Texto</button>
+          <button class="btn-view-msg" style="width:100%; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:700; background:rgba(59,130,246,0.15); color:var(--blue); cursor:pointer;" onclick="openMessage('${phone}', '${day}', 'market', 'text')">💬 Texto</button>
         </div>`;
       }
 
-      const textLog = r.logs.find(l => l.message_type === 'text' && getReportType(l.message_content) === type);
+      const textLog = r.logs.find(l => l.message_type === 'text' && (l.report_type === type || getReportType(l.message_content) === type));
       if (!textLog) return '<span style="color:var(--muted)">—</span>';
 
-      const imgData = findNearestImage(activeFarmLogs, textLog);
+      const imgData = r.logs.find(l => l.message_type === 'image' && (l.report_type === type || (findNearestImage(activeFarmLogs, textLog) && findNearestImage(activeFarmLogs, textLog).id === l.id)));
 
       let html = '<div style="display:flex; flex-direction:column; gap:4px; align-items:center;">';
       html += `<button class="btn-view-msg" style="width:100%; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:700; background:rgba(59,130,246,0.15); color:var(--blue); cursor:pointer;" onclick="openMessage('${phone}', '${day}', '${type}', 'text')">💬 Texto</button>`;
       
-      if (imgData) {
+      if (imgData || findNearestImage(activeFarmLogs, textLog)) {
         html += `<button class="btn-view-msg" style="width:100%; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:700; background:rgba(16,185,129,0.15); color:var(--green); cursor:pointer;" onclick="openMessage('${phone}', '${day}', '${type}', 'image')">🖼️ Mapa</button>`;
       }
       html += '</div>';
@@ -1309,11 +1314,16 @@ function renderLogsTable() {
         <td>
           <span style="font-weight:600; color:var(--primary); font-size:0.9rem;">${day}</span>
         </td>
-        <td style="text-align:center;">${getColContent('D-1')}</td>
-        <td style="text-align:center;">${getColContent('Daily')}</td>
-        <td style="text-align:center;">${getColContent('Hour')}</td>
-        <td style="text-align:center;">${getColContent('Hídrico')}</td>
-        <td style="text-align:center;">${getColContent('Market')}</td>
+        <td style="text-align:center;">${getColContent('d1')}</td>
+        <td style="text-align:center;">${getColContent('daily')}</td>
+        <td style="text-align:center;">${getColContent('hour')}</td>
+        <td style="text-align:center;">${getColContent('irrigacao')}</td>
+        <td style="text-align:center;">${getColContent('market')}</td>
+        <td style="text-align:center;">${getColContent('productivity')}</td>
+        <td style="text-align:center;">${getColContent('revenue')}</td>
+        <td style="text-align:center;">${getColContent('margin')}</td>
+        <td style="text-align:center;">${getColContent('top_rates')}</td>
+        <td style="text-align:center;">${getColContent('idle_machine')}</td>
       </tr>
     `;
   });
@@ -1343,7 +1353,7 @@ function openMessage(phone, date, type, format) {
 
   const modalBox = document.querySelector('.modal-box');
   if (modalBox) {
-    if (type === 'Market') {
+    if (type === 'market') {
       modalBox.style.maxWidth = '1300px';
     } else {
       modalBox.style.maxWidth = ''; // Restaura o padrão de 820px do CSS
@@ -1351,20 +1361,15 @@ function openMessage(phone, date, type, format) {
   }
 
   if (format === 'image') {
-    const textLog = fl.find(l => l.message_type === 'text' && getReportType(l.message_content) === type);
-    if (!textLog) {
-      alert("Relatório de texto correspondente não encontrado.");
-      return;
-    }
-    const imgData = findNearestImage(activeFarmLogs, textLog);
-    if (!imgData) {
+    const imgDataLog = fl.find(l => l.message_type === 'image' && (l.report_type === type || getReportType(l.message_content) === type));
+    if (!imgDataLog) {
       alert("Mapa correspondente não encontrado nos logs.");
       return;
     }
 
-    mTitle.innerText = `${type} — Visualização do Mapa (${date})`;
+    mTitle.innerText = `${type.toUpperCase()} — Visualização do Mapa (${date})`;
     
-    let formattedSrc = imgData;
+    let formattedSrc = imgDataLog.message_content;
     if (!formattedSrc.startsWith('data:')) {
       formattedSrc = `data:image/jpeg;base64,${formattedSrc}`;
     }
@@ -1383,8 +1388,8 @@ function openMessage(phone, date, type, format) {
     `;
     modal.classList.add('open');
   } else {
-    if (type === 'Market') {
-      const marketLogs = fl.filter(l => l.message_type === 'text' && getReportType(l.message_content) === 'Market');
+    if (type === 'market') {
+      const marketLogs = fl.filter(l => l.message_type === 'text' && (l.report_type === 'market' || getReportType(l.message_content) === 'Market'));
       if (marketLogs.length === 0) {
         alert("Mensagens de mercado não encontradas.");
         return;
@@ -1436,13 +1441,12 @@ function openMessage(phone, date, type, format) {
       mBody.innerHTML = itemsHtml;
       modal.classList.add('open');
     } else {
-      const textLog = fl.find(l => l.message_type === 'text' && getReportType(l.message_content) === type);
+      const textLog = fl.find(l => l.message_type === 'text' && (l.report_type === type || getReportType(l.message_content) === type));
       if (!textLog) {
         alert("Mensagem de texto não encontrada.");
         return;
       }
-
-      mTitle.innerText = `${type} — Mensagem do WhatsApp (${date})`;
+      mTitle.innerText = `${type.toUpperCase()} — Mensagem do WhatsApp (${date})`;
       const parsedText = parseWhatsApp(textLog.message_content || '');
 
       mBody.style.background = '#0b141a';
@@ -1881,7 +1885,7 @@ function updateOverviewDashboard() {
              Math.abs(b.time - logTime) < 5 * 60 * 1000;
     });
     
-    const type = getReportType(log.message_content);
+    const type = log.report_type || getReportType(log.message_content);
     
     if (matchingBlockIndex === -1) {
       blocks.push({
@@ -1939,11 +1943,16 @@ function updateOverviewDashboard() {
     const farmBlocks = blocks.filter(b => b.farm_key === f.key);
     const totalReports = farmBlocks.length;
 
-    const d1Count = farmBlocks.filter(b => b.types.includes('D-1')).length;
-    const dailyCount = farmBlocks.filter(b => b.types.includes('Daily')).length;
-    const hourCount = farmBlocks.filter(b => b.types.includes('Hour')).length;
-    const hidricoCount = farmBlocks.filter(b => b.types.includes('Hídrico')).length;
-    const marketCount = farmBlocks.filter(b => b.types.includes('Market')).length;
+    const d1Count = farmBlocks.filter(b => b.types.includes('D-1') || b.types.includes('d1')).length;
+    const dailyCount = farmBlocks.filter(b => b.types.includes('Daily') || b.types.includes('daily')).length;
+    const hourCount = farmBlocks.filter(b => b.types.includes('Hour') || b.types.includes('hour')).length;
+    const hidricoCount = farmBlocks.filter(b => b.types.includes('Hídrico') || b.types.includes('irrigacao')).length;
+    const marketCount = farmBlocks.filter(b => b.types.includes('Market') || b.types.includes('market')).length;
+    const prodCount = farmBlocks.filter(b => b.types.includes('productivity')).length;
+    const revCount = farmBlocks.filter(b => b.types.includes('revenue')).length;
+    const margCount = farmBlocks.filter(b => b.types.includes('margin')).length;
+    const topCount = farmBlocks.filter(b => b.types.includes('top_rates')).length;
+    const idleCount = farmBlocks.filter(b => b.types.includes('idle_machine')).length;
 
     clientBarsHtml += `
       <div style="background: var(--sub); border: 1px solid var(--border); padding: 12px; border-radius: 8px; display: flex; flex-direction: column; gap: 8px;">
@@ -1963,6 +1972,11 @@ function updateOverviewDashboard() {
           <span style="background: rgba(245,158,11,0.08); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(245,158,11,0.12);">Hour: ${hourCount}</span>
           <span style="background: rgba(59,130,246,0.08); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(59,130,246,0.12);">Hídrico: ${hidricoCount}</span>
           <span style="background: rgba(155,111,247,0.08); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(155,111,247,0.12);">Market: ${marketCount}</span>
+          <span style="background: rgba(236,72,153,0.08); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(236,72,153,0.12);">Produtividade: ${prodCount}</span>
+          <span style="background: rgba(34,197,94,0.08); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(34,197,94,0.12);">Receita: ${revCount}</span>
+          <span style="background: rgba(234,179,8,0.08); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(234,179,8,0.12);">Margem: ${margCount}</span>
+          <span style="background: rgba(14,165,233,0.08); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(14,165,233,0.12);">Top Rates: ${topCount}</span>
+          <span style="background: rgba(244,63,94,0.08); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(244,63,94,0.12);">Ociosas: ${idleCount}</span>
         </div>
       </div>
     `;
