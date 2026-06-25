@@ -1643,12 +1643,15 @@ function buildEndpoints(force = false){
 
         if(r.ok) {
           statusClass = ms > 5000 ? 'checking' : ''; // checking (amarelo) ou normal (verde)
+        } else {
+          latText = ms + 'ms (Erro ' + r.status + ')';
         }
         
         if(led) led.className = 'led ' + statusClass;
         if(lat) {
           lat.innerText = latText;
-          if(ms > 5000) lat.style.color = 'var(--yellow)';
+          if(ms > 5000 && r.ok) lat.style.color = 'var(--yellow)';
+          if(!r.ok) lat.style.color = 'var(--red)';
         }
 
         // Registra lentidão extrema no Ticker, ou remove se o endpoint voltou a responder rápido
@@ -2193,6 +2196,9 @@ function selectColinFarm(key, name) {
   fetchInteractions();
 }
 
+// Cache dos contatos ativos por fazenda (sidebar)
+let colinActiveContactsCache = {};
+
 async function fetchInteractions() {
   const token = TOKENS[activeColinFarm];
   const listContainer = document.getElementById('colin-contacts-list');
@@ -2202,70 +2208,65 @@ async function fetchInteractions() {
     listContainer.innerHTML = '<div style="padding:20px; text-align:center; color:var(--red);">Token ausente.</div>';
     return;
   }
-  
-  const cachedLogsStr = localStorage.getItem('colinLogs_' + activeColinFarm);
-  if (cachedLogsStr) {
-      try {
-          colinLogs = JSON.parse(cachedLogsStr);
-          renderColinSidebar();
-          if (activeColinPhone) openColinChat(activeColinPhone);
-      } catch (e) {}
+
+  // Renderiza do cache enquanto busca atualização
+  if (colinActiveContactsCache[activeColinFarm]) {
+    renderColinSidebar();
+    if (activeColinPhone) openColinChat(activeColinPhone);
   } else {
-      listContainer.innerHTML = '<div style="padding:20px; text-align:center; color:var(--muted);">Buscando logs...</div>';
+    listContainer.innerHTML = '<div style="padding:20px; text-align:center; color:var(--muted);">Buscando contatos...</div>';
   }
   
   try {
-    const r = await fetch(BASE + '/chat/interactions?limit=300', {headers:{'X-Encrypted-Token':token}});
+    // ✅ NOVO: busca contatos únicos (sem limite por volume de mensagens)
+    const r = await fetch(BASE + '/chat/active-contacts', {headers:{'X-Encrypted-Token':token}});
     if (!r.ok) throw new Error('API: ' + r.status);
-    colinLogs = await r.json();
-    colinLogs = colinLogs.filter(log => {
-      const p = log.phone || '';
+    const activeContacts = await r.json();
+
+    // Filtra phones válidos
+    const validContacts = activeContacts.filter(c => {
+      const p = c.phone || '';
       return p.replace(/\D/g, '').length > 5;
     });
-    try { localStorage.setItem('colinLogs_' + activeColinFarm, JSON.stringify(colinLogs)); } catch(e){}
-    
-    colinLogs.forEach(log => {
-      const logId = log.id || (log.created_at + log.phone);
-      seenColinMsgIds.add(logId);
-    });
 
-    renderColinSidebar();
-    
+    // Converte para formato compatível com colinLogs para renderColinSidebar
+    // Cada contato vira um "log sintético" com os dados da última interação
+    colinLogs = validContacts.map(c => ({
+      phone: c.phone,
+      created_at: c.last_interaction,
+      text: c.last_text || '',
+      event_type: c.last_event_type || 'message.received',
+      metadata: c.last_metadata || null,
+      _is_contact_summary: true  // marca como resumo, não como log completo
+    }));
+
+    colinActiveContactsCache[activeColinFarm] = colinLogs;
+
+    // Carrega nomes dos contatos em paralelo
     if (!window.farmContactsCache) window.farmContactsCache = {};
     if (!window.farmContactsCache[activeColinFarm]) {
-        // Tenta a rota local /api/contacts, se falhar ou retornar erro, tenta a rota de prod
-        fetch(`/api/contacts?farm_key=${activeColinFarm}`)
-          .then(cr => cr.json())
-          .catch(() => fetch(BASE + `/farms/contacts?farm_key=${activeColinFarm}`).then(r => r.json()))
-          .then(cData => {
-             if (cData && cData.error) {
-                 return fetch(BASE + `/farms/contacts?farm_key=${activeColinFarm}`).then(r => r.json());
-             }
-             return cData;
-          })
-          .then(cData => {
-             window.farmContactsCache[activeColinFarm] = {};
-             let arr = [];
-             if (Array.isArray(cData)) arr = cData;
-             else if (cData && Array.isArray(cData.contacts)) arr = cData.contacts;
-             
-             arr.forEach(c => {
-                if(c.phone_number) {
-                  let cleanP = String(c.phone_number).replace(/\D/g, '');
-                  if (cleanP.startsWith('55') && cleanP.length >= 12) cleanP = cleanP.substring(2);
-                  window.farmContactsCache[activeColinFarm][cleanP] = {
-                      contact_name: c.contact_name,
-                      photo_url: c.photo_url || null
-                  };
-                }
-             });
-             renderColinSidebar();
-          }).catch(ce => console.warn("Erro contatos", ce));
+      fetch(BASE + '/chat/contacts', {headers:{'X-Encrypted-Token':token}})
+        .then(cr => cr.ok ? cr.json() : [])
+        .then(cData => {
+          window.farmContactsCache[activeColinFarm] = {};
+          const arr = Array.isArray(cData) ? cData : (cData && Array.isArray(cData.contacts) ? cData.contacts : []);
+          arr.forEach(c => {
+            if (c.phone_number) {
+              let cleanP = String(c.phone_number).replace(/\D/g, '');
+              if (cleanP.startsWith('55') && cleanP.length >= 12) cleanP = cleanP.substring(2);
+              window.farmContactsCache[activeColinFarm][cleanP] = {
+                contact_name: c.contact_name,
+                photo_url: c.photo_url || null
+              };
+            }
+          });
+          renderColinSidebar();
+        }).catch(ce => console.warn('Erro contatos', ce));
     }
-    
-    if (activeColinPhone) {
-      openColinChat(activeColinPhone);
-    }
+
+    renderColinSidebar();
+    if (activeColinPhone) openColinChat(activeColinPhone);
+
   } catch (e) {
     console.error(e);
     listContainer.innerHTML = '<div style="padding:20px; text-align:center; color:var(--red);">Erro: ' + e.message + '</div>';
@@ -2396,7 +2397,26 @@ function renderColinSidebar() {
 }
 
 
-function openColinChat(phone) {
+// Cache do histórico de chat por phone
+let colinChatHistoryCache = {};
+
+async function _loadColinChatHistory(phone) {
+  const token = TOKENS[activeColinFarm];
+  const chatArea = document.getElementById('colin-chat-messages');
+  if (chatArea) chatArea.innerHTML = '<div style="text-align:center; color:var(--muted); padding:40px; margin-top:20vh;">Carregando histórico...</div>';
+
+  try {
+    const r = await fetch(BASE + `/chat/interactions?phone=${encodeURIComponent(phone)}&limit=200`, {headers:{'X-Encrypted-Token':token}});
+    if (!r.ok) throw new Error('API: ' + r.status);
+    const history = await r.json();
+    colinChatHistoryCache[activeColinFarm + '_' + phone] = history;
+    openColinChat(phone, false);
+  } catch(e) {
+    if (chatArea) chatArea.innerHTML = `<div style="text-align:center; color:var(--red); padding:40px; margin-top:20vh;">Erro ao carregar histórico: ${e.message}</div>`;
+  }
+}
+
+function openColinChat(phone, keepScroll = false) {
   activeColinPhone = phone;
   
   // Atualiza sidebar ativa
@@ -2404,7 +2424,15 @@ function openColinChat(phone) {
   const cItem = document.getElementById('contact-' + phone);
   if(cItem) cItem.classList.add('active');
 
-  const items = colinLogs.filter(i => (i.phone || 'Desconhecido') === phone);
+  // ✅ NOVO: se estamos usando o novo modo (contact summaries), busca histórico por phone
+  const usingNewMode = colinLogs.length > 0 && colinLogs[0]._is_contact_summary;
+  if (usingNewMode && !colinChatHistoryCache[activeColinFarm + '_' + phone]) {
+    _loadColinChatHistory(phone);
+    return;
+  }
+
+  const cachedHistory = colinChatHistoryCache[activeColinFarm + '_' + phone];
+  const items = cachedHistory || colinLogs.filter(i => (i.phone || 'Desconhecido') === phone);
   items.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
   
   const cleanPRaw = phone ? phone.replace(/\D/g, '') : '';
@@ -2442,6 +2470,10 @@ function openColinChat(phone) {
   
   const chatArea = document.getElementById('colin-chat-messages');
   let html = '';
+  
+  if (items.length >= 10) {
+      html += `<div style="text-align:center; padding: 10px; margin-bottom: 10px;"><button id="btn-load-more-colin" class="theme-btn" onclick="loadMoreColinChat('${phone}')" style="font-size:0.8rem; padding: 6px 12px; cursor: pointer;">⬆️ Carregar mensagens anteriores</button></div>`;
+  }
   
   // Agrupar tools pelo request_id (usando colinLogs inteiro pois os eventos de tools não tem telefone atrelado)
   window.agentToolsCache = {};
@@ -2492,8 +2524,56 @@ function openColinChat(phone) {
   if (!html) html = '<div style="text-align: center; color: var(--muted); padding: 40px; margin-top: 20vh;">Nenhuma mensagem processada para exibir.</div>';
   
   chatArea.innerHTML = html;
-  chatArea.scrollTop = chatArea.scrollHeight;
+  if (!keepScroll) {
+      chatArea.scrollTop = chatArea.scrollHeight;
+  }
 }
+
+async function loadMoreColinChat(phone) {
+    const cacheKey = activeColinFarm + '_' + phone;
+    const cachedHistory = colinChatHistoryCache[cacheKey] || colinLogs.filter(i => (i.phone || 'Desconhecido') === phone);
+    const offset = cachedHistory.length;
+    const token = TOKENS[activeColinFarm];
+    const btn = document.getElementById('btn-load-more-colin');
+    if (btn) btn.innerText = "Carregando...";
+
+    try {
+        const r = await fetch(BASE + `/chat/interactions?phone=${encodeURIComponent(phone)}&limit=50&offset=${offset}`, {headers:{'X-Encrypted-Token':token}});
+        if (!r.ok) throw new Error('API: ' + r.status);
+        const newLogs = await r.json();
+        
+        if (newLogs.length === 0) {
+            if (btn) {
+                btn.innerText = "Fim do histórico.";
+                btn.disabled = true;
+                btn.style.opacity = "0.5";
+            }
+            return;
+        }
+
+        // Atualiza o cache correto
+        if (colinChatHistoryCache[cacheKey]) {
+            colinChatHistoryCache[cacheKey] = colinChatHistoryCache[cacheKey].concat(newLogs);
+        } else {
+            colinLogs = colinLogs.concat(newLogs);
+        }
+        
+        const chatArea = document.getElementById('colin-chat-messages');
+        const oldHeight = chatArea.scrollHeight;
+        
+        openColinChat(phone, true);
+        
+        setTimeout(() => {
+            const newHeight = chatArea.scrollHeight;
+            chatArea.scrollTop = newHeight - oldHeight;
+        }, 10);
+        
+    } catch(e) {
+        console.error(e);
+        if (btn) btn.innerText = "Erro ao carregar";
+    }
+}
+
 
 function openAvatarModal(url) {
   let modal = document.getElementById('avatar-modal');
