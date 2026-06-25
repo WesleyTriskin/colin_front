@@ -982,15 +982,17 @@ async function fetchLogs(){
     if (farm !== targetFarm) return;
 
     const fl = logs.filter(l => l.farm_key === targetFarm);
-    const find = kw => fl.find(l => l.message_type==='text' && l.message_content.includes(kw));
+    const findByType = (type) => fl.find(l => (l.report_type === type || getReportType(l.message_content) === type) && l.message_type === 'text');
 
-    const d1txt    = find('RELATÓRIO OPERACIONAL');
-    const dailytxt = find('FECHAMENTO DIÁRIO');
-    const hourtxt  = find('RELATÓRIO HORÁRIO');
-    const hidrtxt  = find('balanço hídrico') || find('Balanço Hídrico') || find('AOOO PARCEIRO');
-    const cotqtxt  = find('COTAÇÕES DO DIA');
-    const notixtxt = find('Síntese Geral');
-    const ecotxt   = find('Economia & Política') || find('Economia &amp; Política');
+    const d1txt    = findByType('d1') || fl.find(l => l.message_type === 'text' && getReportType(l.message_content) === 'D-1');
+    const dailytxt = findByType('daily') || fl.find(l => l.message_type === 'text' && getReportType(l.message_content) === 'Daily');
+    const hourtxt  = findByType('hour') || fl.find(l => l.message_type === 'text' && getReportType(l.message_content) === 'Hour');
+    const hidrtxt  = findByType('irrigacao') || fl.find(l => l.message_type === 'text' && getReportType(l.message_content) === 'Hídrico');
+    
+    const marketLogs = fl.filter(l => (l.report_type === 'market' || getReportType(l.message_content) === 'Market') && l.message_type === 'text');
+    const cotqtxt  = marketLogs.find(l => l.message_content.toUpperCase().includes('COTAÇÕES'));
+    const notixtxt = marketLogs.find(l => l.message_content.toUpperCase().includes('SÍNTESE'));
+    const ecotxt   = marketLogs.find(l => l.message_content.toUpperCase().includes('ECONOMIA'));
 
     const apply = (key, log) => {
       const msgEl = document.getElementById('msg-'+key);
@@ -1034,10 +1036,16 @@ async function fetchLogs(){
     apply('noticias', notixtxt);
     apply('economia', ecotxt);
 
-    setImg('img-d1',     d1txt    ? findNearestImage(fl, d1txt)    : null);
-    setImg('img-daily',  dailytxt ? findNearestImage(fl, dailytxt) : null);
-    setImg('img-hour',   hourtxt  ? findNearestImage(fl, hourtxt)  : null);
-    setImg('img-hidrico',hidrtxt  ? findNearestImage(fl, hidrtxt)  : null);
+    const getImgFor = (type, txtLog) => {
+      const imgLog = fl.find(l => (l.report_type === type || getReportType(l.message_content) === type) && l.message_type === 'image');
+      if (imgLog) return imgLog.message_content.startsWith('data:') ? imgLog.message_content : `data:image/jpeg;base64,${imgLog.message_content}`;
+      return txtLog ? findNearestImage(fl, txtLog) : null;
+    };
+
+    setImg('img-d1',     getImgFor('d1', d1txt));
+    setImg('img-daily',  getImgFor('daily', dailytxt));
+    setImg('img-hour',   getImgFor('hour', hourtxt));
+    setImg('img-hidrico',getImgFor('irrigacao', hidrtxt));
   };
 
   // Se não tem token, exibe mensagem apropriada
