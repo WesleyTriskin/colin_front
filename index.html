@@ -55,6 +55,7 @@ body.critical-error::after {
       </div>
       <div class="topbar-actions" style="display: flex; align-items: center; gap: 12px;">
         <button class="theme-btn" id="btn-test-api" onclick="forceCheckEndpoints()" style="display: none; align-items: center; gap: 8px; font-family:'Outfit',sans-serif; white-space: nowrap;">🔄 Testar Endpoints</button>
+        <button class="theme-btn" id="api-env-btn" onclick="toggleApiEnv()" style="font-family:'Outfit',sans-serif; white-space: nowrap; display: flex; align-items: center; gap: 8px; font-weight: 500;"></button>
         <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">🌙 Modo Escuro</button>
       </div>
     </header>
@@ -314,7 +315,7 @@ body.critical-error::after {
           <span class="badge" id="time-d1">—</span>
         </div>
         <div class="card-body">
-          <div class="imgbox"><img id="img-d1" src="" alt="D-1" onerror="this.src='https://via.placeholder.com/600x420?text=Sem+Imagem'"></div>
+          <div class="imgbox"><img id="img-d1" src="" alt="D-1" onerror="this.src=SVG_PLACEHOLDER"></div>
           <div class="msgbox" id="msg-d1">Carregando...</div>
         </div>
       </div>
@@ -326,7 +327,7 @@ body.critical-error::after {
           <span class="badge" id="time-daily">—</span>
         </div>
         <div class="card-body">
-          <div class="imgbox"><img id="img-daily" src="" alt="Daily" onerror="this.src='https://via.placeholder.com/600x420?text=Sem+Imagem'"></div>
+          <div class="imgbox"><img id="img-daily" src="" alt="Daily" onerror="this.src=SVG_PLACEHOLDER"></div>
           <div class="msgbox" id="msg-daily">Carregando...</div>
         </div>
       </div>
@@ -338,7 +339,7 @@ body.critical-error::after {
           <span class="badge" id="time-hour">—</span>
         </div>
         <div class="card-body">
-          <div class="imgbox"><img id="img-hour" src="" alt="Hour" onerror="this.src='https://via.placeholder.com/600x420?text=Sem+Imagem'"></div>
+          <div class="imgbox"><img id="img-hour" src="" alt="Hour" onerror="this.src=SVG_PLACEHOLDER"></div>
           <div class="msgbox" id="msg-hour">Carregando...</div>
         </div>
       </div>
@@ -350,7 +351,7 @@ body.critical-error::after {
           <span class="badge" id="time-hidrico">—</span>
         </div>
         <div class="card-body">
-          <div class="imgbox"><img id="img-hidrico" src="" alt="Hídrico" onerror="this.src='https://via.placeholder.com/600x420?text=Sem+Imagem'"></div>
+          <div class="imgbox"><img id="img-hidrico" src="" alt="Hídrico" onerror="this.src=SVG_PLACEHOLDER"></div>
           <div class="msgbox" id="msg-hidrico">Carregando...</div>
         </div>
       </div>
@@ -377,7 +378,7 @@ body.critical-error::after {
           <span class="badge" id="time-idle">—</span>
         </div>
         <div class="card-body">
-          <div class="imgbox"><img id="img-idle" src="" alt="Idle" onerror="this.src='https://via.placeholder.com/600x420?text=Sem+Imagem'"></div>
+          <div class="imgbox"><img id="img-idle" src="" alt="Idle" onerror="this.src=SVG_PLACEHOLDER"></div>
           <div class="msgbox" id="msg-idle">Carregando...</div>
         </div>
       </div>
@@ -389,7 +390,7 @@ body.critical-error::after {
           <span class="badge" id="time-margin">—</span>
         </div>
         <div class="card-body">
-          <div class="imgbox"><img id="img-margin" src="" alt="Margin" onerror="this.src='https://via.placeholder.com/600x420?text=Sem+Imagem'"></div>
+          <div class="imgbox"><img id="img-margin" src="" alt="Margin" onerror="this.src=SVG_PLACEHOLDER"></div>
           <div class="msgbox" id="msg-margin">Carregando...</div>
         </div>
       </div>
@@ -401,7 +402,7 @@ body.critical-error::after {
           <span class="badge" id="time-productivity">—</span>
         </div>
         <div class="card-body">
-          <div class="imgbox"><img id="img-productivity" src="" alt="Productivity" onerror="this.src='https://via.placeholder.com/600x420?text=Sem+Imagem'"></div>
+          <div class="imgbox"><img id="img-productivity" src="" alt="Productivity" onerror="this.src=SVG_PLACEHOLDER"></div>
           <div class="msgbox" id="msg-productivity">Carregando...</div>
         </div>
       </div>
@@ -413,7 +414,7 @@ body.critical-error::after {
           <span class="badge" id="time-revenue">—</span>
         </div>
         <div class="card-body">
-          <div class="imgbox"><img id="img-revenue" src="" alt="Revenue" onerror="this.src='https://via.placeholder.com/600x420?text=Sem+Imagem'"></div>
+          <div class="imgbox"><img id="img-revenue" src="" alt="Revenue" onerror="this.src=SVG_PLACEHOLDER"></div>
           <div class="msgbox" id="msg-revenue">Carregando...</div>
         </div>
       </div>
@@ -425,7 +426,7 @@ body.critical-error::after {
           <span class="badge" id="time-top_rates">—</span>
         </div>
         <div class="card-body">
-          <div class="imgbox"><img id="img-top_rates" src="" alt="Top Rates" onerror="this.src='https://via.placeholder.com/600x420?text=Sem+Imagem'"></div>
+          <div class="imgbox"><img id="img-top_rates" src="" alt="Top Rates" onerror="this.src=SVG_PLACEHOLDER"></div>
           <div class="msgbox" id="msg-top_rates">Carregando...</div>
         </div>
       </div>
@@ -708,6 +709,9 @@ body.critical-error::after {
 </div>
 
 <script>
+const SVG_PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='420' viewBox='0 0 600 420'><rect width='100%' height='100%' fill='%231a2238'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Outfit, sans-serif' font-size='22' font-weight='800' fill='%234b5563'>SEM IMAGEM DISPONÍVEL</text></svg>";
+const SVG_NO_ACCESS = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='420' viewBox='0 0 600 420'><rect width='100%' height='100%' fill='%231a2238'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Outfit, sans-serif' font-size='22' font-weight='800' fill='%23ef4444'>SEM ACESSO AO TOKEN JWT</text></svg>";
+
 const FARMS_DATA = [
   { key: 'gjacana', name: 'Fazenda Jaçanã', wallet: '5683', phone: '5511963065709' },
   { key: 'fazenda_ws', name: 'Fazenda WS', wallet: '5702', phone: '5511962678385' },
@@ -721,9 +725,11 @@ const TOKENS = {
   'apoloni': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmYXJtbmFtZSI6IkJvYSBzb3J0ZSIsImRibmFtZSI6ImFncm9fc3RhZ2luZyIsInNjaGVtYW5hbWUiOiJhcG9sb25pIiwidGFibGVuYW1lIjoiaGlzdG9yaWNfbWFjaGluZV9zdW1tYXJ5X3ZpZXcifQ.i4PhmVsHP8yTLJK9N06TuLixUNN6p_clqFdJN9BMxTU',
   'piccini':  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmYXJtbmFtZSI6IlBpY2NpbmkiLCJkYm5hbWUiOiJhZ3JvX3N0YWdpbmciLCJzY2hlbWFuYW1lIjoicGljY2luaSIsInRhYmxlbmFtZSI6Imhpc3RvcmljX21hY2hpbmVfc3VtbWFyeV92aWV3In0.MTDfwyO9btEzOrxSaZPdHsa4fWT5VTbtjlOJqb3d4-o',
 };
-const BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:'
-  ? 'http://localhost:8009/api_data/v1'
-  : 'https://prx.triskin.tech/api_data/v1';
+let BASE = localStorage.getItem('api_base_url') || (
+  window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:'
+    ? 'http://localhost:8009/api_data/v1'
+    : 'https://prx.triskin.tech/api_data/v1'
+);
 let farm = 'gjacana';
 let allLogs = [];
 try {
@@ -931,8 +937,32 @@ function getFarmStatus(farmKey) {
   return localStorage.getItem('farm_status_' + farmKey) || 'ok';
 }
 
-const SVG_PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='420' viewBox='0 0 600 420'><rect width='100%' height='100%' fill='%231a2238'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Outfit, sans-serif' font-size='22' font-weight='800' fill='%234b5563'>SEM IMAGEM DISPONÍVEL</text></svg>";
-const SVG_NO_ACCESS = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='420' viewBox='0 0 600 420'><rect width='100%' height='100%' fill='%231a2238'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Outfit, sans-serif' font-size='22' font-weight='800' fill='%23ef4444'>SEM ACESSO AO TOKEN JWT</text></svg>";
+function updateApiEnvButton() {
+  const currentBase = BASE;
+  const isLocal = currentBase.includes('localhost') || currentBase.includes('127.0.0.1');
+  const btn = document.getElementById('api-env-btn');
+  if (btn) {
+    btn.innerHTML = isLocal 
+      ? '🔌 API: Local (8009)' 
+      : '🌐 API: Produção';
+    btn.style.borderColor = isLocal ? 'var(--primary)' : 'var(--bg-card-border)';
+  }
+}
+
+function toggleApiEnv() {
+  const currentBase = BASE;
+  const isLocal = currentBase.includes('localhost') || currentBase.includes('127.0.0.1');
+  const newBase = isLocal 
+    ? 'https://prx.triskin.tech/api_data/v1' 
+    : 'http://localhost:8009/api_data/v1';
+  localStorage.setItem('api_base_url', newBase);
+  BASE = newBase;
+  updateApiEnvButton();
+  window.location.reload();
+}
+
+// Inicializa o estado do botão de ambiente
+setTimeout(updateApiEnvButton, 50);
 
 let slowEndpoints = [];
 try {
