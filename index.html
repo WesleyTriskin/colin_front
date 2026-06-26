@@ -55,7 +55,7 @@ body.critical-error::after {
       </div>
       <div class="topbar-actions" style="display: flex; align-items: center; gap: 12px;">
         <button class="theme-btn" id="btn-test-api" onclick="forceCheckEndpoints()" style="display: none; align-items: center; gap: 8px; font-family:'Outfit',sans-serif; white-space: nowrap;">🔄 Testar Endpoints</button>
-        <button class="theme-btn" id="api-env-btn" onclick="toggleApiEnv()" style="font-family:'Outfit',sans-serif; white-space: nowrap; display: flex; align-items: center; gap: 8px; font-weight: 500;"></button>
+
         <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">🌙 Modo Escuro</button>
       </div>
     </header>
@@ -725,11 +725,7 @@ const TOKENS = {
   'apoloni': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmYXJtbmFtZSI6IkJvYSBzb3J0ZSIsImRibmFtZSI6ImFncm9fc3RhZ2luZyIsInNjaGVtYW5hbWUiOiJhcG9sb25pIiwidGFibGVuYW1lIjoiaGlzdG9yaWNfbWFjaGluZV9zdW1tYXJ5X3ZpZXcifQ.i4PhmVsHP8yTLJK9N06TuLixUNN6p_clqFdJN9BMxTU',
   'piccini':  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmYXJtbmFtZSI6IlBpY2NpbmkiLCJkYm5hbWUiOiJhZ3JvX3N0YWdpbmciLCJzY2hlbWFuYW1lIjoicGljY2luaSIsInRhYmxlbmFtZSI6Imhpc3RvcmljX21hY2hpbmVfc3VtbWFyeV92aWV3In0.MTDfwyO9btEzOrxSaZPdHsa4fWT5VTbtjlOJqb3d4-o',
 };
-let BASE = localStorage.getItem('api_base_url') || (
-  window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:'
-    ? 'http://localhost:8009/api_data/v1'
-    : 'https://prx.triskin.tech/api_data/v1'
-);
+const BASE = 'https://prx.triskin.tech/api_data/v1';
 let farm = 'gjacana';
 let allLogs = [];
 try {
@@ -937,32 +933,7 @@ function getFarmStatus(farmKey) {
   return localStorage.getItem('farm_status_' + farmKey) || 'ok';
 }
 
-function updateApiEnvButton() {
-  const currentBase = BASE;
-  const isLocal = currentBase.includes('localhost') || currentBase.includes('127.0.0.1');
-  const btn = document.getElementById('api-env-btn');
-  if (btn) {
-    btn.innerHTML = isLocal 
-      ? '🔌 API: Local (8009)' 
-      : '🌐 API: Produção';
-    btn.style.borderColor = isLocal ? 'var(--primary)' : 'var(--bg-card-border)';
-  }
-}
 
-function toggleApiEnv() {
-  const currentBase = BASE;
-  const isLocal = currentBase.includes('localhost') || currentBase.includes('127.0.0.1');
-  const newBase = isLocal 
-    ? 'https://prx.triskin.tech/api_data/v1' 
-    : 'http://localhost:8009/api_data/v1';
-  localStorage.setItem('api_base_url', newBase);
-  BASE = newBase;
-  updateApiEnvButton();
-  window.location.reload();
-}
-
-// Inicializa o estado do botão de ambiente
-setTimeout(updateApiEnvButton, 50);
 
 let slowEndpoints = [];
 try {
