@@ -721,7 +721,9 @@ const TOKENS = {
   'apoloni': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmYXJtbmFtZSI6IkJvYSBzb3J0ZSIsImRibmFtZSI6ImFncm9fc3RhZ2luZyIsInNjaGVtYW5hbWUiOiJhcG9sb25pIiwidGFibGVuYW1lIjoiaGlzdG9yaWNfbWFjaGluZV9zdW1tYXJ5X3ZpZXcifQ.i4PhmVsHP8yTLJK9N06TuLixUNN6p_clqFdJN9BMxTU',
   'piccini':  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmYXJtbmFtZSI6IlBpY2NpbmkiLCJkYm5hbWUiOiJhZ3JvX3N0YWdpbmciLCJzY2hlbWFuYW1lIjoicGljY2luaSIsInRhYmxlbmFtZSI6Imhpc3RvcmljX21hY2hpbmVfc3VtbWFyeV92aWV3In0.MTDfwyO9btEzOrxSaZPdHsa4fWT5VTbtjlOJqb3d4-o',
 };
-const BASE = 'https://prx.triskin.tech/api_data/v1';
+const BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:'
+  ? 'http://localhost:8009/api_data/v1'
+  : 'https://prx.triskin.tech/api_data/v1';
 let farm = 'gjacana';
 let allLogs = [];
 try {
@@ -1124,7 +1126,7 @@ async function fetchLogs(){
 
   // Se não tem token, exibe mensagem apropriada
   if(!token){
-    ['d1','daily','hour','hidrico','cotacoes','noticias','economia'].forEach(k=>{
+    ['d1','daily','hour','hidrico','idle','margin','productivity','revenue','top_rates','cotacoes','noticias','economia'].forEach(k=>{
       document.getElementById('msg-'+k).innerHTML = '<i style="color:var(--yellow)">Token JWT não cadastrado para esta fazenda.</i>';
       document.getElementById('time-'+k).innerHTML = '—';
       const imgEl = document.getElementById('img-'+k);
@@ -1140,7 +1142,7 @@ async function fetchLogs(){
     loadContacts();
   } else {
     // Se não está no cache, exibe "Carregando..." temporariamente para evitar piscada vazia
-    ['d1','daily','hour','hidrico','cotacoes','noticias','economia'].forEach(k=>{
+    ['d1','daily','hour','hidrico','idle','margin','productivity','revenue','top_rates','cotacoes','noticias','economia'].forEach(k=>{
       document.getElementById('msg-'+k).innerText = 'Carregando...';
       document.getElementById('time-'+k).innerHTML = '—';
     });
@@ -1159,7 +1161,7 @@ async function fetchLogs(){
   } catch(e){
     console.error("Erro ao atualizar logs:", e);
     if (!logsCache[activeFarmAtStart] && farm === activeFarmAtStart) {
-      ['d1','daily','hour','hidrico','cotacoes','noticias','economia'].forEach(k=>{
+      ['d1','daily','hour','hidrico','idle','margin','productivity','revenue','top_rates','cotacoes','noticias','economia'].forEach(k=>{
         document.getElementById('msg-'+k).innerHTML = `<span style="color:var(--red)">Erro: ${e.message}</span>`;
       });
     }
