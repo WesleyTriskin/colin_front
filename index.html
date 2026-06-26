@@ -1046,17 +1046,17 @@ async function fetchLogs(){
     const fl = logs.filter(l => l.farm_key === targetFarm);
     const findByType = (type) => fl.find(l => (l.report_type === type || getReportType(l.message_content) === type) && l.message_type === 'text');
 
-    const d1txt    = findByType('d1') || fl.find(l => l.message_type === 'text' && getReportType(l.message_content) === 'D-1');
-    const dailytxt = findByType('daily') || fl.find(l => l.message_type === 'text' && getReportType(l.message_content) === 'Daily');
-    const hourtxt  = findByType('hour') || fl.find(l => l.message_type === 'text' && getReportType(l.message_content) === 'Hour');
-    const hidrtxt  = findByType('irrigacao') || fl.find(l => l.message_type === 'text' && getReportType(l.message_content) === 'Hídrico');
-    const idletxt  = findByType('idle') || fl.find(l => l.message_type === 'text' && getReportType(l.message_content) === 'idle');
-    const margintxt  = findByType('margin') || fl.find(l => l.message_type === 'text' && getReportType(l.message_content) === 'margin');
-    const productivitytxt  = findByType('productivity') || fl.find(l => l.message_type === 'text' && getReportType(l.message_content) === 'productivity');
-    const revenuetxt  = findByType('revenue') || fl.find(l => l.message_type === 'text' && getReportType(l.message_content) === 'revenue');
-    const topratestxt  = findByType('top_rates') || fl.find(l => l.message_type === 'text' && getReportType(l.message_content) === 'top_rates');
+    const d1txt    = findByType('d1');
+    const dailytxt = findByType('daily');
+    const hourtxt  = findByType('hour');
+    const hidrtxt  = findByType('irrigacao');
+    const idletxt  = findByType('idle_machine');
+    const margintxt  = findByType('margin');
+    const productivitytxt  = findByType('productivity');
+    const revenuetxt  = findByType('revenue');
+    const topratestxt  = findByType('top_rates');
     
-    const marketLogs = fl.filter(l => (l.report_type === 'market' || getReportType(l.message_content) === 'Market') && l.message_type === 'text');
+    const marketLogs = fl.filter(l => (l.report_type === 'market' || getReportType(l.message_content) === 'market') && l.message_type === 'text');
     const cotqtxt  = marketLogs.find(l => l.message_content.toUpperCase().includes('COTAÇÕES'));
     const notixtxt = marketLogs.find(l => l.message_content.toUpperCase().includes('SÍNTESE'));
     const ecotxt   = marketLogs.find(l => l.message_content.toUpperCase().includes('ECONOMIA'));
@@ -1118,7 +1118,7 @@ async function fetchLogs(){
     setImg('img-daily',  getImgFor('daily', dailytxt));
     setImg('img-hour',   getImgFor('hour', hourtxt));
     setImg('img-hidrico',getImgFor('irrigacao', hidrtxt));
-    setImg('img-idle',   getImgFor('idle', idletxt));
+    setImg('img-idle',   getImgFor('idle_machine', idletxt));
     setImg('img-margin', getImgFor('margin', margintxt));
     setImg('img-productivity', getImgFor('productivity', productivitytxt));
     setImg('img-revenue',getImgFor('revenue', revenuetxt));
@@ -1185,12 +1185,12 @@ function getCalendarDate(dateStr) {
 function getReportType(content) {
   if (!content) return null;
   const c = content.toUpperCase();
-  if (c.includes('RELATÓRIO OPERACIONAL')) return 'D-1';
-  if (c.includes('FECHAMENTO DIÁRIO')) return 'Daily';
-  if (c.includes('RELATÓRIO HORÁRIO')) return 'Hour';
-  if (c.includes('BALANÇO HÍDRICO') || c.includes('BALANÇO DE ÁGUA') || c.includes('IRRIGAÇÃO') || c.includes('PIVÔ') || c.includes('PIVOS')) return 'Hídrico';
-  if (c.includes('COTAÇÕES DO DIA') || c.includes('SÍNTESE GERAL') || c.includes('ECONOMIA & POLÍTICA') || c.includes('ECONOMIA &AMP; POLÍTICA')) return 'Market';
-  if (c.includes('MÁQUINAS INATIVAS') || c.includes('IDLE')) return 'idle';
+  if (c.includes('RELATÓRIO OPERACIONAL')) return 'd1';
+  if (c.includes('FECHAMENTO DIÁRIO')) return 'daily';
+  if (c.includes('RELATÓRIO HORÁRIO')) return 'hour';
+  if (c.includes('BALANÇO HÍDRICO') || c.includes('BALANÇO DE ÁGUA') || c.includes('IRRIGAÇÃO') || c.includes('PIVÔ') || c.includes('PIVOS')) return 'irrigacao';
+  if (c.includes('COTAÇÕES DO DIA') || c.includes('SÍNTESE GERAL') || c.includes('ECONOMIA & POLÍTICA') || c.includes('ECONOMIA &AMP; POLÍTICA')) return 'market';
+  if (c.includes('MÁQUINAS INATIVAS') || c.includes('IDLE')) return 'idle_machine';
   if (c.includes('MARGEM') || c.includes('RENTABILIDADE')) return 'margin';
   if (c.includes('PRODUTIVIDADE') || c.includes('COLHEITA')) return 'productivity';
   if (c.includes('RECEITA') || c.includes('VENDAS')) return 'revenue';
@@ -1373,7 +1373,7 @@ function renderLogsTable() {
 
     const getColContent = (type) => {
       if (type === 'market') {
-        const hasMarket = r.logs.some(l => l.message_type === 'text' && (l.report_type === 'market' || getReportType(l.message_content) === 'Market'));
+        const hasMarket = r.logs.some(l => l.message_type === 'text' && (l.report_type === 'market' || getReportType(l.message_content) === 'market'));
         if (!hasMarket) return '<span style="color:var(--muted)">—</span>';
         return `<div style="display:flex; flex-direction:column; gap:4px; align-items:center;">
           <button class="btn-view-msg" style="width:100%; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:700; background:rgba(59,130,246,0.15); color:var(--blue); cursor:pointer;" onclick="openMessage('${phone}', '${day}', 'market', 'text')">💬 Texto</button>
@@ -1479,7 +1479,7 @@ function openMessage(phone, date, type, format) {
     modal.classList.add('open');
   } else {
     if (type === 'market') {
-      const marketLogs = fl.filter(l => l.message_type === 'text' && (l.report_type === 'market' || getReportType(l.message_content) === 'Market'));
+      const marketLogs = fl.filter(l => l.message_type === 'text' && (l.report_type === 'market' || getReportType(l.message_content) === 'market'));
       if (marketLogs.length === 0) {
         alert("Mensagens de mercado não encontradas.");
         return;
