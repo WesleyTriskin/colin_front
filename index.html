@@ -1111,7 +1111,7 @@ function getReportType(content) {
   if (c.includes('RELATÓRIO OPERACIONAL')) return 'D-1';
   if (c.includes('FECHAMENTO DIÁRIO')) return 'Daily';
   if (c.includes('RELATÓRIO HORÁRIO')) return 'Hour';
-  if (c.includes('BALANÇO HÍDRICO')) return 'Hídrico';
+  if (c.includes('BALANÇO HÍDRICO') || c.includes('BALANÇO DE ÁGUA') || c.includes('IRRIGAÇÃO') || c.includes('PIVÔ') || c.includes('PIVOS')) return 'Hídrico';
   if (c.includes('COTAÇÕES DO DIA') || c.includes('SÍNTESE GERAL') || c.includes('ECONOMIA & POLÍTICA') || c.includes('ECONOMIA &AMP; POLÍTICA')) return 'Market';
   return null;
 }
