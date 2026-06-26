@@ -1124,7 +1124,7 @@ async function fetchLogs(){
     setImg('img-daily',  getImgFor('daily', dailytxt));
     setImg('img-hour',   getImgFor('hour', hourtxt));
     setImg('img-hidrico',getImgFor('irrigacao', hidrtxt));
-    setImg('img-idle',   getImgFor('idle_machine', idletxt));
+    setImg('img-idle',   getImgFor('idle_machine', idletxt) || 'images/colin_avatar.png');
     setImg('img-margin', getImgFor('margin', margintxt));
     setImg('img-productivity', getImgFor('productivity', productivitytxt));
     setImg('img-revenue',getImgFor('revenue', revenuetxt));
