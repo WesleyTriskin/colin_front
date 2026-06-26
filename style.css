@@ -196,6 +196,7 @@ body.light .ticker-wrap { background: rgba(0,0,0,0.03); }
   overflow: hidden; display: block;
 }
 .imgbox img { width: 100%; height: 100%; object-fit: cover; display: block; }
+#img-top_rates, #img-idle { object-position: top; }
 
 .msgbox {
   flex: 1;
