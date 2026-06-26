@@ -1108,10 +1108,16 @@ async function fetchLogs(){
     apply('noticias', notixtxt);
     apply('economia', ecotxt);
 
-    const getImgFor = (type, txtLog) => {
-      const imgLog = fl.find(l => (l.report_type === type || getReportType(l.message_content) === type) && l.message_type === 'image');
-      if (imgLog) return imgLog.message_content.startsWith('data:') ? imgLog.message_content : `data:image/jpeg;base64,${imgLog.message_content}`;
-      return txtLog ? findNearestImage(fl, txtLog) : null;
+    const getImgFor = (type, txtMsg) => {
+      if (!txtMsg) return null;
+      const tTime = new Date(txtMsg.sent_at).getTime();
+      
+      let candidate = fl.find(l => l.message_type === 'image' && l.report_type === type);
+      
+      if(!candidate) {
+          candidate = fl.find(l => l.message_type === 'image' && (!l.report_type || l.report_type === 'outro') && Math.abs(new Date(l.sent_at).getTime() - tTime) <= 1500000);
+      }
+      return candidate ? (candidate.message_content.startsWith('data:') ? candidate.message_content : `data:image/jpeg;base64,${candidate.message_content}`) : null;
     };
 
     setImg('img-d1',     getImgFor('d1', d1txt));
@@ -1122,7 +1128,7 @@ async function fetchLogs(){
     setImg('img-margin', getImgFor('margin', margintxt));
     setImg('img-productivity', getImgFor('productivity', productivitytxt));
     setImg('img-revenue',getImgFor('revenue', revenuetxt));
-    setImg('img-top_rates', getImgFor('top_rates', topratestxt));
+    setImg('img-top_rates', getImgFor('top_rates', topratestxt) || 'images/colin_avatar.png');
   };
 
   // Se não tem token, exibe mensagem apropriada
