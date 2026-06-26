@@ -370,6 +370,65 @@ body.critical-error::after {
           <div class="msgbox" id="msg-economia">Carregando...</div>
         </div>
       </div>
+      <!-- 6. Idle Machine -->
+      <div class="card fw">
+        <div class="card-header">
+          <span class="card-title">6. Máquinas Inativas (Idle)</span>
+          <span class="badge" id="time-idle">—</span>
+        </div>
+        <div class="card-body">
+          <div class="imgbox"><img id="img-idle" src="" alt="Idle" onerror="this.src='https://via.placeholder.com/600x420?text=Sem+Imagem'"></div>
+          <div class="msgbox" id="msg-idle">Carregando...</div>
+        </div>
+      </div>
+
+      <!-- 7. Margin -->
+      <div class="card fw">
+        <div class="card-header">
+          <span class="card-title">7. Margem e Rentabilidade</span>
+          <span class="badge" id="time-margin">—</span>
+        </div>
+        <div class="card-body">
+          <div class="imgbox"><img id="img-margin" src="" alt="Margin" onerror="this.src='https://via.placeholder.com/600x420?text=Sem+Imagem'"></div>
+          <div class="msgbox" id="msg-margin">Carregando...</div>
+        </div>
+      </div>
+
+      <!-- 8. Productivity -->
+      <div class="card fw">
+        <div class="card-header">
+          <span class="card-title">8. Produtividade e Colheita</span>
+          <span class="badge" id="time-productivity">—</span>
+        </div>
+        <div class="card-body">
+          <div class="imgbox"><img id="img-productivity" src="" alt="Productivity" onerror="this.src='https://via.placeholder.com/600x420?text=Sem+Imagem'"></div>
+          <div class="msgbox" id="msg-productivity">Carregando...</div>
+        </div>
+      </div>
+
+      <!-- 9. Revenue -->
+      <div class="card fw">
+        <div class="card-header">
+          <span class="card-title">9. Receita e Vendas</span>
+          <span class="badge" id="time-revenue">—</span>
+        </div>
+        <div class="card-body">
+          <div class="imgbox"><img id="img-revenue" src="" alt="Revenue" onerror="this.src='https://via.placeholder.com/600x420?text=Sem+Imagem'"></div>
+          <div class="msgbox" id="msg-revenue">Carregando...</div>
+        </div>
+      </div>
+
+      <!-- 10. Top Rates -->
+      <div class="card fw">
+        <div class="card-header">
+          <span class="card-title">10. Top Rates (Taxas)</span>
+          <span class="badge" id="time-top_rates">—</span>
+        </div>
+        <div class="card-body">
+          <div class="imgbox"><img id="img-top_rates" src="" alt="Top Rates" onerror="this.src='https://via.placeholder.com/600x420?text=Sem+Imagem'"></div>
+          <div class="msgbox" id="msg-top_rates">Carregando...</div>
+        </div>
+      </div>
 
     </div><!-- /grid2 -->
 
@@ -988,6 +1047,11 @@ async function fetchLogs(){
     const dailytxt = findByType('daily') || fl.find(l => l.message_type === 'text' && getReportType(l.message_content) === 'Daily');
     const hourtxt  = findByType('hour') || fl.find(l => l.message_type === 'text' && getReportType(l.message_content) === 'Hour');
     const hidrtxt  = findByType('irrigacao') || fl.find(l => l.message_type === 'text' && getReportType(l.message_content) === 'Hídrico');
+    const idletxt  = findByType('idle') || fl.find(l => l.message_type === 'text' && getReportType(l.message_content) === 'idle');
+    const margintxt  = findByType('margin') || fl.find(l => l.message_type === 'text' && getReportType(l.message_content) === 'margin');
+    const productivitytxt  = findByType('productivity') || fl.find(l => l.message_type === 'text' && getReportType(l.message_content) === 'productivity');
+    const revenuetxt  = findByType('revenue') || fl.find(l => l.message_type === 'text' && getReportType(l.message_content) === 'revenue');
+    const topratestxt  = findByType('top_rates') || fl.find(l => l.message_type === 'text' && getReportType(l.message_content) === 'top_rates');
     
     const marketLogs = fl.filter(l => (l.report_type === 'market' || getReportType(l.message_content) === 'Market') && l.message_type === 'text');
     const cotqtxt  = marketLogs.find(l => l.message_content.toUpperCase().includes('COTAÇÕES'));
@@ -1032,6 +1096,11 @@ async function fetchLogs(){
     apply('daily',    dailytxt);
     apply('hour',     hourtxt);
     apply('hidrico',  hidrtxt);
+    apply('idle',     idletxt);
+    apply('margin',   margintxt);
+    apply('productivity', productivitytxt);
+    apply('revenue',  revenuetxt);
+    apply('top_rates',topratestxt);
     apply('cotacoes', cotqtxt);
     apply('noticias', notixtxt);
     apply('economia', ecotxt);
@@ -1046,6 +1115,11 @@ async function fetchLogs(){
     setImg('img-daily',  getImgFor('daily', dailytxt));
     setImg('img-hour',   getImgFor('hour', hourtxt));
     setImg('img-hidrico',getImgFor('irrigacao', hidrtxt));
+    setImg('img-idle',   getImgFor('idle', idletxt));
+    setImg('img-margin', getImgFor('margin', margintxt));
+    setImg('img-productivity', getImgFor('productivity', productivitytxt));
+    setImg('img-revenue',getImgFor('revenue', revenuetxt));
+    setImg('img-top_rates', getImgFor('top_rates', topratestxt));
   };
 
   // Se não tem token, exibe mensagem apropriada
@@ -1113,6 +1187,11 @@ function getReportType(content) {
   if (c.includes('RELATÓRIO HORÁRIO')) return 'Hour';
   if (c.includes('BALANÇO HÍDRICO') || c.includes('BALANÇO DE ÁGUA') || c.includes('IRRIGAÇÃO') || c.includes('PIVÔ') || c.includes('PIVOS')) return 'Hídrico';
   if (c.includes('COTAÇÕES DO DIA') || c.includes('SÍNTESE GERAL') || c.includes('ECONOMIA & POLÍTICA') || c.includes('ECONOMIA &AMP; POLÍTICA')) return 'Market';
+  if (c.includes('MÁQUINAS INATIVAS') || c.includes('IDLE')) return 'idle';
+  if (c.includes('MARGEM') || c.includes('RENTABILIDADE')) return 'margin';
+  if (c.includes('PRODUTIVIDADE') || c.includes('COLHEITA')) return 'productivity';
+  if (c.includes('RECEITA') || c.includes('VENDAS')) return 'revenue';
+  if (c.includes('TOP RATES') || c.includes('TAXAS')) return 'top_rates';
   return null;
 }
 
@@ -1956,11 +2035,11 @@ function updateOverviewDashboard() {
     const hourCount = farmBlocks.filter(b => b.types.includes('Hour') || b.types.includes('hour')).length;
     const hidricoCount = farmBlocks.filter(b => b.types.includes('Hídrico') || b.types.includes('irrigacao')).length;
     const marketCount = farmBlocks.filter(b => b.types.includes('Market') || b.types.includes('market')).length;
-    const prodCount = farmBlocks.filter(b => b.types.includes('productivity')).length;
-    const revCount = farmBlocks.filter(b => b.types.includes('revenue')).length;
-    const margCount = farmBlocks.filter(b => b.types.includes('margin')).length;
-    const topCount = farmBlocks.filter(b => b.types.includes('top_rates')).length;
-    const idleCount = farmBlocks.filter(b => b.types.includes('idle_machine')).length;
+    const prodCount = farmBlocks.filter(b => b.types.includes('productivity') || b.types.includes('Productivity')).length;
+    const revCount = farmBlocks.filter(b => b.types.includes('revenue') || b.types.includes('Revenue')).length;
+    const margCount = farmBlocks.filter(b => b.types.includes('margin') || b.types.includes('Margin')).length;
+    const topCount = farmBlocks.filter(b => b.types.includes('top_rates') || b.types.includes('Top Rates')).length;
+    const idleCount = farmBlocks.filter(b => b.types.includes('idle_machine') || b.types.includes('idle') || b.types.includes('Idle')).length;
 
     clientBarsHtml += `
       <div style="background: var(--sub); border: 1px solid var(--border); padding: 12px; border-radius: 8px; display: flex; flex-direction: column; gap: 8px;">
