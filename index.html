@@ -703,7 +703,7 @@ body.critical-error::after {
 </div>
 
 <script>
-const SVG_PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='420' viewBox='0 0 600 420'><rect width='100%' height='100%' fill='%231a2238'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Outfit, sans-serif' font-size='22' font-weight='800' fill='%234b5563'>SEM IMAGEM DISPONÍVEL</text></svg>";
+const SVG_PLACEHOLDER = "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27600%27%20height%3D%27420%27%20viewBox%3D%270%200%20600%20420%27%3E%3Crect%20width%3D%27100%25%27%20height%3D%27100%25%27%20fill%3D%27%231a2238%27%2F%3E%3Ctext%20x%3D%2750%25%27%20y%3D%2750%25%27%20dominant-baseline%3D%27middle%27%20text-anchor%3D%27middle%27%20font-family%3D%27Outfit%2C%20sans-serif%27%20font-size%3D%2722%27%20font-weight%3D%27800%27%20fill%3D%27%234b5563%27%3ESEM%20IMAGEM%20DISPON%C3%8DVEL%3C%2Ftext%3E%3C%2Fsvg%3E";
 const SVG_NO_ACCESS = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='420' viewBox='0 0 600 420'><rect width='100%' height='100%' fill='%231a2238'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Outfit, sans-serif' font-size='22' font-weight='800' fill='%23ef4444'>SEM ACESSO AO TOKEN JWT</text></svg>";
 
 const FARMS_DATA = [
@@ -1151,7 +1151,7 @@ async function fetchLogs(){
 
   // Sincroniza em background
   try {
-    const r = await fetch(`${BASE}/chat/logs?limit=200&_cb=${Date.now()}`, {headers:{'X-Encrypted-Token':token}});
+    const r = await fetch(`${BASE}/chat/logs?limit=500&_cb=${Date.now()}`, {headers:{'X-Encrypted-Token':token}});
     if(!r.ok) throw new Error('API retornou '+r.status);
     const freshLogs = await r.json();
     
