@@ -371,10 +371,22 @@ body.critical-error::after {
           <div class="msgbox" id="msg-economia">Carregando...</div>
         </div>
       </div>
-      <!-- 6. Idle Machine -->
+      <!-- 6. Top Rates -->
       <div class="card fw">
         <div class="card-header">
-          <span class="card-title">6. Máquinas Inativas (Idle)</span>
+          <span class="card-title">6. Top Rates (Taxas)</span>
+          <span class="badge" id="time-top_rates">—</span>
+        </div>
+        <div class="card-body">
+          <div class="imgbox"><img id="img-top_rates" src="" alt="Top Rates" onerror="this.src=SVG_PLACEHOLDER"></div>
+          <div class="msgbox" id="msg-top_rates">Carregando...</div>
+        </div>
+      </div>
+
+      <!-- 7. Idle Machine -->
+      <div class="card fw">
+        <div class="card-header">
+          <span class="card-title">7. Máquinas Inativas (Idle)</span>
           <span class="badge" id="time-idle">—</span>
         </div>
         <div class="card-body">
@@ -383,10 +395,10 @@ body.critical-error::after {
         </div>
       </div>
 
-      <!-- 7. Margin -->
+      <!-- 8. Margin -->
       <div class="card fw">
         <div class="card-header">
-          <span class="card-title">7. Margem e Rentabilidade</span>
+          <span class="card-title">8. Margem e Rentabilidade</span>
           <span class="badge" id="time-margin">—</span>
         </div>
         <div class="card-body">
@@ -395,10 +407,10 @@ body.critical-error::after {
         </div>
       </div>
 
-      <!-- 8. Productivity -->
+      <!-- 9. Productivity -->
       <div class="card fw">
         <div class="card-header">
-          <span class="card-title">8. Produtividade e Colheita</span>
+          <span class="card-title">9. Produtividade e Colheita</span>
           <span class="badge" id="time-productivity">—</span>
         </div>
         <div class="card-body">
@@ -407,27 +419,15 @@ body.critical-error::after {
         </div>
       </div>
 
-      <!-- 9. Revenue -->
+      <!-- 10. Revenue -->
       <div class="card fw">
         <div class="card-header">
-          <span class="card-title">9. Receita e Vendas</span>
+          <span class="card-title">10. Receita e Vendas</span>
           <span class="badge" id="time-revenue">—</span>
         </div>
         <div class="card-body">
           <div class="imgbox"><img id="img-revenue" src="" alt="Revenue" onerror="this.src=SVG_PLACEHOLDER"></div>
           <div class="msgbox" id="msg-revenue">Carregando...</div>
-        </div>
-      </div>
-
-      <!-- 10. Top Rates -->
-      <div class="card fw">
-        <div class="card-header">
-          <span class="card-title">10. Top Rates (Taxas)</span>
-          <span class="badge" id="time-top_rates">—</span>
-        </div>
-        <div class="card-body">
-          <div class="imgbox"><img id="img-top_rates" src="" alt="Top Rates" onerror="this.src=SVG_PLACEHOLDER"></div>
-          <div class="msgbox" id="msg-top_rates">Carregando...</div>
         </div>
       </div>
 
@@ -1066,7 +1066,7 @@ async function fetchLogs(){
       msgEl.style.opacity = '0';
       msgEl.innerHTML = log
         ? parseWhatsApp(log.message_content)
-        : `<i style="color:var(--muted)">Nenhum envio encontrado nos logs.</i>`;
+        : `<i style="color:var(--muted)">${key === 'idle' ? 'ℹ️ Este relatório é exclusivo para máquinas John Deere.' : 'Nenhum envio encontrado nos logs.'}</i>`;
       requestAnimationFrame(() => {
         msgEl.style.transition = 'opacity 0.25s ease';
         msgEl.style.opacity = '1';
@@ -1157,7 +1157,7 @@ async function fetchLogs(){
 
   // Sincroniza em background
   try {
-    const r = await fetch(`${BASE}/chat/logs?limit=200`, {headers:{'X-Encrypted-Token':token}});
+    const r = await fetch(`${BASE}/chat/logs?limit=200&_cb=${Date.now()}`, {headers:{'X-Encrypted-Token':token}});
     if(!r.ok) throw new Error('API retornou '+r.status);
     const freshLogs = await r.json();
     
