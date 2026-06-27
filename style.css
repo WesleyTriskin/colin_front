@@ -201,6 +201,7 @@ body.light .ticker-wrap { background: rgba(0,0,0,0.03); }
 .msgbox {
   flex: 1;
   height: 450px;
+  max-height: 450px;
   background: var(--code);
   border: 1px solid var(--border);
   border-radius: 10px;
