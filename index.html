@@ -1149,9 +1149,9 @@ async function fetchLogs(){
     });
   }
 
-  // Sincroniza em background
+  // Sincroniza em background (endpoint leve: sem message_content)
   try {
-    const r = await fetch(`${BASE}/chat/logs?limit=500&_cb=${Date.now()}`, {headers:{'X-Encrypted-Token':token}});
+    const r = await fetch(`${BASE}/chat/logs/meta?_cb=${Date.now()}`, {headers:{'X-Encrypted-Token':token}});
     if(!r.ok) throw new Error('API retornou '+r.status);
     const freshLogs = await r.json();
     
@@ -1420,15 +1420,20 @@ function renderLogsTable() {
 }
 
 function openMessage(phone, date, type, format) {
-  const activeFarmLogs = allLogs.filter(l => l.farm_key === farm);
-  const fl = activeFarmLogs.filter(l => l.phone_number === phone && getCalendarDate(l.sent_at) === date);
-
+  const token = TOKENS[farm] || TOKENS['gjacana'];
   const modal = document.getElementById('modal');
   const mTitle = document.getElementById('modal-title');
   const mBody = document.getElementById('modal-body');
 
-  mBody.innerHTML = '';
-  // Reseta estilos prévios
+  // Converte date dd/mm para YYYY-MM-DD
+  const toApiDate = (d) => {
+    if (!d || d === '—') return null;
+    const [day, month] = d.split('/');
+    return `2026-${month.padStart(2,'0')}-${day.padStart(2,'0')}`;
+  };
+  const apiDate = toApiDate(date);
+
+  mBody.innerHTML = '<div style="padding:30px;text-align:center;color:var(--muted)">⏳ Carregando mensagem...</div>';
   mBody.style.background = '';
   mBody.style.backgroundImage = '';
   mBody.style.backgroundBlendMode = '';
@@ -1440,125 +1445,120 @@ function openMessage(phone, date, type, format) {
   mBody.style.display = '';
   mBody.style.flexDirection = '';
   mBody.style.alignItems = '';
+  modal.classList.add('open');
 
   const modalBox = document.querySelector('.modal-box');
   if (modalBox) {
-    if (type === 'market') {
-      modalBox.style.maxWidth = '1300px';
-    } else {
-      modalBox.style.maxWidth = ''; // Restaura o padrão de 820px do CSS
-    }
+    modalBox.style.maxWidth = type === 'market' ? '1300px' : '';
   }
 
-  if (format === 'image') {
-    const imgDataLog = fl.find(l => l.message_type === 'image' && (l.report_type === type || getReportType(l.message_content) === type));
-    if (!imgDataLog) {
-      alert("Mapa correspondente não encontrado nos logs.");
-      return;
-    }
+  // Determina o report_type correto para a query
+  const reportTypeMap = {
+    'market': ['market_cotacao', 'market_sintese', 'market_economia'],
+  };
 
-    mTitle.innerText = `${type.toUpperCase()} — Visualização do Mapa (${date})`;
-    
-    let formattedSrc = imgDataLog.message_content;
-    if (!formattedSrc.startsWith('data:')) {
-      formattedSrc = `data:image/jpeg;base64,${formattedSrc}`;
-    }
+  const fetchContent = async (rt) => {
+    const url = `${BASE}/chat/logs/content?report_type=${rt}${apiDate ? '&date='+apiDate : ''}`;
+    const res = await fetch(url, {headers:{'X-Encrypted-Token':token}});
+    if (!res.ok) throw new Error('Erro '+res.status);
+    return res.json();
+  };
 
-    // Estilo premium para o visualizador de mapa
-    mBody.style.background = 'transparent';
-    mBody.style.border = 'none';
-    mBody.style.padding = '0';
-    mBody.style.maxHeight = 'none';
-    mBody.style.overflow = 'visible';
-
-    mBody.innerHTML = `
-      <div style="display:flex; justify-content:center; align-items:center; background:#0e1117; padding:20px; border-radius:12px; border:1px solid var(--border); max-height:70vh; overflow:auto;">
-        <img src="${formattedSrc}" style="max-width:100%; max-height:65vh; border-radius:8px; box-shadow:0 10px 40px rgba(0,0,0,0.5); object-fit:contain;" alt="Mapa do Relatório">
-      </div>
-    `;
-    modal.classList.add('open');
-  } else {
-    if (type === 'market') {
-      const marketLogs = fl.filter(l => l.message_type === 'text' && (l.report_type === 'market' || getReportType(l.message_content) === 'market'));
-      if (marketLogs.length === 0) {
-        alert("Mensagens de mercado não encontradas.");
-        return;
-      }
-
-      // Ordena por horário de envio
-      marketLogs.sort((a, b) => new Date(a.sent_at) - new Date(b.sent_at));
-
-      mTitle.innerText = `Market — Relatórios do Dia (${date})`;
-
-      // Visual de chat do WhatsApp
-      mBody.style.background = '#0b141a';
-      mBody.style.backgroundImage = "url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')";
-      mBody.style.backgroundBlendMode = 'overlay';
-      mBody.style.padding = '24px';
-      mBody.style.border = '1px solid rgba(255,255,255,0.05)';
-      mBody.style.maxHeight = '65vh';
-      mBody.style.overflowY = 'auto';
-      mBody.style.display = 'flex';
-      mBody.style.flexDirection = 'row';
-      mBody.style.flexWrap = 'wrap';
-      mBody.style.gap = '20px';
-      mBody.style.alignItems = 'stretch';
-      mBody.style.justifyContent = 'center';
-
-      let itemsHtml = '';
-      marketLogs.forEach(log => {
-        const parsedText = parseWhatsApp(log.message_content || '');
-        const timeStr = new Date(log.sent_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        
-        let title = 'Mercado';
-        const txt = log.message_content || '';
-        const uc = txt.toUpperCase();
-        if (uc.includes('COTAÇÕES')) title = '📊 Cotações do Dia';
-        else if (uc.includes('SÍNTESE')) title = '📰 Síntese Geral';
-        else if (uc.includes('ECONOMIA')) title = '💼 Economia & Política';
-
-        itemsHtml += `
-          <div style="flex: 1 1 300px; min-width: 280px; max-width: 400px; background: #202c33; color: #e9edef; padding: 16px; border-radius: 10px; box-shadow: 0 1px 0.5px rgba(0,0,0,0.13); font-family: inherit; font-size: 0.95rem; line-height: 1.6; display: flex; flex-direction: column; justify-content: space-between;">
-            <div>
-              <div style="font-weight: 800; font-size: 1.05rem; color: var(--primary); margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 6px;">${title}</div>
-              <div style="white-space: pre-wrap; word-break: break-word; text-align: left;">${parsedText}</div>
-            </div>
-            <div style="text-align: right; font-size: 0.72rem; color: #8696a0; margin-top: 12px;">${timeStr}</div>
+  (async () => {
+    try {
+      if (format === 'image') {
+        const data = await fetchContent(type);
+        const imgLog = data.find(d => d.message_type === 'image');
+        if (!imgLog || !imgLog.message_content) {
+          mBody.innerHTML = '<div style="padding:20px;color:var(--red)">Mapa não encontrado para este relatório.</div>';
+          return;
+        }
+        mTitle.innerText = `${type.toUpperCase()} — Visualização do Mapa (${date})`;
+        let src = imgLog.message_content;
+        if (!src.startsWith('data:')) src = `data:image/jpeg;base64,${src}`;
+        mBody.style.background = 'transparent';
+        mBody.style.border = 'none';
+        mBody.style.padding = '0';
+        mBody.style.maxHeight = 'none';
+        mBody.style.overflow = 'visible';
+        mBody.innerHTML = `
+          <div style="display:flex;justify-content:center;align-items:center;background:#0e1117;padding:20px;border-radius:12px;border:1px solid var(--border);max-height:70vh;overflow:auto;">
+            <img src="${src}" style="max-width:100%;max-height:65vh;border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,0.5);object-fit:contain;" alt="Mapa do Relatório">
           </div>
         `;
-      });
-
-      mBody.innerHTML = itemsHtml;
-      modal.classList.add('open');
-    } else {
-      const textLog = fl.find(l => l.message_type === 'text' && (l.report_type === type || getReportType(l.message_content) === type));
-      if (!textLog) {
-        alert("Mensagem de texto não encontrada.");
-        return;
+      } else if (type === 'market') {
+        // Market tem 3 sub-relatórios
+        const subtypes = ['market_cotacao', 'market_sintese', 'market_economia'];
+        const results = await Promise.all(subtypes.map(st => fetchContent(st).catch(() => [])));
+        const allTexts = results.flat().filter(d => d.message_type === 'text' && d.message_content);
+        if (allTexts.length === 0) {
+          mBody.innerHTML = '<div style="padding:20px;color:var(--red)">Mensagens de mercado não encontradas.</div>';
+          return;
+        }
+        mTitle.innerText = `Market — Relatórios do Dia (${date})`;
+        mBody.style.background = '#0b141a';
+        mBody.style.backgroundImage = "url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')";
+        mBody.style.backgroundBlendMode = 'overlay';
+        mBody.style.padding = '24px';
+        mBody.style.border = '1px solid rgba(255,255,255,0.05)';
+        mBody.style.maxHeight = '65vh';
+        mBody.style.overflowY = 'auto';
+        mBody.style.display = 'flex';
+        mBody.style.flexDirection = 'row';
+        mBody.style.flexWrap = 'wrap';
+        mBody.style.gap = '20px';
+        mBody.style.alignItems = 'stretch';
+        mBody.style.justifyContent = 'center';
+        let itemsHtml = '';
+        allTexts.forEach(log => {
+          const parsedText = parseWhatsApp(log.message_content || '');
+          const timeStr = new Date(log.sent_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+          let title = 'Mercado';
+          const uc = (log.message_content || '').toUpperCase();
+          if (uc.includes('COTAÇÕES')) title = '📊 Cotações do Dia';
+          else if (uc.includes('SÍNTESE')) title = '📰 Síntese Geral';
+          else if (uc.includes('ECONOMIA')) title = '💼 Economia & Política';
+          itemsHtml += `
+            <div style="flex:1 1 300px;min-width:280px;max-width:400px;background:#202c33;color:#e9edef;padding:16px;border-radius:10px;box-shadow:0 1px 0.5px rgba(0,0,0,0.13);font-family:inherit;font-size:0.95rem;line-height:1.6;display:flex;flex-direction:column;justify-content:space-between;">
+              <div>
+                <div style="font-weight:800;font-size:1.05rem;color:var(--primary);margin-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:6px;">${title}</div>
+                <div style="white-space:pre-wrap;word-break:break-word;text-align:left;">${parsedText}</div>
+              </div>
+              <div style="text-align:right;font-size:0.72rem;color:#8696a0;margin-top:12px;">${timeStr}</div>
+            </div>
+          `;
+        });
+        mBody.innerHTML = itemsHtml;
+      } else {
+        const data = await fetchContent(type);
+        const textLog = data.find(d => d.message_type === 'text');
+        if (!textLog || !textLog.message_content) {
+          mBody.innerHTML = '<div style="padding:20px;color:var(--red)">Mensagem não encontrada para este relatório.</div>';
+          return;
+        }
+        mTitle.innerText = `${type.toUpperCase()} — Mensagem do WhatsApp (${date})`;
+        const parsedText = parseWhatsApp(textLog.message_content || '');
+        mBody.style.background = '#0b141a';
+        mBody.style.backgroundImage = "url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')";
+        mBody.style.backgroundBlendMode = 'overlay';
+        mBody.style.padding = '24px';
+        mBody.style.border = '1px solid rgba(255,255,255,0.05)';
+        mBody.style.maxHeight = '60vh';
+        mBody.style.overflowY = 'auto';
+        mBody.style.display = 'flex';
+        mBody.style.flexDirection = 'column';
+        mBody.style.alignItems = 'flex-start';
+        mBody.innerHTML = `
+          <div style="background:#202c33;color:#e9edef;padding:12px 16px;border-radius:0 10px 10px 10px;max-width:85%;box-shadow:0 1px 0.5px rgba(0,0,0,0.13);font-family:inherit;font-size:1.05rem;line-height:1.6;white-space:pre-wrap;word-break:break-word;text-align:left;">
+            ${parsedText}
+            <div style="text-align:right;font-size:0.72rem;color:#8696a0;margin-top:6px;">${new Date(textLog.sent_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div>
+          </div>
+        `;
       }
-      mTitle.innerText = `${type.toUpperCase()} — Mensagem do WhatsApp (${date})`;
-      const parsedText = parseWhatsApp(textLog.message_content || '');
-
-      mBody.style.background = '#0b141a';
-      mBody.style.backgroundImage = "url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')";
-      mBody.style.backgroundBlendMode = 'overlay';
-      mBody.style.padding = '24px';
-      mBody.style.border = '1px solid rgba(255,255,255,0.05)';
-      mBody.style.maxHeight = '60vh';
-      mBody.style.overflowY = 'auto';
-      mBody.style.display = 'flex';
-      mBody.style.flexDirection = 'column';
-      mBody.style.alignItems = 'flex-start';
-
-      mBody.innerHTML = `
-        <div style="background: #202c33; color: #e9edef; padding: 12px 16px; border-radius: 0 10px 10px 10px; max-width: 85%; box-shadow: 0 1px 0.5px rgba(0,0,0,0.13); font-family: inherit; font-size: 1.05rem; line-height: 1.6; white-space: pre-wrap; word-break: break-word; text-align: left;">
-          ${parsedText}
-          <div style="text-align: right; font-size: 0.72rem; color: #8696a0; margin-top: 6px;">${new Date(textLog.sent_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-        </div>
-      `;
-      modal.classList.add('open');
+    } catch(e) {
+      mBody.innerHTML = `<div style="padding:20px;color:var(--red)">Erro ao carregar: ${e.message}</div>`;
     }
-  }
+  })();
 }
 
 
