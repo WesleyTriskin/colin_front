@@ -1383,7 +1383,12 @@ function renderLogsTable() {
       const textLog = r.logs.find(l => l.message_type === 'text' && (l.report_type === type || getReportType(l.message_content) === type));
       if (!textLog) return '<span style="color:var(--muted)">—</span>';
 
-      const imgData = r.logs.find(l => l.message_type === 'image' && (l.report_type === type || (findNearestImage(activeFarmLogs, textLog) && findNearestImage(activeFarmLogs, textLog).id === l.id)));
+      const imgData = r.logs.find(l => {
+        if (l.message_type !== 'image') return false;
+        if (l.report_type === type) return true;
+        const nearestImg = findNearestImage(activeFarmLogs, textLog);
+        return nearestImg && nearestImg === l.message_content;
+      });
 
       let html = '<div style="display:flex; flex-direction:column; gap:4px; align-items:center;">';
       html += `<button class="btn-view-msg" style="width:100%; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:700; background:rgba(59,130,246,0.15); color:var(--blue); cursor:pointer;" onclick="openMessage('${phone}', '${day}', '${type}', 'text')">💬 Texto</button>`;
