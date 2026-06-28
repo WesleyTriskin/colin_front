@@ -1020,6 +1020,7 @@ function findNearestImage(logs, textLog){
 
 function setImg(id, src){
   const el = document.getElementById(id);
+  if (!el) return;
   el.src = src || SVG_PLACEHOLDER;
 }
 
