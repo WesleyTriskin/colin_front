@@ -1451,7 +1451,7 @@ function openMessage(phone, date, type, format) {
   }
 
   if (format === 'image') {
-    const imgDataLog = activeFarmLogs.find(l => l.message_type === 'image' && (l.report_type === type || getReportType(l.message_content) === type));
+    const imgDataLog = fl.find(l => l.message_type === 'image' && (l.report_type === type || getReportType(l.message_content) === type));
     if (!imgDataLog) {
       alert("Mapa correspondente não encontrado nos logs.");
       return;
@@ -1479,7 +1479,7 @@ function openMessage(phone, date, type, format) {
     modal.classList.add('open');
   } else {
     if (type === 'market') {
-      const marketLogs = activeFarmLogs.filter(l => l.message_type === 'text' && (l.report_type === 'market' || getReportType(l.message_content) === 'market') && l.message_content && getCalendarDate(l.sent_at) === date);
+      const marketLogs = fl.filter(l => l.message_type === 'text' && (l.report_type === 'market' || getReportType(l.message_content) === 'market'));
       if (marketLogs.length === 0) {
         alert("Mensagens de mercado não encontradas.");
         return;
@@ -1531,7 +1531,7 @@ function openMessage(phone, date, type, format) {
       mBody.innerHTML = itemsHtml;
       modal.classList.add('open');
     } else {
-      const textLog = activeFarmLogs.find(l => l.message_type === 'text' && (l.report_type === type || getReportType(l.message_content) === type) && l.message_content && getCalendarDate(l.sent_at) === date);
+      const textLog = fl.find(l => l.message_type === 'text' && (l.report_type === type || getReportType(l.message_content) === type));
       if (!textLog) {
         alert("Mensagem de texto não encontrada.");
         return;
