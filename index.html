@@ -1149,9 +1149,9 @@ async function fetchLogs(){
     });
   }
 
-  // Sincroniza em background (endpoint leve: sem message_content)
+  // Sincroniza os CARDS em background (conteúdo completo: texto + imagem)
   try {
-    const r = await fetch(`${BASE}/chat/logs/meta?_cb=${Date.now()}`, {headers:{'X-Encrypted-Token':token}});
+    const r = await fetch(`${BASE}/chat/logs?limit=500&_cb=${Date.now()}`, {headers:{'X-Encrypted-Token':token}});
     if(!r.ok) throw new Error('API retornou '+r.status);
     const freshLogs = await r.json();
     
@@ -1218,44 +1218,41 @@ async function loadContacts() {
   const tbody = document.getElementById('tbody');
   const token = TOKENS[activeFarmAtStart] || TOKENS['gjacana'];
   
-  const processAndApplyContacts = (contacts, targetFarm) => {
-    // Se o usuário mudou de fazenda durante a requisição, ignora
+  const processAndApplyContacts = (contacts, metaLogs, targetFarm) => {
     if (farm !== targetFarm) return;
 
-    // Limpa dicionário anterior para evitar vazamento entre fazendas
+    // Limpa dicionário anterior
     for (const key in contactMap) delete contactMap[key];
     
     const contactsList = Array.isArray(contacts) ? contacts : (contacts.contacts || []);
     contactsList.forEach(c => {
-      if (c.phone_number) {
-        contactMap[c.phone_number] = c.contact_name;
-      }
+      if (c.phone_number) contactMap[c.phone_number] = c.contact_name;
     });
 
-    const activeFarmLogs = allLogs.filter(l => l.farm_key === targetFarm);
-    currentLogs = activeFarmLogs;
+    // Usa os metadados leves para a tabela (sem limite de paginação)
+    const activeFarmMetaLogs = metaLogs.filter(l => l.farm_key === targetFarm);
+    currentLogs = activeFarmMetaLogs;
 
-    populateFilterSelects(activeFarmLogs);
-    renderLogsTable();
+    populateFilterSelects(activeFarmMetaLogs);
+    renderLogsTable(activeFarmMetaLogs);
   };
 
-  // Se já temos contatos em cache, aplica IMEDIATAMENTE!
-  if (contactsCache[activeFarmAtStart]) {
-    processAndApplyContacts(contactsCache[activeFarmAtStart], activeFarmAtStart);
-  }
-
+  // Busca contatos E metadados em paralelo
   try {
-    const r = await fetch(`${BASE}/farms/contacts`, {headers:{'X-Encrypted-Token':token}});
-    if (r.ok) {
-      const freshContacts = await r.json();
-      contactsCache[activeFarmAtStart] = freshContacts;
-      processAndApplyContacts(freshContacts, activeFarmAtStart);
-    }
+    const [contactsRes, metaRes] = await Promise.all([
+      fetch(`${BASE}/farms/contacts`, {headers:{'X-Encrypted-Token':token}}),
+      fetch(`${BASE}/chat/logs/meta?_cb=${Date.now()}`, {headers:{'X-Encrypted-Token':token}})
+    ]);
+
+    const contacts = contactsRes.ok ? await contactsRes.json() : (contactsCache[activeFarmAtStart] || []);
+    const metaLogs = metaRes.ok ? await metaRes.json() : [];
+
+    if (contactsRes.ok) contactsCache[activeFarmAtStart] = contacts;
+    
+    processAndApplyContacts(contacts, metaLogs, activeFarmAtStart);
   } catch(e) {
-    console.warn("Erro ao buscar contatos da API:", e);
-    if (!contactsCache[activeFarmAtStart] && farm === activeFarmAtStart) {
-      tbody.innerHTML = `<tr><td colspan="7" style="color:var(--red);text-align:center;padding:20px">Erro ao carregar contatos: ${e.message}</td></tr>`;
-    }
+    console.warn("Erro ao buscar dados da tabela:", e);
+    tbody.innerHTML = `<tr><td colspan="11" style="color:var(--red);text-align:center;padding:20px">Erro ao carregar: ${e.message}</td></tr>`;
   }
 }
 
@@ -1313,13 +1310,15 @@ function populateFilterSelects(logs) {
   if (sortedDays.includes(selectedDay)) filterDay.value = selectedDay;
 }
 
-function renderLogsTable() {
+function renderLogsTable(metaLogs) {
   const tbody = document.getElementById('tbody');
   const filterName = document.getElementById('filter-name').value;
   const filterPhone = document.getElementById('filter-phone').value;
   const filterDay = document.getElementById('filter-day').value;
 
-  const activeFarmLogs = allLogs.filter(l => l.farm_key === farm);
+  // Usa metaLogs se passado (endpoint leve), senão cai no allLogs global
+  const source = metaLogs || allLogs;
+  const activeFarmLogs = source.filter(l => l.farm_key === farm);
 
   // Group by phone and day
   const groups = {};
@@ -1373,27 +1372,31 @@ function renderLogsTable() {
 
     const getColContent = (type) => {
       if (type === 'market') {
-        const hasMarket = r.logs.some(l => l.message_type === 'text' && (l.report_type === 'market' || getReportType(l.message_content) === 'market'));
+        const hasMarket = r.logs.some(l => l.message_type === 'text' && (
+          l.report_type === 'market' || l.report_type === 'market_cotacao' ||
+          l.report_type === 'market_sintese' || l.report_type === 'market_economia'
+        ));
         if (!hasMarket) return '<span style="color:var(--muted)">—</span>';
         return `<div style="display:flex; flex-direction:column; gap:4px; align-items:center;">
           <button class="btn-view-msg" style="width:100%; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:700; background:rgba(59,130,246,0.15); color:var(--blue); cursor:pointer;" onclick="openMessage('${phone}', '${day}', 'market', 'text')">💬 Texto</button>
         </div>`;
       }
 
-      const textLog = r.logs.find(l => l.message_type === 'text' && (l.report_type === type || getReportType(l.message_content) === type));
+      const textLog = r.logs.find(l => l.message_type === 'text' && l.report_type === type);
       if (!textLog) return '<span style="color:var(--muted)">—</span>';
 
-      const imgData = r.logs.find(l => l.message_type === 'image' && (l.report_type === type || (findNearestImage(activeFarmLogs, textLog) && findNearestImage(activeFarmLogs, textLog).id === l.id)));
+      const imgLog = r.logs.find(l => l.message_type === 'image' && l.report_type === type);
 
       let html = '<div style="display:flex; flex-direction:column; gap:4px; align-items:center;">';
       html += `<button class="btn-view-msg" style="width:100%; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:700; background:rgba(59,130,246,0.15); color:var(--blue); cursor:pointer;" onclick="openMessage('${phone}', '${day}', '${type}', 'text')">💬 Texto</button>`;
       
-      if (imgData || findNearestImage(activeFarmLogs, textLog)) {
+      if (imgLog) {
         html += `<button class="btn-view-msg" style="width:100%; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:700; background:rgba(16,185,129,0.15); color:var(--green); cursor:pointer;" onclick="openMessage('${phone}', '${day}', '${type}', 'image')">🖼️ Mapa</button>`;
       }
       html += '</div>';
       return html;
     };
+
 
     tbody.innerHTML += `
       <tr>
