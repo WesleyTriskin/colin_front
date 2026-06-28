@@ -1115,16 +1115,39 @@ async function fetchLogs(){
       return candidate ? (candidate.message_content.startsWith('data:') ? candidate.message_content : `data:image/jpeg;base64,${candidate.message_content}`) : null;
     };
 
-    setImg('img-d1',     getImgFor('d1', d1txt));
-    setImg('img-daily',  getImgFor('daily', dailytxt));
-    setImg('img-hour',   getImgFor('hour', hourtxt));
-    setImg('img-hidrico',getImgFor('irrigacao', hidrtxt));
-    setImg('img-idle',   getImgFor('idle_machine', idletxt) || 'images/colin_avatar.png');
-    setImg('img-margin', getImgFor('margin', margintxt));
-    setImg('img-productivity', getImgFor('productivity', productivitytxt));
-    setImg('img-revenue',getImgFor('revenue', revenuetxt));
-    setImg('img-top_rates', getImgFor('top_rates', topratestxt) || 'images/colin_avatar.png');
+    // Função que seta imagem e, se não achar no payload, busca via /logs/content
+    const setImgWithFallback = async (imgId, type, txtMsg, fallbackSrc) => {
+      const found = getImgFor(type, txtMsg);
+      if (found) { setImg(imgId, found); return; }
+      if (fallbackSrc) { setImg(imgId, fallbackSrc); return; }
+      if (!txtMsg || !token) return;
+      // Busca sob demanda do endpoint de conteúdo
+      try {
+        const dateStr = txtMsg.sent_at ? txtMsg.sent_at.substring(0, 10) : null;
+        const url = `${BASE}/chat/logs/content?report_type=${type}${dateStr ? '&date='+dateStr : ''}`;
+        const res = await fetch(url, {headers:{'X-Encrypted-Token':token}});
+        if (!res.ok) return;
+        const data = await res.json();
+        const imgLog = data.find(d => d.message_type === 'image' && d.message_content);
+        if (imgLog) {
+          let src = imgLog.message_content;
+          if (!src.startsWith('data:')) src = `data:image/jpeg;base64,${src}`;
+          setImg(imgId, src);
+        }
+      } catch(e) { /* silencioso */ }
+    };
+
+    setImgWithFallback('img-d1',          'd1',          d1txt);
+    setImgWithFallback('img-daily',       'daily',       dailytxt);
+    setImgWithFallback('img-hour',        'hour',        hourtxt);
+    setImgWithFallback('img-hidrico',     'irrigacao',   hidrtxt);
+    setImgWithFallback('img-idle',        'idle_machine',idletxt,  'images/colin_avatar.png');
+    setImgWithFallback('img-margin',      'margin',      margintxt);
+    setImgWithFallback('img-productivity','productivity', productivitytxt);
+    setImgWithFallback('img-revenue',     'revenue',     revenuetxt);
+    setImgWithFallback('img-top_rates',   'top_rates',   topratestxt, 'images/colin_avatar.png');
   };
+
 
   // Se não tem token, exibe mensagem apropriada
   if(!token){
