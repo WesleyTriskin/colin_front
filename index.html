@@ -30,6 +30,13 @@ body.critical-error::after {
   50% { border-color: rgba(239, 68, 68, 0.3); }
   100% { border-color: rgba(239, 68, 68, 1); }
 }
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.spinning {
+  animation: spin 1s linear infinite;
+}
 </style>
 </head>
 <body class="light">
@@ -55,6 +62,9 @@ body.critical-error::after {
       </div>
       <div class="topbar-actions" style="display: flex; align-items: center; gap: 12px;">
         <button class="theme-btn" id="btn-test-api" onclick="forceCheckEndpoints()" style="display: none; align-items: center; gap: 8px; font-family:'Outfit',sans-serif; white-space: nowrap;">🔄 Testar Endpoints</button>
+        <button class="theme-btn" id="btn-refresh-logs" onclick="forceRefreshLogs()" style="display: none; align-items: center; gap: 8px; font-family:'Outfit',sans-serif; white-space: nowrap;">
+          <span class="refresh-icon" style="display: inline-block;">🔄</span> Atualizar Logs
+        </button>
 
         <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">🌙 Modo Escuro</button>
       </div>
@@ -869,6 +879,13 @@ function switchTab(id){
     if(testBtn) testBtn.style.display = 'none';
   }
 
+  const refreshBtn = document.getElementById('btn-refresh-logs');
+  if(id==='dashboard'){
+    if(refreshBtn) refreshBtn.style.display = 'flex';
+  } else {
+    if(refreshBtn) refreshBtn.style.display = 'none';
+  }
+
   localStorage.setItem('active_tab', id);
 
   if(id==='overview') {
@@ -1026,6 +1043,19 @@ function setImg(id, src){
 
 const logsCache = {};
 const contactsCache = {};
+const metaCache = {};
+
+// Carrega caches persistidos do localStorage para carregamento instantaneo (offline/F5)
+try {
+  const cachedLogs = localStorage.getItem('colin_logs_cache_v3');
+  const cachedContacts = localStorage.getItem('colin_contacts_cache_v3');
+  const cachedMeta = localStorage.getItem('colin_meta_cache_v3');
+  if (cachedLogs) Object.assign(logsCache, JSON.parse(cachedLogs));
+  if (cachedContacts) Object.assign(contactsCache, JSON.parse(cachedContacts));
+  if (cachedMeta) Object.assign(metaCache, JSON.parse(cachedMeta));
+} catch (e) {
+  console.warn("Erro ao ler caches do localStorage:", e);
+}
 
 async function fetchLogs(){
   const activeFarmAtStart = farm;
@@ -1181,6 +1211,9 @@ async function fetchLogs(){
     
     // Atualiza cache e aplica dados na tela
     logsCache[activeFarmAtStart] = freshLogs;
+    try {
+      localStorage.setItem('colin_logs_cache_v3', JSON.stringify(logsCache));
+    } catch(e) {}
     processAndApplyLogs(freshLogs, activeFarmAtStart);
     loadContacts();
   } catch(e){
@@ -1189,6 +1222,24 @@ async function fetchLogs(){
       ['d1','daily','hour','hidrico','idle','margin','productivity','revenue','top_rates','cotacoes','noticias','economia'].forEach(k=>{
         document.getElementById('msg-'+k).innerHTML = `<span style="color:var(--red)">Erro: ${e.message}</span>`;
       });
+    }
+  }
+}
+
+async function forceRefreshLogs() {
+  const btn = document.getElementById('btn-refresh-logs');
+  const icon = btn ? btn.querySelector('.refresh-icon') : null;
+  if (icon) icon.classList.add('spinning');
+  
+  try {
+    await fetchLogs();
+  } catch (e) {
+    console.error("Erro ao forcar atualizacao:", e);
+  } finally {
+    if (icon) {
+      setTimeout(() => {
+        icon.classList.remove('spinning');
+      }, 600);
     }
   }
 }
@@ -1261,6 +1312,11 @@ async function loadContacts() {
     renderLogsTable(activeFarmMetaLogs);
   };
 
+  // Se ja temos os contatos e metadados em cache, aplica IMEDIATAMENTE (carregamento instantaneo)
+  if (contactsCache[activeFarmAtStart] && metaCache[activeFarmAtStart]) {
+    processAndApplyContacts(contactsCache[activeFarmAtStart], metaCache[activeFarmAtStart], activeFarmAtStart);
+  }
+
   // Busca contatos E metadados em paralelo
   try {
     const [contactsRes, metaRes] = await Promise.all([
@@ -1270,9 +1326,20 @@ async function loadContacts() {
 
     const contacts = contactsRes.ok ? await contactsRes.json() : (contactsCache[activeFarmAtStart] || []);
     // Se /logs/meta falhar, usa allLogs como fallback (garante que tabela sempre renderiza)
-    const metaLogs = metaRes.ok ? await metaRes.json() : allLogs;
+    const metaLogs = metaRes.ok ? await metaRes.json() : (metaCache[activeFarmAtStart] || allLogs);
 
-    if (contactsRes.ok) contactsCache[activeFarmAtStart] = contacts;
+    if (contactsRes.ok) {
+      contactsCache[activeFarmAtStart] = contacts;
+      try {
+        localStorage.setItem('colin_contacts_cache_v3', JSON.stringify(contactsCache));
+      } catch(e) {}
+    }
+    if (metaRes.ok) {
+      metaCache[activeFarmAtStart] = metaLogs;
+      try {
+        localStorage.setItem('colin_meta_cache_v3', JSON.stringify(metaCache));
+      } catch(e) {}
+    }
     
     processAndApplyContacts(contacts, metaLogs, activeFarmAtStart);
   } catch(e) {
