@@ -1403,7 +1403,7 @@ function renderLogsTable(metaLogs) {
         ));
         if (!hasMarket) return '<span style="color:var(--muted)">—</span>';
         return `<div style="display:flex; flex-direction:column; gap:4px; align-items:center;">
-          <button class="btn-view-msg" style="width:100%; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:700; background:rgba(59,130,246,0.15); color:var(--blue); cursor:pointer;" onclick="openMessage('${phone}', '${day}', 'market', 'text')">💬 Texto</button>
+          <span style="display:inline-flex; align-items:center; gap:2px; font-size:0.75rem; font-weight:700; padding:4px 8px; border-radius:4px; background:rgba(59,130,246,0.15); color:var(--blue);">✓ Texto</span>
         </div>`;
       }
 
@@ -1412,11 +1412,10 @@ function renderLogsTable(metaLogs) {
 
       const imgLog = r.logs.find(l => l.message_type === 'image' && l.report_type === type);
 
-      let html = '<div style="display:flex; flex-direction:column; gap:4px; align-items:center;">';
-      html += `<button class="btn-view-msg" style="width:100%; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:700; background:rgba(59,130,246,0.15); color:var(--blue); cursor:pointer;" onclick="openMessage('${phone}', '${day}', '${type}', 'text')">💬 Texto</button>`;
-      
+      let html = '<div style="display:flex; flex-direction:column; gap:4px; align-items:center; width:100%;">';
+      html += `<span style="display:inline-flex; align-items:center; gap:2px; font-size:0.75rem; font-weight:700; padding:4px 8px; border-radius:4px; background:rgba(59,130,246,0.15); color:var(--blue); width:100%; justify-content:center; box-sizing:border-box;">✓ Texto</span>`;
       if (imgLog) {
-        html += `<button class="btn-view-msg" style="width:100%; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:700; background:rgba(16,185,129,0.15); color:var(--green); cursor:pointer;" onclick="openMessage('${phone}', '${day}', '${type}', 'image')">🖼️ Mapa</button>`;
+        html += `<span style="display:inline-flex; align-items:center; gap:2px; font-size:0.75rem; font-weight:700; padding:4px 8px; border-radius:4px; background:rgba(16,185,129,0.15); color:var(--green); width:100%; justify-content:center; box-sizing:border-box; margin-top:4px;">✓ Mapa</span>`;
       }
       html += '</div>';
       return html;
