@@ -2215,7 +2215,11 @@ function updateOverviewDashboard() {
   }
 
   const recvsCount = targetColinLogs.filter(l => l.event_type === 'message.received').length;
-  const enviasCount = targetColinLogs.filter(l => l.event_type === 'message.sent').length;
+  const colinSentRequests = new Set(targetColinLogs.filter(l => l.event_type === 'message.sent').map(l => l.request_id));
+  const enviasCount = targetColinLogs.filter(l => 
+    l.event_type === 'message.sent' || 
+    (l.event_type === 'gateway.reply_received' && (!l.request_id || !colinSentRequests.has(l.request_id)))
+  ).length;
   const totalInteractive = recvsCount + enviasCount;
   const avgChannel = Math.round(totalInteractive / 4);
 
@@ -2235,7 +2239,11 @@ function updateOverviewDashboard() {
     const fLogs = targetColinLogs.filter(l => l.farm_key === f.key);
     const phones = new Set(fLogs.filter(l => l.phone).map(l => l.phone));
     const recvs = fLogs.filter(l => l.event_type === 'message.received').length;
-    const envias = fLogs.filter(l => l.event_type === 'message.sent').length;
+    const fSentRequests = new Set(fLogs.filter(l => l.event_type === 'message.sent').map(l => l.request_id));
+    const envias = fLogs.filter(l => 
+      l.event_type === 'message.sent' || 
+      (l.event_type === 'gateway.reply_received' && (!l.request_id || !fSentRequests.has(l.request_id)))
+    ).length;
     const tools = fLogs.filter(l => l.event_type && (l.event_type.includes('tool') || l.tool_name)).length;
     const sqls = fLogs.filter(l => l.event_type && (l.event_type.includes('sql') || l.sql_query)).length;
     
@@ -2738,8 +2746,19 @@ function renderColinSidebar() {
   sortedPhones.forEach(phone => {
     const list = chats[phone];
     
-    // Ignorar erro se não for a ultima msg pro preview
-    const textMsgs = list.filter(m => ['message.received', 'interim.sent', 'gateway.reply_received'].includes(m.event_type));
+    // Ignorar erro se não for a ultima msg pro preview, removendo duplicidades com request_id
+    const hasMsgSent = {};
+    list.forEach(m => {
+      if (m.event_type === 'message.sent' && m.request_id) {
+        hasMsgSent[m.request_id] = true;
+      }
+    });
+    const textMsgs = list.filter(m => 
+      m.event_type === 'message.received' || 
+      m.event_type === 'interim.sent' || 
+      m.event_type === 'message.sent' || 
+      (m.event_type === 'gateway.reply_received' && (!m.request_id || !hasMsgSent[m.request_id]))
+    );
     const lastMsg = list[list.length-1];
     const previewMsg = textMsgs.length > 0 ? textMsgs[textMsgs.length-1] : lastMsg;
     
@@ -2917,7 +2936,21 @@ function openColinChat(phone, keepScroll = false) {
     }
   });
   
+  const hasMessageSent = {};
   items.forEach(it => {
+    if (it.event_type === 'message.sent' && it.request_id) {
+      hasMessageSent[it.request_id] = true;
+    }
+  });
+
+  const filteredItems = items.filter(it => {
+    if (it.event_type === 'gateway.reply_received' && it.request_id && hasMessageSent[it.request_id]) {
+      return false;
+    }
+    return true;
+  });
+
+  filteredItems.forEach(it => {
     if (['message.received', 'interim.sent', 'gateway.reply_received', 'gateway.error', 'message.sent'].includes(it.event_type)) {
       
       const isInbound = it.event_type === 'message.received';
