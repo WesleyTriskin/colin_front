@@ -37,6 +37,33 @@ body.critical-error::after {
 .spinning {
   animation: spin 1s linear infinite;
 }
+
+/* Badges de Origem de Interação */
+.origin-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-left: 8px;
+  letter-spacing: 0.5px;
+}
+.badge-whatsapp { background-color: #25d366; color: #fff; }
+.badge-insights { background-color: #8b5cf6; color: #fff; }
+.badge-swagger { background-color: #10b981; color: #fff; }
+.badge-erp { background-color: #3b82f6; color: #fff; }
+.badge-mobile { background-color: #f59e0b; color: #fff; }
+
+.filter-origin-btn {
+  transition: all 0.2s ease;
+  font-weight: 600;
+}
+.filter-origin-btn.active {
+  background-color: var(--green) !important;
+  color: #fff !important;
+  border-color: var(--green) !important;
+}
 </style>
 </head>
 <body class="light">
@@ -685,10 +712,18 @@ body.critical-error::after {
     <div class="colin-container">
       <div class="colin-sidebar">
         <div class="colin-sidebar-header">
-          <h3 style="margin:0; font-size:1.1rem; color:var(--text); display:flex; justify-content:space-between;">
+          <h3 style="margin:0; font-size:1.1rem; color:var(--text); display:flex; justify-content:space-between; align-items:center;">
             Conversas Ativas
             <button class="theme-btn" onclick="fetchInteractions()" style="font-size:0.75rem; padding:4px 8px;">🔄</button>
           </h3>
+          <div style="margin-top: 10px; display: flex; gap: 4px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none;">
+            <button class="filter-origin-btn active" id="f-origin-all" onclick="filterColinOrigin('all')" style="font-size: 0.7rem; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--panel); color: var(--text); cursor: pointer; white-space: nowrap;">Todos</button>
+            <button class="filter-origin-btn" id="f-origin-whatsapp" onclick="filterColinOrigin('whatsapp')" style="font-size: 0.7rem; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--panel); color: var(--text); cursor: pointer; white-space: nowrap;">WhatsApp</button>
+            <button class="filter-origin-btn" id="f-origin-insights" onclick="filterColinOrigin('insights')" style="font-size: 0.7rem; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--panel); color: var(--text); cursor: pointer; white-space: nowrap;">Insights</button>
+            <button class="filter-origin-btn" id="f-origin-erp" onclick="filterColinOrigin('erp')" style="font-size: 0.7rem; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--panel); color: var(--text); cursor: pointer; white-space: nowrap;">ERP</button>
+            <button class="filter-origin-btn" id="f-origin-mobile" onclick="filterColinOrigin('mobile')" style="font-size: 0.7rem; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--panel); color: var(--text); cursor: pointer; white-space: nowrap;">Mobile</button>
+            <button class="filter-origin-btn" id="f-origin-swagger" onclick="filterColinOrigin('swagger')" style="font-size: 0.7rem; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--panel); color: var(--text); cursor: pointer; white-space: nowrap;">Swagger</button>
+          </div>
         </div>
         <div class="colin-contacts-list" id="colin-contacts-list">
           <div style="padding: 20px; text-align: center; color: var(--muted);">Selecione uma fazenda e aguarde...</div>
@@ -2534,6 +2569,15 @@ function selectColinFarm(key, name) {
 
 // Cache dos contatos ativos por fazenda (sidebar)
 let colinActiveContactsCache = {};
+let activeColinOriginFilter = 'all';
+
+function filterColinOrigin(origin) {
+  activeColinOriginFilter = origin;
+  document.querySelectorAll('.filter-origin-btn').forEach(btn => btn.classList.remove('active'));
+  const activeBtn = document.getElementById('f-origin-' + origin);
+  if (activeBtn) activeBtn.classList.add('active');
+  renderColinSidebar();
+}
 
 async function fetchInteractions() {
   const token = TOKENS[activeColinFarm];
@@ -2562,7 +2606,7 @@ async function fetchInteractions() {
     // Filtra phones válidos
     const validContacts = activeContacts.filter(c => {
       const p = c.phone || '';
-      return p.replace(/\D/g, '').length > 5;
+      return p.includes(':') || p.replace(/\D/g, '').length > 5;
     });
 
     // Converte para formato compatível com colinLogs para renderColinSidebar
@@ -2674,11 +2718,21 @@ function renderColinSidebar() {
   });
 
   // Ordenar as conversas pela mais recente
-  const sortedPhones = Object.keys(chats).sort((a, b) => {
+  let sortedPhones = Object.keys(chats).sort((a, b) => {
     const lastA = chats[a][chats[a].length - 1];
     const lastB = chats[b][chats[b].length - 1];
     return new Date(lastB.created_at) - new Date(lastA.created_at);
   });
+
+  // Filtrar por origem
+  if (activeColinOriginFilter !== 'all') {
+    sortedPhones = sortedPhones.filter(phone => {
+      if (activeColinOriginFilter === 'whatsapp') {
+        return !phone.includes(':');
+      }
+      return phone.startsWith(activeColinOriginFilter + ':');
+    });
+  }
 
   let htmlSidebar = '';
   sortedPhones.forEach(phone => {
@@ -2703,12 +2757,33 @@ function renderColinSidebar() {
             dbName = cObj; // backward compatibility
         }
     }
-    const name = dbName ? dbName : ((lastMsg.metadata && lastMsg.metadata.contact_name) ? lastMsg.metadata.contact_name : formatPhone(phone));
+    
+    let cleanDisplayName = '';
+    let originLabel = '';
+    let originClass = '';
+    let subtitle = '';
+    
+    if (phone.includes(':')) {
+      const parts = phone.split(':');
+      const origin = parts[0];
+      const userVal = parts[1];
+      
+      originLabel = origin.toUpperCase();
+      originClass = 'badge-' + origin;
+      subtitle = originLabel + ' API';
+      
+      cleanDisplayName = dbName ? dbName : ((lastMsg.metadata && lastMsg.metadata.contact_name) ? lastMsg.metadata.contact_name : userVal);
+    } else {
+      originLabel = 'WhatsApp';
+      originClass = 'badge-whatsapp';
+      cleanDisplayName = dbName ? dbName : ((lastMsg.metadata && lastMsg.metadata.contact_name) ? lastMsg.metadata.contact_name : formatPhone(phone));
+      subtitle = formatPhone(phone);
+    }
     
     let metaForAvatar = lastMsg.metadata ? { ...lastMsg.metadata } : {};
     if (dbPhoto) metaForAvatar.photo_url = dbPhoto;
     
-    const avatar = getAvatarForUser(name, metaForAvatar);
+    const avatar = getAvatarForUser(cleanDisplayName, metaForAvatar);
     
     let preview = previewMsg.text || previewMsg.event_type;
     if(preview.length > 35) preview = preview.substring(0,35) + '...';
@@ -2721,8 +2796,11 @@ function renderColinSidebar() {
           <img src="${avatar}" style="width:100%; height:100%; object-fit:cover;">
         </div>
         <div style="flex:1; min-width:0; display: flex; flex-direction: column; justify-content: center;">
-          <div style="font-weight: 700; color: var(--text); font-size: 1rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom: 2px;">${name}</div>
-          ${name !== formatPhone(phone) ? '<div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 4px;">' + formatPhone(phone) + '</div>' : ''}
+          <div style="font-weight: 700; color: var(--text); font-size: 1rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom: 2px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${cleanDisplayName}</span>
+            <span class="origin-badge ${originClass}">${originLabel}</span>
+          </div>
+          ${cleanDisplayName !== subtitle ? '<div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 4px;">' + subtitle + '</div>' : ''}
           <div style="font-size: 0.85rem; color: #a0aec0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${preview}</div>
         </div>
       </div>
@@ -2786,21 +2864,37 @@ function openColinChat(phone, keepScroll = false) {
   }
 
   const lastMsg = items[items.length-1];
-  const metadataName = (lastMsg && lastMsg.metadata && lastMsg.metadata.contact_name) ? lastMsg.metadata.contact_name : formatPhone(phone);
-  const name = dbName ? dbName : metadataName;
   
+  let cleanDisplayName = '';
+  let originLabel = '';
+  let subtitle = '';
+
+  if (phone.includes(':')) {
+    const parts = phone.split(':');
+    const origin = parts[0];
+    const userVal = parts[1];
+    
+    originLabel = origin.toUpperCase();
+    subtitle = originLabel + ' API';
+    cleanDisplayName = dbName ? dbName : ((lastMsg && lastMsg.metadata && lastMsg.metadata.contact_name) ? lastMsg.metadata.contact_name : userVal);
+  } else {
+    originLabel = 'WhatsApp';
+    cleanDisplayName = dbName ? dbName : ((lastMsg && lastMsg.metadata && lastMsg.metadata.contact_name) ? lastMsg.metadata.contact_name : formatPhone(phone));
+    subtitle = formatPhone(phone);
+  }
+
   let metaForAvatar = lastMsg && lastMsg.metadata ? { ...lastMsg.metadata } : {};
   if (dbPhoto) metaForAvatar.photo_url = dbPhoto;
   
-  const avatar = getAvatarForUser(name, metaForAvatar);
+  const avatar = getAvatarForUser(cleanDisplayName, metaForAvatar);
   
   document.getElementById('colin-chat-header').innerHTML = `
     <div class="colin-avatar-wrap" onclick="openAvatarModal(this.querySelector('img').src)" style="width: 40px; height: 40px; margin-right: 12px; border-radius:50%; overflow:hidden; cursor:pointer;" title="Ver foto">
       <img src="${avatar}" class="colin-avatar" style="width:100%; height:100%; object-fit:cover;">
     </div>
     <div>
-      <h3 style="margin: 0; font-size: 1.1rem; color: var(--text);">${name}</h3>
-      <span style="font-size: 0.8rem; color: var(--muted);">${name !== formatPhone(phone) ? formatPhone(phone) : 'Agente: Colin ' + activeColinFarmName}</span>
+      <h3 style="margin: 0; font-size: 1.1rem; color: var(--text);">${cleanDisplayName}</h3>
+      <span style="font-size: 0.8rem; color: var(--muted);">${subtitle}</span>
     </div>
   `;
   
@@ -2824,9 +2918,7 @@ function openColinChat(phone, keepScroll = false) {
   });
   
   items.forEach(it => {
-    if (it.event_type === 'message.sent') return; 
-    
-    if (['message.received', 'interim.sent', 'gateway.reply_received', 'gateway.error'].includes(it.event_type)) {
+    if (['message.received', 'interim.sent', 'gateway.reply_received', 'gateway.error', 'message.sent'].includes(it.event_type)) {
       
       const isInbound = it.event_type === 'message.received';
       const rowClass = isInbound ? 'inbound' : 'outbound';
@@ -2834,10 +2926,8 @@ function openColinChat(phone, keepScroll = false) {
       const timeStr = _d.toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'}) + ' ' + _d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
       
       let toolsHtml = '';
-      let clickAttr = '';
-      let cursorStyle = '';
       
-      if (!isInbound && it.event_type === 'gateway.reply_received') {
+      if (!isInbound && (it.event_type === 'gateway.reply_received' || it.event_type === 'message.sent')) {
         toolsHtml = `<span class="agent-tools-btn" onclick="openAgentToolsModal('${it.request_id}')" style="cursor:pointer; margin-left: 8px; font-size:1.1rem; opacity: 0.6; transition:all 0.2s; vertical-align: middle; display: inline-flex; align-items: center; justify-content: center;" onmouseover="this.style.opacity=1;this.style.transform='scale(1.1)';" onmouseout="this.style.opacity=0.6;this.style.transform='scale(1)';" title="Ver auditoria da IA (Ferramentas/SQL)">⚙️</span>`;
       }
 
