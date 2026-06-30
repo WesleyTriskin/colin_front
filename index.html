@@ -577,7 +577,7 @@ body.critical-error::after {
         overflow: hidden;
       }
       .colin-sidebar {
-        width: 320px;
+        width: 380px;
         background: var(--sub);
         border-right: 1px solid var(--border);
         display: flex;
@@ -716,7 +716,7 @@ body.critical-error::after {
             Conversas Ativas
             <button class="theme-btn" onclick="fetchInteractions()" style="font-size:0.75rem; padding:4px 8px;">🔄</button>
           </h3>
-          <div style="margin-top: 10px; display: flex; gap: 4px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none;">
+          <div style="margin-top: 10px; display: flex; gap: 4px; flex-wrap: wrap; padding-bottom: 4px;">
             <button class="filter-origin-btn active" id="f-origin-all" onclick="filterColinOrigin('all')" style="font-size: 0.7rem; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--panel); color: var(--text); cursor: pointer; white-space: nowrap;">Todos</button>
             <button class="filter-origin-btn" id="f-origin-whatsapp" onclick="filterColinOrigin('whatsapp')" style="font-size: 0.7rem; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--panel); color: var(--text); cursor: pointer; white-space: nowrap;">WhatsApp</button>
             <button class="filter-origin-btn" id="f-origin-insights" onclick="filterColinOrigin('insights')" style="font-size: 0.7rem; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--panel); color: var(--text); cursor: pointer; white-space: nowrap;">Insights</button>
@@ -2827,6 +2827,26 @@ function renderColinSidebar() {
   });
   
   sidebar.innerHTML = htmlSidebar;
+
+  // Auto-selecionar a primeira conversa se não houver nenhuma ativa ou se a ativa não estiver na lista atual
+  if (sortedPhones.length > 0) {
+    if (!activeColinPhone || !sortedPhones.includes(activeColinPhone)) {
+      openColinChat(sortedPhones[0]);
+    }
+  } else {
+    // Limpa a área do chat se não houver contatos
+    activeColinPhone = null;
+    const chatHeader = document.getElementById('colin-chat-header');
+    if (chatHeader) {
+      chatHeader.querySelector('h3').innerText = 'Agente Colin';
+      const subtitleSpan = chatHeader.querySelector('span');
+      if (subtitleSpan) subtitleSpan.innerText = 'Nenhuma conversa ativa para este filtro';
+    }
+    const chatArea = document.getElementById('colin-chat-messages');
+    if (chatArea) {
+      chatArea.innerHTML = '<div style="text-align: center; color: var(--muted); padding: 40px; margin-top: 20vh;">Nenhuma conversa para exibir.</div>';
+    }
+  }
 }
 
 
