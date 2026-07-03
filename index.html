@@ -2611,11 +2611,11 @@ async function fetchInteractions() {
     if (!r.ok) throw new Error('API: ' + r.status);
     const activeContacts = await r.json();
 
-    // Filtra phones válidos
+    // Filtra phones válidos e ordena pelos mais recentes primeiro
     const validContacts = activeContacts.filter(c => {
       const p = c.phone || '';
       return p.includes(':') || p.replace(/\D/g, '').length > 5;
-    });
+    }).sort((a,b) => parseDateMs(b.last_interaction) - parseDateMs(a.last_interaction));
 
     // Converte para formato compatível com colinLogs para renderColinSidebar
     // Cada contato vira um "log sintético" com os dados da última interação
@@ -2705,6 +2705,17 @@ function getAvatarForUser(name, metadata) {
   return `data:image/svg+xml;utf8,<svg width='150' height='150' viewBox='0 0 150 150' xmlns='http://www.w3.org/2000/svg'><rect width='100%' height='100%' fill='${bgColor}'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='60' fill='%23e9edef'>${initials}</text></svg>`;
 }
 
+function parseDateMs(d) {
+  if (!d) return 0;
+  if (d instanceof Date) return d.getTime();
+  let s = String(d).trim();
+  if (s.includes(' ') && !s.includes('T')) {
+    s = s.replace(' ', 'T');
+  }
+  const ts = new Date(s).getTime();
+  return isNaN(ts) ? 0 : ts;
+}
+
 function renderColinSidebar() {
   const sidebar = document.getElementById('colin-contacts-list');
   if (!colinLogs || colinLogs.length === 0) {
@@ -2720,16 +2731,16 @@ function renderColinSidebar() {
     chats[p].push(it);
   });
   
-  // Ordenar cada chat por created_at ASC
+  // Ordenar mensagens internas de cada chat por created_at ASC
   Object.values(chats).forEach(list => {
-    list.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+    list.sort((a,b) => parseDateMs(a.created_at) - parseDateMs(b.created_at));
   });
 
-  // Ordenar as conversas pela mais recente
+  // Ordenar a lista de conversas pela mais recente primeiro (DESC)
   let sortedPhones = Object.keys(chats).sort((a, b) => {
     const lastA = chats[a][chats[a].length - 1];
     const lastB = chats[b][chats[b].length - 1];
-    return new Date(lastB.created_at) - new Date(lastA.created_at);
+    return parseDateMs(lastB ? lastB.created_at : null) - parseDateMs(lastA ? lastA.created_at : null);
   });
 
   // Filtrar por origem
