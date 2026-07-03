@@ -2599,6 +2599,7 @@ async function fetchInteractions() {
 
   // Renderiza do cache enquanto busca atualização
   if (colinActiveContactsCache[activeColinFarm]) {
+    colinLogs = colinActiveContactsCache[activeColinFarm];
     renderColinSidebar();
     if (activeColinPhone) openColinChat(activeColinPhone);
   } else {
@@ -2738,9 +2739,9 @@ function renderColinSidebar() {
 
   // Ordenar a lista de conversas pela mais recente primeiro (DESC)
   let sortedPhones = Object.keys(chats).sort((a, b) => {
-    const lastA = chats[a][chats[a].length - 1];
-    const lastB = chats[b][chats[b].length - 1];
-    return parseDateMs(lastB ? lastB.created_at : null) - parseDateMs(lastA ? lastA.created_at : null);
+    const maxA = Math.max(...chats[a].map(item => parseDateMs(item ? (item.created_at || item.last_interaction) : null)));
+    const maxB = Math.max(...chats[b].map(item => parseDateMs(item ? (item.created_at || item.last_interaction) : null)));
+    return maxB - maxA;
   });
 
   // Filtrar por origem
