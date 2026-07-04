@@ -635,7 +635,7 @@ function renderFarmsTable() {
   document.getElementById('farms-table-body').innerHTML = farmsList.map(f => {
     const st = f.status || 'ok';
 
-    return `
+    let rowHtml = `
     <tr>
       <td>${formatGroupName(f.farm_key)}</td>
       <td><strong>${f.display_name}</strong></td>
@@ -657,6 +657,58 @@ function renderFarmsTable() {
       </td>
     </tr>
     `;
+
+    if (editingFarmKey === f.farm_key) {
+      rowHtml += `
+      <tr style="background: var(--bg-hover);">
+        <td colspan="6" style="padding: 16px; border-top: 1px solid var(--border); border-bottom: 2px solid var(--primary);">
+          <div style="font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; color: var(--primary);">
+            <span>⚙ Editar Fazenda: ${f.display_name}</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 12px;">
+            <div>
+              <label style="display:block; font-size:0.75rem; color:var(--muted); margin-bottom:4px; font-weight:500;">Nome da Fazenda</label>
+              <input type="text" id="inline-name-${f.farm_key}" value="${f.display_name || ''}" class="form-control" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
+            </div>
+            <div>
+              <label style="display:block; font-size:0.75rem; color:var(--muted); margin-bottom:4px; font-weight:500;">Telefone Principal</label>
+              <input type="text" id="inline-phone-${f.farm_key}" value="${formatPhoneInputVal(f.phone_number) || ''}" class="form-control" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
+            </div>
+            <div>
+              <label style="display:block; font-size:0.75rem; color:var(--muted); margin-bottom:4px; font-weight:500;">Wallet ID</label>
+              <input type="number" id="inline-wallet-${f.farm_key}" value="${f.wallet_id || ''}" class="form-control" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
+            </div>
+            <div>
+              <label style="display:block; font-size:0.75rem; color:var(--muted); margin-bottom:4px; font-weight:500;">Responsável</label>
+              <input type="text" id="inline-resp-name-${f.farm_key}" value="${f.responsible_name || ''}" class="form-control" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
+            </div>
+            <div>
+              <label style="display:block; font-size:0.75rem; color:var(--muted); margin-bottom:4px; font-weight:500;">Tel. Responsável</label>
+              <input type="text" id="inline-resp-phone-${f.farm_key}" value="${formatPhoneInputVal(f.responsible_phone) || ''}" class="form-control" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
+            </div>
+            <div>
+              <label style="display:block; font-size:0.75rem; color:var(--muted); margin-bottom:4px; font-weight:500;">Marca Máquina</label>
+              <input type="text" id="inline-machine-${f.farm_key}" value="${f.machine_brand || ''}" class="form-control" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
+            </div>
+            <div>
+              <label style="display:block; font-size:0.75rem; color:var(--muted); margin-bottom:4px; font-weight:500;">Latitude</label>
+              <input type="text" id="inline-lat-${f.farm_key}" value="${f.latitude !== null && f.latitude !== undefined ? f.latitude : ''}" class="form-control" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
+            </div>
+            <div>
+              <label style="display:block; font-size:0.75rem; color:var(--muted); margin-bottom:4px; font-weight:500;">Longitude</label>
+              <input type="text" id="inline-lon-${f.farm_key}" value="${f.longitude !== null && f.longitude !== undefined ? f.longitude : ''}" class="form-control" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px; justify-content: flex-end;">
+            <button class="btn-submit" onclick="saveInlineFarm('${f.farm_key}')" style="padding: 6px 12px; font-size: 0.85rem; background: var(--success); color: white; border: none; border-radius: 6px; cursor: pointer;">💾 Salvar</button>
+            <button class="btn-delete" onclick="cancelInlineEdit()" style="padding: 6px 12px; font-size: 0.85rem; background: var(--muted); color: white; border: none; border-radius: 6px; cursor: pointer;">❌ Cancelar</button>
+          </div>
+        </td>
+      </tr>
+      `;
+    }
+
+    return rowHtml;
   }).join('');
 }
 
@@ -680,25 +732,64 @@ function openNewFarmForm() {
 }
 
 function openEditFarmForm(farmKey) {
-  const farm = farmsList.find(f => f.farm_key === farmKey);
-  if (!farm) return;
-  
-  document.getElementById('new-farm-title').innerText = '⚙ Editar Fazenda';
-  document.getElementById('f_key').disabled = true;
-  document.getElementById('f_key').value = farm.farm_key;
-  document.getElementById('f_name').value = farm.display_name || '';
-  document.getElementById('f_phone').value = formatPhoneInputVal(farm.phone_number) || '';
-  document.getElementById('f_wallet').value = farm.wallet_id || '';
-  document.getElementById('f_lat').value = farm.latitude !== null && farm.latitude !== undefined ? farm.latitude : '';
-  document.getElementById('f_lon').value = farm.longitude !== null && farm.longitude !== undefined ? farm.longitude : '';
-  document.getElementById('f_resp_name').value = farm.responsible_name || '';
-  document.getElementById('f_resp_phone').value = formatPhoneInputVal(farm.responsible_phone) || '';
-  document.getElementById('f_machine').value = farm.machine_brand || '';
-  document.getElementById('f_status').value = farm.status || 'ok';
-  
-  const container = document.getElementById('new-farm-container');
-  container.style.display = 'block';
-  container.scrollIntoView({ behavior: 'smooth' });
+  editingFarmKey = farmKey;
+  renderFarmsTable();
+}
+
+function cancelInlineEdit() {
+  editingFarmKey = null;
+  renderFarmsTable();
+}
+
+async function saveInlineFarm(key) {
+  let displayName = document.getElementById(`inline-name-${key}`).value;
+  let phone = document.getElementById(`inline-phone-${key}`).value.replace(/\D/g, '');
+  if (phone.length > 0 && !phone.startsWith('55')) {
+    phone = '55' + phone;
+  }
+  let wallet = parseInt(document.getElementById(`inline-wallet-${key}`).value) || null;
+  let lat = document.getElementById(`inline-lat-${key}`).value;
+  let lon = document.getElementById(`inline-lon-${key}`).value;
+  let respName = document.getElementById(`inline-resp-name-${key}`).value;
+  let respPhone = document.getElementById(`inline-resp-phone-${key}`).value.replace(/\D/g, '');
+  if (respPhone.length > 0 && !respPhone.startsWith('55')) {
+    respPhone = '55' + respPhone;
+  }
+  let machine = document.getElementById(`inline-machine-${key}`).value;
+
+  const farm = farmsList.find(f => f.farm_key === key);
+  const status = farm ? farm.status : 'ok';
+
+  const payload = {
+    farm_key: key,
+    display_name: displayName,
+    phone_number: phone,
+    wallet_id: wallet,
+    latitude: lat !== "" ? parseFloat(lat) : null,
+    longitude: lon !== "" ? parseFloat(lon) : null,
+    responsible_name: respName,
+    responsible_phone: respPhone,
+    machine_brand: machine,
+    status: status
+  };
+
+  try {
+    const res = await fetch(API_URL + '/farms', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if(data.success) {
+      showModal("Sucesso", "Fazenda atualizada com sucesso!");
+      editingFarmKey = null;
+      loadFarms();
+    } else {
+      showModal("Erro", "Erro ao salvar: " + data.error);
+    }
+  } catch(e) {
+    showModal("Erro", "Erro de rede ao salvar.");
+  }
 }
 
 function updateFarmsSelects() {
