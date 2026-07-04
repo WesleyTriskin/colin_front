@@ -243,6 +243,7 @@
             <th>Grupo</th>
             <th>Fazenda</th>
             <th>Telefone</th>
+            <th>Link2Go Wallet ID</th>
             <th>Status do Telefone</th>
             <th>Ações</th>
           </tr>
@@ -252,6 +253,7 @@
             <td><input type="text" id="f_key" required placeholder="Grupo (ex: jacana)" style="width:140px; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);"></td>
             <td><input type="text" id="f_name" required placeholder="Nome (ex: Jaçanã)" style="width:160px; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);"></td>
             <td><input type="text" id="f_phone" placeholder="(11) 90000-0000" oninput="maskPhone(this)" style="width:140px; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);"></td>
+            <td><input type="number" id="f_wallet" placeholder="ex: 6084" style="width:100px; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);"></td>
             <td><em>Salvar para editar status</em></td>
             <td style="display:flex; gap:8px;">
               <button class="btn-submit" onclick="saveFarm(event)" style="padding:6px 12px;">Salvar</button>
@@ -268,6 +270,7 @@
           <th>Grupo</th>
           <th>Fazenda</th>
           <th>Telefone</th>
+          <th>Link2Go Wallet ID</th>
           <th>Status do Telefone</th>
           <th>Ações</th>
         </tr>
@@ -546,6 +549,7 @@ function renderFarmsTable() {
       <td>${formatGroupName(f.farm_key)}</td>
       <td>${f.display_name}</td>
       <td>${formatPhone(f.phone_number)}</td>
+      <td><strong>${f.wallet_id || ''}</strong></td>
       <td>
         <button class="sbtn ok ${st==='ok'?'on':''}" onclick="setStatus('${f.farm_key}', '${f.phone_number}', 'ok')">🟢 OK</button>
         <button class="sbtn inc ${st==='inc'?'on':''}" onclick="setStatus('${f.farm_key}', '${f.phone_number}', 'inc')">🟡 Instável</button>
@@ -553,17 +557,18 @@ function renderFarmsTable() {
         <button class="sbtn none ${st==='none'?'on':''}" onclick="setStatus('${f.farm_key}', '${f.phone_number}', 'none')">⚪ Sem Número</button>
       </td>
       <td>
-        <button class="btn-action-manage" style="padding: 4px 8px; font-size: 0.8rem;" onclick="editFarm('${f.farm_key}', '${f.display_name}', '${f.phone_number}')">⚙ Editar</button>
+        <button class="btn-action-manage" style="padding: 4px 8px; font-size: 0.8rem;" onclick="editFarm('${f.farm_key}', '${f.display_name}', '${f.phone_number}', ${f.wallet_id || 'null'})">⚙ Editar</button>
       </td>
     </tr>
     `;
   }).join('');
 }
 
-function editFarm(key, name, phone) {
+function editFarm(key, name, phone, walletId) {
   document.getElementById('new-farm-container').style.display = 'block';
   document.getElementById('f_key').value = key;
   document.getElementById('f_name').value = name;
+  document.getElementById('f_wallet').value = walletId || '';
   let v = (phone || '').replace(/\D/g, '');
   if (v.startsWith('55') && v.length > 11) v = v.substring(2);
   if(v.length > 2) v = '(' + v.substring(0,2) + ') ' + v.substring(2);
@@ -589,6 +594,7 @@ async function saveFarm(e) {
     source_db_name: '',
     source_schema: '',
     phone_number: inputPhone,
+    wallet_id: parseInt(document.getElementById('f_wallet').value) || null,
   };
   try {
     const res = await fetch(API_URL + '/farms', {
@@ -602,6 +608,7 @@ async function saveFarm(e) {
       document.getElementById('f_key').value = '';
       document.getElementById('f_name').value = '';
       document.getElementById('f_phone').value = '';
+      document.getElementById('f_wallet').value = '';
       document.getElementById('new-farm-container').style.display = 'none';
       loadFarms();
     } else showModal("Erro", "Erro: " + data.error);
