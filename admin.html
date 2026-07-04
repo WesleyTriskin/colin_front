@@ -585,7 +585,13 @@ function getFilteredContacts(excludeFilter = null) {
     }
     if (excludeFilter !== 'report' && fReps.length > 0) {
       if (!fReps.some(r => hasReport(c.report_type, r))) return false;
- let openAccordions = {};
+    }
+    return true;
+  });
+}
+
+let isUpdatingTable = false;
+let openAccordions = {};
 
 function toggleContactAccordion(phone) {
   const el = document.getElementById(`row_details_${phone}`);
