@@ -309,6 +309,14 @@
             <input type="text" id="f_lon" placeholder="-48.123456" style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);">
           </div>
           <div>
+            <label style="display:block; margin-bottom:5px; font-weight:500; font-size:0.85rem;">Cidade</label>
+            <input type="text" id="f_city" placeholder="Ex: Vera" style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);">
+          </div>
+          <div>
+            <label style="display:block; margin-bottom:5px; font-weight:500; font-size:0.85rem;">Estado (UF)</label>
+            <input type="text" id="f_state" placeholder="Ex: MT" maxlength="2" style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);">
+          </div>
+          <div>
             <label style="display:block; margin-bottom:5px; font-weight:500; font-size:0.85rem;">Responsável (Nome)</label>
             <input type="text" id="f_resp_name" placeholder="Nome do Responsável" style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);">
           </div>
@@ -320,8 +328,9 @@
             <label style="display:block; margin-bottom:5px; font-weight:500; font-size:0.85rem;">Marca da Máquina</label>
             <select id="f_machine" style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);">
               <option value="">Nenhuma</option>
-              <option value="CNH">CNH</option>
+              <option value="CASE IH">CASE IH</option>
               <option value="John Deere">John Deere</option>
+              <option value="Massey Ferguson">Massey Ferguson</option>
             </select>
           </div>
           <div>
@@ -635,6 +644,18 @@ function renderFarmsTable() {
   document.getElementById('farms-table-body').innerHTML = farmsList.map(f => {
     const st = f.status || 'ok';
 
+    let actionButtons = '';
+    if (editingFarmKey === f.farm_key) {
+      actionButtons = `<span style="font-size:0.85rem; color:var(--primary); font-weight:600; display:flex; align-items:center; gap:4px;">✏️ Editando...</span>`;
+    } else {
+      actionButtons = `
+        <div style="display:flex; gap:6px;">
+          <button class="btn-action-manage" style="padding: 4px 8px; font-size: 0.8rem;" onclick="openEditFarmForm('${f.farm_key}')">⚙ Editar</button>
+          <button class="btn-action-delete" style="padding: 4px 8px; font-size: 0.8rem;" onclick="deleteFarm('${f.farm_key}')">🗑 Excluir</button>
+        </div>
+      `;
+    }
+
     let rowHtml = `
     <tr>
       <td>${formatGroupName(f.farm_key)}</td>
@@ -649,12 +670,7 @@ function renderFarmsTable() {
           <option value="none" ${st==='none'?'selected':''}>⚪ Sem Número</option>
         </select>
       </td>
-      <td>
-        <div style="display:flex; gap:6px;">
-          <button class="btn-action-manage" style="padding: 4px 8px; font-size: 0.8rem;" onclick="openEditFarmForm('${f.farm_key}')">⚙ Editar</button>
-          <button class="btn-action-delete" style="padding: 4px 8px; font-size: 0.8rem;" onclick="deleteFarm('${f.farm_key}')">🗑 Excluir</button>
-        </div>
-      </td>
+      <td>${actionButtons}</td>
     </tr>
     `;
 
@@ -688,7 +704,20 @@ function renderFarmsTable() {
             </div>
             <div>
               <label style="display:block; font-size:0.75rem; color:var(--muted); margin-bottom:4px; font-weight:500;">Marca Máquina</label>
-              <input type="text" id="inline-machine-${f.farm_key}" value="${f.machine_brand || ''}" class="form-control" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
+              <select id="inline-machine-${f.farm_key}" class="form-control" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
+                <option value="" ${!f.machine_brand ? 'selected' : ''}>Nenhuma</option>
+                <option value="CASE IH" ${f.machine_brand === 'CASE IH' ? 'selected' : ''}>CASE IH</option>
+                <option value="John Deere" ${f.machine_brand === 'John Deere' ? 'selected' : ''}>John Deere</option>
+                <option value="Massey Ferguson" ${f.machine_brand === 'Massey Ferguson' ? 'selected' : ''}>Massey Ferguson</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:block; font-size:0.75rem; color:var(--muted); margin-bottom:4px; font-weight:500;">Cidade</label>
+              <input type="text" id="inline-city-${f.farm_key}" value="${f.city || ''}" class="form-control" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
+            </div>
+            <div>
+              <label style="display:block; font-size:0.75rem; color:var(--muted); margin-bottom:4px; font-weight:500;">Estado (UF)</label>
+              <input type="text" id="inline-state-${f.farm_key}" value="${f.state || ''}" maxlength="2" class="form-control" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
             </div>
             <div>
               <label style="display:block; font-size:0.75rem; color:var(--muted); margin-bottom:4px; font-weight:500;">Latitude</label>
@@ -721,6 +750,8 @@ function openNewFarmForm() {
   document.getElementById('f_wallet').value = '';
   document.getElementById('f_lat').value = '';
   document.getElementById('f_lon').value = '';
+  document.getElementById('f_city').value = '';
+  document.getElementById('f_state').value = '';
   document.getElementById('f_resp_name').value = '';
   document.getElementById('f_resp_phone').value = '';
   document.getElementById('f_machine').value = '';
@@ -750,6 +781,8 @@ async function saveInlineFarm(key) {
   let wallet = parseInt(document.getElementById(`inline-wallet-${key}`).value) || null;
   let lat = document.getElementById(`inline-lat-${key}`).value;
   let lon = document.getElementById(`inline-lon-${key}`).value;
+  let city = document.getElementById(`inline-city-${key}`).value;
+  let state = document.getElementById(`inline-state-${key}`).value;
   let respName = document.getElementById(`inline-resp-name-${key}`).value;
   let respPhone = document.getElementById(`inline-resp-phone-${key}`).value.replace(/\D/g, '');
   if (respPhone.length > 0 && !respPhone.startsWith('55')) {
@@ -767,6 +800,8 @@ async function saveInlineFarm(key) {
     wallet_id: wallet,
     latitude: lat !== "" ? parseFloat(lat) : null,
     longitude: lon !== "" ? parseFloat(lon) : null,
+    city: city,
+    state: state,
     responsible_name: respName,
     responsible_phone: respPhone,
     machine_brand: machine,
@@ -814,6 +849,8 @@ async function saveFarm(e) {
     wallet_id: parseInt(document.getElementById('f_wallet').value) || null,
     latitude: document.getElementById('f_lat').value !== "" ? parseFloat(document.getElementById('f_lat').value) : null,
     longitude: document.getElementById('f_lon').value !== "" ? parseFloat(document.getElementById('f_lon').value) : null,
+    city: document.getElementById('f_city').value,
+    state: document.getElementById('f_state').value,
     responsible_name: document.getElementById('f_resp_name').value,
     responsible_phone: respPhone,
     machine_brand: document.getElementById('f_machine').value,
@@ -836,6 +873,8 @@ async function saveFarm(e) {
       document.getElementById('f_wallet').value = '';
       document.getElementById('f_lat').value = '';
       document.getElementById('f_lon').value = '';
+      document.getElementById('f_city').value = '';
+      document.getElementById('f_state').value = '';
       document.getElementById('f_resp_name').value = '';
       document.getElementById('f_resp_phone').value = '';
       document.getElementById('f_machine').value = '';
@@ -847,7 +886,8 @@ async function saveFarm(e) {
 }
 
 async function deleteFarm(farmKey) {
-  if(!confirm(`Excluir fazenda ${farmKey}?`)) return;
+  const confirmMsg = `⚠️ ATENÇÃO: Você tem certeza de que deseja deletar permanentemente a fazenda "${farmKey}"?\n\nEsta ação excluirá as configurações de recebimento de relatórios e telemetria da fazenda, prejudicando todos os outros usuários e integrações associadas!\n\nConfirma a exclusão?`;
+  if(!confirm(confirmMsg)) return;
   try {
     const res = await fetch(API_URL + '/farms', {
       method: 'DELETE',
