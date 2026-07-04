@@ -269,6 +269,7 @@
           <th>Fazenda</th>
           <th>Telefone</th>
           <th>Status do Telefone</th>
+          <th>Ações</th>
         </tr>
       </thead>
       <tbody id="farms-table-body">
@@ -550,6 +551,9 @@ function renderFarmsTable() {
         <button class="sbtn inc ${st==='inc'?'on':''}" onclick="setStatus('${f.farm_key}', '${f.phone_number}', 'inc')">🟡 Instável</button>
         <button class="sbtn ban ${st==='ban'?'on':''}" onclick="setStatus('${f.farm_key}', '${f.phone_number}', 'ban')">🔴 Banido</button>
         <button class="sbtn none ${st==='none'?'on':''}" onclick="setStatus('${f.farm_key}', '${f.phone_number}', 'none')">⚪ Sem Número</button>
+      </td>
+      <td>
+        <button class="btn-action-manage" style="padding: 4px 8px; font-size: 0.8rem;" onclick="editFarm('${f.farm_key}', '${f.display_name}', '${f.phone_number}')">⚙ Editar</button>
       </td>
     </tr>
     `;
