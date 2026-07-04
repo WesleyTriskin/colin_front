@@ -205,12 +205,57 @@
   .sub-table th, .sub-table td {
     border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
   }
+  .sub-table th {
+    padding: 4px 6px !important;
+    font-size: 0.7rem !important;
+    font-weight: 700;
+  }
+  .sub-table td {
+    padding: 4px 6px !important;
+    font-size: 0.8rem !important;
+  }
+  .btn-toggle-shortcut {
+    padding: 2px 4px !important;
+    font-size: 0.6rem !important;
+  }
+  .btn-desvincular {
+    padding: 4px 8px !important;
+    font-size: 0.7rem !important;
+  }
+  .badge-machine {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  .badge-machine.cnh {
+    background: rgba(241, 196, 15, 0.2);
+    color: #f1c40f;
+    border: 1px solid rgba(241, 196, 15, 0.4);
+  }
+  .badge-machine.john-deere {
+    background: rgba(46, 204, 113, 0.2);
+    color: #2ecc71;
+    border: 1px solid rgba(46, 204, 113, 0.4);
+  }
+  .badge-machine.none {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--muted);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
   .sbtn {
     padding: 6px 12px !important;
     font-size: 0.8rem !important;
     border-radius: 6px !important;
     margin-right: 4px !important;
     margin-bottom: 2px !important;
+  }
+  .coord-inputs, .resp-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
   }
 </style>
 </head>
@@ -235,33 +280,65 @@
       <button class="btn-submit" onclick="document.getElementById('new-farm-container').style.display='block'">+ Nova Fazenda</button>
     </div>
     
-    <div id="new-farm-container" style="display:none; margin-top: 20px; margin-bottom: 20px; overflow-x: auto; background:rgba(41, 128, 185, 0.1); border:2px solid var(--primary); border-radius:12px; padding: 15px;">
-      <h4 style="margin: 0 0 10px 0; color: var(--text);">➕ Nova Fazenda</h4>
-      <table style="font-size: 0.85rem; margin:0;">
-        <thead>
-          <tr>
-            <th>Grupo</th>
-            <th>Fazenda</th>
-            <th>Telefone</th>
-            <th>Link2Go Wallet ID</th>
-            <th>Status do Telefone</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><input type="text" id="f_key" required placeholder="Grupo (ex: jacana)" style="width:140px; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);"></td>
-            <td><input type="text" id="f_name" required placeholder="Nome (ex: Jaçanã)" style="width:160px; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);"></td>
-            <td><input type="text" id="f_phone" placeholder="(11) 90000-0000" oninput="maskPhone(this)" style="width:140px; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);"></td>
-            <td><input type="number" id="f_wallet" placeholder="ex: 6084" style="width:100px; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);"></td>
-            <td><em>Salvar para editar status</em></td>
-            <td style="display:flex; gap:8px;">
-              <button class="btn-submit" onclick="saveFarm(event)" style="padding:6px 12px;">Salvar</button>
-              <button class="btn-delete" style="background:#555;" onclick="document.getElementById('new-farm-container').style.display='none';">Cancelar</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div id="new-farm-container" style="display:none; margin-top: 20px; margin-bottom: 20px; background:rgba(41, 128, 185, 0.1); border:2px solid var(--primary); border-radius:12px; padding: 20px;">
+      <h4 style="margin: 0 0 15px 0; color: var(--text); font-family:'Outfit',sans-serif; font-size:1.2rem;">➕ Cadastrar Nova Fazenda</h4>
+      <form onsubmit="saveFarm(event)">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+          <div>
+            <label style="display:block; margin-bottom:5px; font-weight:500; font-size:0.85rem;">Grupo (farm_key)</label>
+            <input type="text" id="f_key" required placeholder="Ex: jacana" style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);">
+          </div>
+          <div>
+            <label style="display:block; margin-bottom:5px; font-weight:500; font-size:0.85rem;">Nome da Fazenda</label>
+            <input type="text" id="f_name" required placeholder="Ex: Jaçanã" style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);">
+          </div>
+          <div>
+            <label style="display:block; margin-bottom:5px; font-weight:500; font-size:0.85rem;">Telefone do WhatsApp</label>
+            <input type="text" id="f_phone" placeholder="Ex: (11) 99999-9999" oninput="maskPhone(this)" style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);">
+          </div>
+          <div>
+            <label style="display:block; margin-bottom:5px; font-weight:500; font-size:0.85rem;">Link2Go Wallet ID</label>
+            <input type="number" id="f_wallet" placeholder="Ex: 5683" style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);">
+          </div>
+          <div>
+            <label style="display:block; margin-bottom:5px; font-weight:500; font-size:0.85rem;">Latitude</label>
+            <input type="text" id="f_lat" placeholder="-22.123456" style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);">
+          </div>
+          <div>
+            <label style="display:block; margin-bottom:5px; font-weight:500; font-size:0.85rem;">Longitude</label>
+            <input type="text" id="f_lon" placeholder="-48.123456" style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);">
+          </div>
+          <div>
+            <label style="display:block; margin-bottom:5px; font-weight:500; font-size:0.85rem;">Responsável (Nome)</label>
+            <input type="text" id="f_resp_name" placeholder="Nome do Responsável" style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);">
+          </div>
+          <div>
+            <label style="display:block; margin-bottom:5px; font-weight:500; font-size:0.85rem;">Responsável (Telefone)</label>
+            <input type="text" id="f_resp_phone" placeholder="Ex: (11) 99999-9999" oninput="maskPhone(this)" style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);">
+          </div>
+          <div>
+            <label style="display:block; margin-bottom:5px; font-weight:500; font-size:0.85rem;">Marca da Máquina</label>
+            <select id="f_machine" style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);">
+              <option value="">Nenhuma</option>
+              <option value="CNH">CNH</option>
+              <option value="John Deere">John Deere</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block; margin-bottom:5px; font-weight:500; font-size:0.85rem;">Status do Telefone</label>
+            <select id="f_status" style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);">
+              <option value="ok">🟢 OK</option>
+              <option value="inc">🟡 Instável</option>
+              <option value="ban">🔴 Banido</option>
+              <option value="none">⚪ Sem Número</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+          <button type="submit" class="btn-submit" style="padding:8px 20px;">Salvar</button>
+          <button type="button" class="btn-delete" style="background:#555; padding:8px 20px;" onclick="document.getElementById('new-farm-container').style.display='none';">Cancelar</button>
+        </div>
+      </form>
     </div>
 
     <table>
@@ -271,6 +348,9 @@
           <th>Fazenda</th>
           <th>Telefone</th>
           <th>Link2Go Wallet ID</th>
+          <th>Coordenadas</th>
+          <th>Responsável</th>
+          <th>Máquina</th>
           <th>Status do Telefone</th>
           <th>Ações</th>
         </tr>
@@ -347,10 +427,14 @@
 </div>
 
 <script>
-const API_URL = 'https://prx.triskin.tech/api_data/v1';
+const API_URL = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+  ? 'http://localhost:3000'
+  : 'https://prx.triskin.tech/api_data/v1';
 let farmsList = [];
 let currentContacts = [];
 let tsFilterFarm, tsFilterPhone, tsFilterReport, tsCFarm, tsFilterName;
+let editingFarmKey = null;
+
 const ALL_REPORTS = ['d1', 'daily', 'hour', 'margin', 'market', 'idle', 'productivity', 'revenue', 'top_rates', 'irrigacao', 'interativo'];
 const REPORT_LABELS = {
   'd1': 'D1',
@@ -365,6 +449,15 @@ const REPORT_LABELS = {
   'irrigacao': 'Irrigação',
   'interativo': 'Interativo'
 };
+
+function formatPhoneInputVal(phone) {
+  if (!phone) return '';
+  let v = phone.toString().replace(/\D/g, '');
+  if (v.startsWith('55') && v.length > 11) v = v.substring(2);
+  if(v.length > 2) v = '(' + v.substring(0,2) + ') ' + v.substring(2);
+  if(v.length > 10) v = v.substring(0,10) + '-' + v.substring(10);
+  return v;
+}
 
 function switchTab(tabId) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -395,13 +488,13 @@ function closeAlertModal() {
 }
 
 const GROUP_NAME_OVERRIDES = {
-  'gjacana': 'Grupo Jacanã',
-  'g_jacana': 'Grupo Jacanã',
-  'apoloni': 'Grupo Apoloni',
-  'amazonia': 'Grupo Amazônia',
-  'ws': 'Grupo Suprema',
-  'fazenda_ws': 'Grupo Suprema',
-  'piccini': 'Grupo Piccini'
+  'gjacana': 'Jacanã',
+  'g_jacana': 'Jacanã',
+  'apoloni': 'Apoloni',
+  'amazonia': 'Amazônia',
+  'ws': 'Suprema',
+  'fazenda_ws': 'Suprema',
+  'piccini': 'Piccini'
 };
 
 function formatGroupName(key) {
@@ -544,12 +637,74 @@ async function loadFarms() {
 function renderFarmsTable() {
   document.getElementById('farms-table-body').innerHTML = farmsList.map(f => {
     const st = f.status || 'ok';
+    const isEditing = (editingFarmKey === f.farm_key);
+
+    if (isEditing) {
+      return `
+      <tr class="editing-row">
+        <td><strong>${formatGroupName(f.farm_key)}</strong></td>
+        <td>
+          <input type="text" id="edit-display-name-${f.farm_key}" value="${f.display_name}" style="width:100%; min-width:120px; padding:6px; border-radius:4px; border:1px solid var(--primary); background:var(--bg); color:var(--text);">
+        </td>
+        <td>
+          <input type="text" id="edit-phone-${f.farm_key}" value="${formatPhoneInputVal(f.phone_number)}" oninput="maskPhone(this)" style="width:100%; min-width:110px; padding:6px; border-radius:4px; border:1px solid var(--primary); background:var(--bg); color:var(--text);">
+        </td>
+        <td>
+          <input type="number" id="edit-wallet-${f.farm_key}" value="${f.wallet_id || ''}" style="width:100%; min-width:70px; padding:6px; border-radius:4px; border:1px solid var(--primary); background:var(--bg); color:var(--text);">
+        </td>
+        <td>
+          <div style="display:flex; flex-direction:column; gap:4px;">
+            <input type="text" id="edit-lat-${f.farm_key}" placeholder="Lat" value="${f.latitude !== null && f.latitude !== undefined ? f.latitude : ''}" style="width:100%; padding:4px; font-size:0.8rem; border-radius:4px; border:1px solid var(--primary); background:var(--bg); color:var(--text);">
+            <input type="text" id="edit-lon-${f.farm_key}" placeholder="Lon" value="${f.longitude !== null && f.longitude !== undefined ? f.longitude : ''}" style="width:100%; padding:4px; font-size:0.8rem; border-radius:4px; border:1px solid var(--primary); background:var(--bg); color:var(--text);">
+          </div>
+        </td>
+        <td>
+          <div style="display:flex; flex-direction:column; gap:4px;">
+            <input type="text" id="edit-resp-name-${f.farm_key}" placeholder="Responsável" value="${f.responsible_name || ''}" style="width:100%; padding:4px; font-size:0.8rem; border-radius:4px; border:1px solid var(--primary); background:var(--bg); color:var(--text);">
+            <input type="text" id="edit-resp-phone-${f.farm_key}" placeholder="Telefone" value="${formatPhoneInputVal(f.responsible_phone)}" oninput="maskPhone(this)" style="width:100%; padding:4px; font-size:0.8rem; border-radius:4px; border:1px solid var(--primary); background:var(--bg); color:var(--text);">
+          </div>
+        </td>
+        <td>
+          <select id="edit-machine-${f.farm_key}" style="width:100%; padding:6px; border-radius:4px; border:1px solid var(--primary); background:var(--bg); color:var(--text);">
+            <option value="" ${!f.machine_brand?'selected':''}>Nenhuma</option>
+            <option value="CNH" ${f.machine_brand==='CNH'?'selected':''}>CNH</option>
+            <option value="John Deere" ${f.machine_brand==='John Deere'?'selected':''}>John Deere</option>
+          </select>
+        </td>
+        <td>
+          <select id="edit-status-${f.farm_key}" style="width:100%; padding:6px; border-radius:4px; border:1px solid var(--primary); background:var(--bg); color:var(--text);">
+            <option value="ok" ${st==='ok'?'selected':''}>🟢 OK</option>
+            <option value="inc" ${st==='inc'?'selected':''}>🟡 Instável</option>
+            <option value="ban" ${st==='ban'?'selected':''}>🔴 Banido</option>
+            <option value="none" ${st==='none'?'selected':''}>⚪ Sem Número</option>
+          </select>
+        </td>
+        <td>
+          <div style="display:flex; gap:6px;">
+            <button class="btn-submit" onclick="saveInlineFarm('${f.farm_key}')" style="padding:4px 8px; font-size:0.75rem; background:#27ae60;">💾 Salvar</button>
+            <button class="btn-delete" onclick="cancelInlineEdit()" style="padding:4px 8px; font-size:0.75rem; background:#7f8c8d;">❌ Cancelar</button>
+          </div>
+        </td>
+      </tr>
+      `;
+    }
+
     return `
     <tr>
       <td>${formatGroupName(f.farm_key)}</td>
-      <td>${f.display_name}</td>
+      <td><strong>${f.display_name}</strong></td>
       <td>${formatPhone(f.phone_number)}</td>
       <td><strong>${f.wallet_id || ''}</strong></td>
+      <td>
+        <span style="font-size:0.8rem; color:var(--muted);">Lat: ${f.latitude !== null && f.latitude !== undefined ? f.latitude : '-'}<br>Lon: ${f.longitude !== null && f.longitude !== undefined ? f.longitude : '-'}</span>
+      </td>
+      <td>
+        <span style="font-weight:600; font-size:0.85rem;">${f.responsible_name || '<i style="color:var(--muted)">N/A</i>'}</span>
+        ${f.responsible_phone ? `<br><span style="font-size:0.8rem; color:var(--muted);">${formatPhone(f.responsible_phone)}</span>` : ''}
+      </td>
+      <td>
+        <span class="badge-machine ${f.machine_brand ? f.machine_brand.toLowerCase().replace(' ', '-') : 'none'}">${f.machine_brand || 'Nenhuma'}</span>
+      </td>
       <td>
         <button class="sbtn ok ${st==='ok'?'on':''}" onclick="setStatus('${f.farm_key}', '${f.phone_number}', 'ok')">🟢 OK</button>
         <button class="sbtn inc ${st==='inc'?'on':''}" onclick="setStatus('${f.farm_key}', '${f.phone_number}', 'inc')">🟡 Instável</button>
@@ -557,24 +712,73 @@ function renderFarmsTable() {
         <button class="sbtn none ${st==='none'?'on':''}" onclick="setStatus('${f.farm_key}', '${f.phone_number}', 'none')">⚪ Sem Número</button>
       </td>
       <td>
-        <button class="btn-action-manage" style="padding: 4px 8px; font-size: 0.8rem;" onclick="editFarm('${f.farm_key}', '${f.display_name}', '${f.phone_number}', ${f.wallet_id || 'null'})">⚙ Editar</button>
+        <div style="display:flex; gap:6px;">
+          <button class="btn-action-manage" style="padding: 4px 8px; font-size: 0.8rem;" onclick="startInlineEdit('${f.farm_key}')">⚙ Editar</button>
+          <button class="btn-action-delete" style="padding: 4px 8px; font-size: 0.8rem;" onclick="deleteFarm('${f.farm_key}')">🗑 Excluir</button>
+        </div>
       </td>
     </tr>
     `;
   }).join('');
 }
 
-function editFarm(key, name, phone, walletId) {
-  document.getElementById('new-farm-container').style.display = 'block';
-  document.getElementById('f_key').value = key;
-  document.getElementById('f_name').value = name;
-  document.getElementById('f_wallet').value = walletId || '';
-  let v = (phone || '').replace(/\D/g, '');
-  if (v.startsWith('55') && v.length > 11) v = v.substring(2);
-  if(v.length > 2) v = '(' + v.substring(0,2) + ') ' + v.substring(2);
-  if(v.length > 10) v = v.substring(0,10) + '-' + v.substring(10);
-  document.getElementById('f_phone').value = v;
-  window.scrollTo(0,0);
+function startInlineEdit(key) {
+  editingFarmKey = key;
+  renderFarmsTable();
+}
+
+function cancelInlineEdit() {
+  editingFarmKey = null;
+  renderFarmsTable();
+}
+
+async function saveInlineFarm(key) {
+  let displayName = document.getElementById(`edit-display-name-${key}`).value;
+  let phone = document.getElementById(`edit-phone-${key}`).value.replace(/\D/g, '');
+  if (phone.length > 0 && !phone.startsWith('55')) {
+    phone = '55' + phone;
+  }
+  let wallet = parseInt(document.getElementById(`edit-wallet-${key}`).value) || null;
+  let lat = document.getElementById(`edit-lat-${key}`).value;
+  let lon = document.getElementById(`edit-lon-${key}`).value;
+  let respName = document.getElementById(`edit-resp-name-${key}`).value;
+  let respPhone = document.getElementById(`edit-resp-phone-${key}`).value.replace(/\D/g, '');
+  if (respPhone.length > 0 && !respPhone.startsWith('55')) {
+    respPhone = '55' + respPhone;
+  }
+  let machine = document.getElementById(`edit-machine-${key}`).value;
+  let status = document.getElementById(`edit-status-${key}`).value;
+
+  const payload = {
+    farm_key: key,
+    display_name: displayName,
+    phone_number: phone,
+    wallet_id: wallet,
+    latitude: lat !== "" ? parseFloat(lat) : null,
+    longitude: lon !== "" ? parseFloat(lon) : null,
+    responsible_name: respName,
+    responsible_phone: respPhone,
+    machine_brand: machine,
+    status: status
+  };
+
+  try {
+    const res = await fetch(API_URL + '/farms', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if(data.success) {
+      showModal("Sucesso", "Fazenda atualizada com sucesso!");
+      editingFarmKey = null;
+      loadFarms();
+    } else {
+      showModal("Erro", "Erro ao salvar: " + data.error);
+    }
+  } catch(e) {
+    showModal("Erro", "Erro de rede ao salvar.");
+  }
 }
 
 function updateFarmsSelects() {
@@ -587,15 +791,24 @@ async function saveFarm(e) {
   if (inputPhone.length > 0 && !inputPhone.startsWith('55')) {
     inputPhone = '55' + inputPhone;
   }
+  let respPhone = document.getElementById('f_resp_phone').value.replace(/\D/g, '');
+  if (respPhone.length > 0 && !respPhone.startsWith('55')) {
+    respPhone = '55' + respPhone;
+  }
   
   const payload = {
     farm_key: document.getElementById('f_key').value,
     display_name: document.getElementById('f_name').value,
-    source_db_name: '',
-    source_schema: '',
     phone_number: inputPhone,
     wallet_id: parseInt(document.getElementById('f_wallet').value) || null,
+    latitude: document.getElementById('f_lat').value !== "" ? parseFloat(document.getElementById('f_lat').value) : null,
+    longitude: document.getElementById('f_lon').value !== "" ? parseFloat(document.getElementById('f_lon').value) : null,
+    responsible_name: document.getElementById('f_resp_name').value,
+    responsible_phone: respPhone,
+    machine_brand: document.getElementById('f_machine').value,
+    status: document.getElementById('f_status').value
   };
+
   try {
     const res = await fetch(API_URL + '/farms', {
       method: 'POST',
@@ -604,11 +817,17 @@ async function saveFarm(e) {
     });
     const data = await res.json();
     if(data.success) {
-      showModal("Sucesso", "Fazenda cadastrada/atualizada!");
+      showModal("Sucesso", "Fazenda cadastrada com sucesso!");
       document.getElementById('f_key').value = '';
       document.getElementById('f_name').value = '';
       document.getElementById('f_phone').value = '';
       document.getElementById('f_wallet').value = '';
+      document.getElementById('f_lat').value = '';
+      document.getElementById('f_lon').value = '';
+      document.getElementById('f_resp_name').value = '';
+      document.getElementById('f_resp_phone').value = '';
+      document.getElementById('f_machine').value = '';
+      document.getElementById('f_status').value = 'ok';
       document.getElementById('new-farm-container').style.display = 'none';
       loadFarms();
     } else showModal("Erro", "Erro: " + data.error);
@@ -895,10 +1114,10 @@ function renderContactsTable() {
       ALL_REPORTS.forEach(r => {
         const checked = hasReport(a.report_type, r) ? 'checked' : '';
         checkboxesHtml += `
-          <td style="text-align:center; padding: 8px 4px; vertical-align: middle;">
-            <label class="switch-toggle">
+          <td style="text-align:center; padding: 4px 2px; vertical-align: middle;">
+            <label class="switch-toggle" style="width: 32px; height: 16px;">
               <input type="checkbox" ${checked} onchange="toggleReport('${a.farm_key}', '${c.phone_number}', '${r}', this.checked, '${safeName}', '${safeNotes}', '${a.report_type}')">
-              <span class="switch-slider"></span>
+              <span class="switch-slider" style="border-radius: 16px;"></span>
             </label>
           </td>
         `;
@@ -906,17 +1125,17 @@ function renderContactsTable() {
 
       return `
         <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-          <td style="padding: 8px 4px; font-weight: bold; color: var(--text);">
-            <div style="display:flex; flex-direction:column; gap:4px;">
+          <td style="padding: 4px 2px; font-weight: bold; color: var(--text); font-size: 0.8rem;">
+            <div style="display:flex; flex-direction:column; gap:2px;">
               <span>🌾 ${farmName}</span>
-              <div style="display:flex; gap:4px;">
+              <div style="display:flex; gap:2px;">
                 <button type="button" class="btn-toggle-shortcut" onclick="selectAllAssocReports('${a.farm_key}', '${c.phone_number}', '${safeName}', '${safeNotes}', '${a.report_type}', true)">Todos</button>
                 <button type="button" class="btn-toggle-shortcut" onclick="selectAllAssocReports('${a.farm_key}', '${c.phone_number}', '${safeName}', '${safeNotes}', '${a.report_type}', false)">Nenhum</button>
               </div>
             </div>
           </td>
           ${checkboxesHtml}
-          <td style="text-align:right; padding: 8px 12px; vertical-align: middle;">
+          <td style="text-align:right; padding: 4px 6px; vertical-align: middle;">
             <button class="btn-desvincular" onclick="deleteContact('${a.farm_key}', '${c.phone_number}')">🗑 Desvincular</button>
           </td>
         </tr>
@@ -930,54 +1149,54 @@ function renderContactsTable() {
     if (unlinkedFarms.length > 0) {
       const selectOptionsHtml = unlinkedFarms.map(f => `<option value="${f.farm_key}">${f.display_name}</option>`).join('');
       addFarmHtml = `
-        <div style="display:flex; align-items:center; gap:10px; margin-top:15px; padding-top:15px; border-top:1px dashed var(--border);" onclick="event.stopPropagation()">
-          <span style="font-size:0.85rem; color:var(--muted); font-weight:bold;">🔗 Vincular a nova fazenda:</span>
-          <select id="add_farm_select_${c.phone_number}" style="padding:6px 10px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-size:0.85rem;">
+        <div style="display:flex; align-items:center; gap:8px; margin-top:8px; padding-top:8px; border-top:1px dashed var(--border);" onclick="event.stopPropagation()">
+          <span style="font-size:0.75rem; color:var(--muted); font-weight:bold;">🔗 Vincular a nova fazenda:</span>
+          <select id="add_farm_select_${c.phone_number}" style="padding:4px 8px; border-radius:4px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-size:0.75rem;">
             ${selectOptionsHtml}
           </select>
-          <button class="btn-add-farm" onclick="linkNewFarmToContact('${c.phone_number}', '${c.contact_name.replace(/'/g, "\\'")}', '${c.notes.replace(/'/g, "\\'")}')">[+] Vincular Nova Fazenda</button>
+          <button class="btn-add-farm" style="padding: 4px 10px; font-size: 0.75rem; margin-left: 4px;" onclick="linkNewFarmToContact('${c.phone_number}', '${c.contact_name.replace(/'/g, "\\'")}', '${c.notes.replace(/'/g, "\\'")}')">[+] Vincular Nova Fazenda</button>
         </div>
       `;
     }
 
     let rowHtml = `
     <tr style="cursor:pointer;" onclick="toggleContactAccordion('${c.phone_number}')" class="main-contact-row">
-      <td style="font-weight:bold; font-size: 0.95rem;"><span style="margin-right:8px; color:var(--primary); font-size:0.8rem;">${arrow}</span>${c.contact_name || '<i style="color:var(--muted)">Sem nome</i>'}</td>
-      <td style="font-size: 0.95rem; color: var(--muted);">${formatPhone(c.phone_number)}</td>
-      <td><span style="background:rgba(41, 128, 185, 0.1); border:1px solid rgba(41, 128, 185, 0.3); border-radius:6px; padding:4px 8px; font-size:0.8rem; color:var(--text); font-weight:bold;">${associatedFarmsText}</span></td>
+      <td style="font-weight:bold; font-size: 0.9rem;"><span style="margin-right:8px; color:var(--primary); font-size:0.75rem;">${arrow}</span>${c.contact_name || '<i style="color:var(--muted)">Sem nome</i>'}</td>
+      <td style="font-size: 0.9rem; color: var(--muted);">${formatPhone(c.phone_number)}</td>
+      <td><span style="background:rgba(41, 128, 185, 0.1); border:1px solid rgba(41, 128, 185, 0.3); border-radius:6px; padding:3px 6px; font-size:0.75rem; color:var(--text); font-weight:bold;">${associatedFarmsText}</span></td>
       <td>
-        <div style="display:flex; gap:8px;">
-          <button class="btn-action-manage" onclick="event.stopPropagation(); toggleContactAccordion('${c.phone_number}')">⚙ Gerenciar</button>
-          <button class="btn-action-delete" onclick="event.stopPropagation(); deleteWholeContact('${c.phone_number}')">🗑 Excluir</button>
+        <div style="display:flex; gap:6px;">
+          <button class="btn-action-manage" style="padding: 4px 8px; font-size: 0.75rem;" onclick="event.stopPropagation(); toggleContactAccordion('${c.phone_number}')">⚙ Gerenciar</button>
+          <button class="btn-action-delete" style="padding: 4px 8px; font-size: 0.75rem;" onclick="event.stopPropagation(); deleteWholeContact('${c.phone_number}')">🗑 Excluir</button>
         </div>
       </td>
     </tr>
     <tr id="row_details_${c.phone_number}" style="display:${displayStyle}; background:rgba(0,0,0,0.15);">
-      <td colspan="4" style="padding:20px; border-left:4px solid var(--primary);">
+      <td colspan="4" style="padding:10px 12px; border-left:4px solid var(--primary);">
         
         <!-- Inline Name/Phone Editor -->
-        <div style="display:flex; flex-wrap:wrap; gap:15px; margin-bottom:15px; padding-bottom:15px; border-bottom:1px solid var(--border); align-items:center;">
+        <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid var(--border); align-items:center;">
           <div>
-            <span style="font-size:0.85rem; color:var(--muted); font-weight:bold; margin-right:4px;">Nome:</span>
-            <input type="text" id="edit_name_${c.phone_number}" value="${c.contact_name}" style="padding:6px 10px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-weight:bold; font-size:0.85rem; width:180px;">
+            <span style="font-size:0.8rem; color:var(--muted); font-weight:bold; margin-right:4px;">Nome:</span>
+            <input type="text" id="edit_name_${c.phone_number}" value="${c.contact_name}" style="padding:4px 8px; border-radius:4px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-weight:bold; font-size:0.8rem; width:160px;">
           </div>
           <div>
-            <span style="font-size:0.85rem; color:var(--muted); font-weight:bold; margin-right:4px;">Telefone:</span>
-            <input type="text" id="edit_phone_${c.phone_number}" value="${formatPhone(c.phone_number)}" oninput="maskPhone(this)" style="padding:6px 10px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-size:0.85rem; width:160px;">
+            <span style="font-size:0.8rem; color:var(--muted); font-weight:bold; margin-right:4px;">Telefone:</span>
+            <input type="text" id="edit_phone_${c.phone_number}" value="${formatPhone(c.phone_number)}" oninput="maskPhone(this)" style="padding:4px 8px; border-radius:4px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-size:0.8rem; width:140px;">
           </div>
           <div>
-            <button class="btn-save-details" onclick="saveContactDetails('${c.phone_number}')">💾 Salvar Alterações</button>
+            <button class="btn-save-details" style="padding: 6px 12px; font-size: 0.8rem;" onclick="saveContactDetails('${c.phone_number}')">💾 Salvar Alterações</button>
           </div>
         </div>
 
         <!-- Sub-table of Farms and Reports -->
         <div style="overflow-x:auto;">
-          <table class="sub-table" style="width:100%; border-collapse:collapse; margin-top:10px;">
+          <table class="sub-table" style="width:100%; border-collapse:collapse; margin-top:6px;">
             <thead>
               <tr style="border-bottom:2px solid var(--border);">
-                <th style="font-size:0.75rem; color:var(--muted); font-weight:800; padding:8px 4px; text-transform:uppercase;">Fazenda</th>
-                ${ALL_REPORTS.map(r => `<th style="text-align:center; font-size:0.75rem; color:var(--muted); font-weight:800; padding:8px 4px; text-transform:uppercase;">${REPORT_LABELS[r]}</th>`).join('')}
-                <th style="text-align:right; font-size:0.75rem; color:var(--muted); font-weight:800; padding:8px 12px; text-transform:uppercase; width:120px;">Ações</th>
+                <th style="font-size:0.7rem; color:var(--muted); font-weight:800; padding:4px 2px; text-transform:uppercase;">Fazenda</th>
+                ${ALL_REPORTS.map(r => `<th style="text-align:center; font-size:0.7rem; color:var(--muted); font-weight:800; padding:4px 2px; text-transform:uppercase;">${REPORT_LABELS[r]}</th>`).join('')}
+                <th style="text-align:right; font-size:0.7rem; color:var(--muted); font-weight:800; padding:4px 6px; text-transform:uppercase; width:100px;">Ações</th>
               </tr>
             </thead>
             <tbody>
