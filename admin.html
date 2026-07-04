@@ -205,6 +205,13 @@
   .sub-table th, .sub-table td {
     border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
   }
+  .sbtn {
+    padding: 6px 12px !important;
+    font-size: 0.8rem !important;
+    border-radius: 6px !important;
+    margin-right: 4px !important;
+    margin-bottom: 2px !important;
+  }
 </style>
 </head>
 <body class="light">
@@ -234,7 +241,7 @@
         <thead>
           <tr>
             <th>Grupo</th>
-            <th>Nome</th>
+            <th>Fazenda</th>
             <th>Telefone</th>
             <th>Status do Telefone</th>
             <th>Ações</th>
@@ -259,10 +266,9 @@
       <thead>
         <tr>
           <th>Grupo</th>
-          <th>Nome</th>
+          <th>Fazenda</th>
           <th>Telefone</th>
           <th>Status do Telefone</th>
-          <th>Ações</th>
         </tr>
       </thead>
       <tbody id="farms-table-body">
@@ -384,7 +390,7 @@ function closeAlertModal() {
   document.getElementById('alert-modal').style.display = 'none';
 }
 
-const FARM_NAME_OVERRIDES = {
+const GROUP_NAME_OVERRIDES = {
   'gjacana': 'Grupo Jacanã',
   'g_jacana': 'Grupo Jacanã',
   'apoloni': 'Grupo Apoloni',
@@ -394,8 +400,23 @@ const FARM_NAME_OVERRIDES = {
   'piccini': 'Grupo Piccini'
 };
 
+function formatGroupName(key) {
+  const k = (key || '').toLowerCase();
+  return GROUP_NAME_OVERRIDES[k] || key;
+}
+
+const FARM_NAME_OVERRIDES = {
+  'gjacana': 'Jacanã',
+  'g_jacana': 'Jacanã',
+  'apoloni': 'Apoloni',
+  'amazonia': 'Buriti',
+  'ws': 'Fazenda Wilson Sierra',
+  'fazenda_ws': 'Fazenda Wilson Sierra',
+  'piccini': 'Piccini'
+};
+
 function formatFarmName(key, currentName) {
-  const k = key.toLowerCase();
+  const k = (key || '').toLowerCase();
   if (FARM_NAME_OVERRIDES[k]) return FARM_NAME_OVERRIDES[k];
   return currentName;
 }
@@ -521,7 +542,7 @@ function renderFarmsTable() {
     const st = f.status || 'ok';
     return `
     <tr>
-      <td>${f.farm_key}</td>
+      <td>${formatGroupName(f.farm_key)}</td>
       <td>${f.display_name}</td>
       <td>${formatPhone(f.phone_number)}</td>
       <td>
@@ -529,10 +550,6 @@ function renderFarmsTable() {
         <button class="sbtn inc ${st==='inc'?'on':''}" onclick="setStatus('${f.farm_key}', '${f.phone_number}', 'inc')">🟡 Instável</button>
         <button class="sbtn ban ${st==='ban'?'on':''}" onclick="setStatus('${f.farm_key}', '${f.phone_number}', 'ban')">🔴 Banido</button>
         <button class="sbtn none ${st==='none'?'on':''}" onclick="setStatus('${f.farm_key}', '${f.phone_number}', 'none')">⚪ Sem Número</button>
-      </td>
-      <td>
-        <button class="btn-delete" style="background:var(--primary);" onclick="editFarm('${f.farm_key}', '${f.display_name}', '${f.phone_number}')">Editar</button>
-        <button class="btn-delete" onclick="deleteFarm('${f.farm_key}')">Excluir</button>
       </td>
     </tr>
     `;
