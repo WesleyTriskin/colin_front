@@ -71,6 +71,140 @@
   .ts-dropdown .option.selected::after { content: " ✔"; float: right; color: var(--primary); font-weight: bold; }
   .ts-wrapper:not(.has-items) .ts-dropdown .option[data-value="all"] { background: var(--panel) !important; color: var(--primary) !important; font-weight: bold; }
   .ts-wrapper:not(.has-items) .ts-dropdown .option[data-value="all"]::after { content: " ✔"; float: right; color: var(--primary); font-weight: bold; }
+
+  /* Switch Toggle Styling */
+  .switch-toggle {
+    position: relative;
+    display: inline-block;
+    width: 38px;
+    height: 20px;
+  }
+  .switch-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .switch-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--border);
+    transition: .3s;
+    border-radius: 20px;
+  }
+  .switch-slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+  }
+  input:checked + .switch-slider {
+    background-color: var(--primary);
+  }
+  input:checked + .switch-slider:before {
+    transform: translateX(18px);
+  }
+
+  /* Refactored Contact Table Buttons */
+  .btn-action-manage {
+    background: transparent;
+    color: var(--primary);
+    border: 1px solid var(--primary);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: 0.2s;
+  }
+  .btn-action-manage:hover {
+    background: rgba(41, 128, 185, 0.1);
+  }
+  .btn-action-delete {
+    background: transparent;
+    color: #e74c3c;
+    border: 1px solid #e74c3c;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: 0.2s;
+  }
+  .btn-action-delete:hover {
+    background: rgba(231, 76, 60, 0.1);
+  }
+  .btn-desvincular {
+    background: transparent;
+    color: #e74c3c;
+    border: 1px solid #e74c3c;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .btn-desvincular:hover {
+    background: rgba(231, 76, 60, 0.1);
+  }
+  .btn-toggle-shortcut {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 3px 6px;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    cursor: pointer;
+    transition: 0.2s;
+    display: inline-block;
+  }
+  .btn-toggle-shortcut:hover {
+    background: rgba(255,255,255,0.1);
+    color: var(--text);
+  }
+  .btn-save-details {
+    background: #27ae60;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: 0.2s;
+  }
+  .btn-save-details:hover {
+    background: #219653;
+  }
+  .btn-add-farm {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: 0.2s;
+    margin-left: 8px;
+  }
+  .btn-add-farm:hover {
+    opacity: 0.9;
+  }
+  .main-contact-row:hover {
+    background: rgba(255,255,255,0.02) !important;
+  }
+  .sub-table th, .sub-table td {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  }
 </style>
 </head>
 <body class="dark">
@@ -727,7 +861,7 @@ function renderContactsTable() {
     const displayStyle = openAccordions[c.phone_number] ? 'table-row' : 'none';
     const arrow = openAccordions[c.phone_number] ? '▼' : '▶';
 
-    // Build sub-rows inside accordion
+    // Build sub-rows inside accordion sub-table
     let assocRowsHtml = c.associations.map(a => {
       const farmName = formatFarmName(a.farm_key, a.farm_key);
       const safeName = c.contact_name.replace(/'/g, "\\'");
@@ -737,27 +871,31 @@ function renderContactsTable() {
       ALL_REPORTS.forEach(r => {
         const checked = hasReport(a.report_type, r) ? 'checked' : '';
         checkboxesHtml += `
-          <div style="display:inline-flex; flex-direction:column; align-items:center; gap:4px; border: 1px solid var(--border); border-radius:6px; padding: 6px 8px; background:var(--bg);">
-            <span style="font-size:0.7rem; color:var(--text); font-weight:bold;">${REPORT_LABELS[r]}</span>
-            <input type="checkbox" ${checked} onchange="toggleReport('${a.farm_key}', '${c.phone_number}', '${r}', this.checked, '${safeName}', '${safeNotes}', '${a.report_type}')" style="cursor:pointer; width:16px; height:16px; accent-color:var(--primary);">
-          </div>
+          <td style="text-align:center; padding: 8px 4px; vertical-align: middle;">
+            <label class="switch-toggle">
+              <input type="checkbox" ${checked} onchange="toggleReport('${a.farm_key}', '${c.phone_number}', '${r}', this.checked, '${safeName}', '${safeNotes}', '${a.report_type}')">
+              <span class="switch-slider"></span>
+            </label>
+          </td>
         `;
       });
 
       return `
-        <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:15px; border-bottom:1px solid var(--border); padding-bottom:10px; margin-bottom:10px;">
-          <div style="display:flex; align-items:center; gap:10px;">
-            <strong style="color:var(--primary); font-size:0.95rem;">🌾 ${farmName}</strong>
-            <button class="btn-submit" style="padding:4px 8px; font-size:0.75rem; background:#7f8c8d;" onclick="selectAllAssocReports('${a.farm_key}', '${c.phone_number}', '${safeName}', '${safeNotes}', '${a.report_type}', true)">✔ Todos</button>
-            <button class="btn-submit" style="padding:4px 8px; font-size:0.75rem; background:#7f8c8d;" onclick="selectAllAssocReports('${a.farm_key}', '${c.phone_number}', '${safeName}', '${safeNotes}', '${a.report_type}', false)">✖ Nenhum</button>
-          </div>
-          <div style="display:flex; flex-wrap:wrap; gap:6px;">
-            ${checkboxesHtml}
-          </div>
-          <div>
-            <button class="btn-delete" style="padding:6px 12px; background:#c0392b; font-size:0.8rem;" onclick="deleteContact('${a.farm_key}', '${c.phone_number}')">🗑 Desvincular</button>
-          </div>
-        </div>
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <td style="padding: 8px 4px; font-weight: bold; color: var(--text);">
+            <div style="display:flex; flex-direction:column; gap:4px;">
+              <span>🌾 ${farmName}</span>
+              <div style="display:flex; gap:4px;">
+                <button type="button" class="btn-toggle-shortcut" onclick="selectAllAssocReports('${a.farm_key}', '${c.phone_number}', '${safeName}', '${safeNotes}', '${a.report_type}', true)">Todos</button>
+                <button type="button" class="btn-toggle-shortcut" onclick="selectAllAssocReports('${a.farm_key}', '${c.phone_number}', '${safeName}', '${safeNotes}', '${a.report_type}', false)">Nenhum</button>
+              </div>
+            </div>
+          </td>
+          ${checkboxesHtml}
+          <td style="text-align:right; padding: 8px 12px; vertical-align: middle;">
+            <button class="btn-desvincular" onclick="deleteContact('${a.farm_key}', '${c.phone_number}')">🗑 Desvincular</button>
+          </td>
+        </tr>
       `;
     }).join('');
 
@@ -769,46 +907,59 @@ function renderContactsTable() {
       const selectOptionsHtml = unlinkedFarms.map(f => `<option value="${f.farm_key}">${f.display_name}</option>`).join('');
       addFarmHtml = `
         <div style="display:flex; align-items:center; gap:10px; margin-top:15px; padding-top:15px; border-top:1px dashed var(--border);" onclick="event.stopPropagation()">
-          <span style="font-size:0.85rem; color:var(--text); font-weight:bold;">🔗 Vincular à nova fazenda:</span>
-          <select id="add_farm_select_${c.phone_number}" style="padding:6px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-size:0.85rem;">
+          <span style="font-size:0.85rem; color:var(--muted); font-weight:bold;">🔗 Vincular a nova fazenda:</span>
+          <select id="add_farm_select_${c.phone_number}" style="padding:6px 10px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-size:0.85rem;">
             ${selectOptionsHtml}
           </select>
-          <button class="btn-submit" style="padding:6px 12px; font-size:0.85rem;" onclick="linkNewFarmToContact('${c.phone_number}', '${c.contact_name.replace(/'/g, "\\'")}', '${c.notes.replace(/'/g, "\\'")}')">Adicionar</button>
+          <button class="btn-add-farm" onclick="linkNewFarmToContact('${c.phone_number}', '${c.contact_name.replace(/'/g, "\\'")}', '${c.notes.replace(/'/g, "\\'")}')">[+] Vincular Nova Fazenda</button>
         </div>
       `;
     }
 
     let rowHtml = `
-    <tr style="cursor:pointer;" onclick="toggleContactAccordion('${c.phone_number}')">
-      <td style="font-weight:bold;"><span style="margin-right:8px; color:var(--primary); font-size:0.8rem;">${arrow}</span>${c.contact_name || '<i style="color:var(--muted)">Sem nome</i>'}</td>
-      <td>${formatPhone(c.phone_number)}</td>
+    <tr style="cursor:pointer;" onclick="toggleContactAccordion('${c.phone_number}')" class="main-contact-row">
+      <td style="font-weight:bold; font-size: 0.95rem;"><span style="margin-right:8px; color:var(--primary); font-size:0.8rem;">${arrow}</span>${c.contact_name || '<i style="color:var(--muted)">Sem nome</i>'}</td>
+      <td style="font-size: 0.95rem; color: var(--muted);">${formatPhone(c.phone_number)}</td>
       <td><span style="background:rgba(41, 128, 185, 0.1); border:1px solid rgba(41, 128, 185, 0.3); border-radius:6px; padding:4px 8px; font-size:0.8rem; color:var(--text); font-weight:bold;">${associatedFarmsText}</span></td>
       <td>
-        <button class="btn-submit" style="padding:6px 12px; background:var(--primary);" onclick="event.stopPropagation(); toggleContactAccordion('${c.phone_number}')">⚙ Gerenciar</button>
-        <button class="btn-delete" style="padding:6px 12px;" onclick="event.stopPropagation(); deleteWholeContact('${c.phone_number}')">🗑 Excluir</button>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-action-manage" onclick="event.stopPropagation(); toggleContactAccordion('${c.phone_number}')">⚙ Gerenciar</button>
+          <button class="btn-action-delete" onclick="event.stopPropagation(); deleteWholeContact('${c.phone_number}')">🗑 Excluir</button>
+        </div>
       </td>
     </tr>
     <tr id="row_details_${c.phone_number}" style="display:${displayStyle}; background:rgba(0,0,0,0.15);">
-      <td colspan="4" style="padding:15px; border-left:4px solid var(--primary);">
+      <td colspan="4" style="padding:20px; border-left:4px solid var(--primary);">
         
         <!-- Inline Name/Phone Editor -->
         <div style="display:flex; flex-wrap:wrap; gap:15px; margin-bottom:15px; padding-bottom:15px; border-bottom:1px solid var(--border); align-items:center;">
           <div>
-            <span style="font-size:0.85rem; color:var(--text); font-weight:bold;">Nome:</span>
-            <input type="text" id="edit_name_${c.phone_number}" value="${c.contact_name}" style="padding:6px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-weight:bold; font-size:0.85rem; width:150px;">
+            <span style="font-size:0.85rem; color:var(--muted); font-weight:bold; margin-right:4px;">Nome:</span>
+            <input type="text" id="edit_name_${c.phone_number}" value="${c.contact_name}" style="padding:6px 10px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-weight:bold; font-size:0.85rem; width:180px;">
           </div>
           <div>
-            <span style="font-size:0.85rem; color:var(--text); font-weight:bold;">Telefone:</span>
-            <input type="text" id="edit_phone_${c.phone_number}" value="${formatPhone(c.phone_number)}" oninput="maskPhone(this)" style="padding:6px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-size:0.85rem; width:150px;">
+            <span style="font-size:0.85rem; color:var(--muted); font-weight:bold; margin-right:4px;">Telefone:</span>
+            <input type="text" id="edit_phone_${c.phone_number}" value="${formatPhone(c.phone_number)}" oninput="maskPhone(this)" style="padding:6px 10px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-size:0.85rem; width:160px;">
           </div>
           <div>
-            <button class="btn-submit" style="padding:6px 12px; font-size:0.85rem; background:#27ae60;" onclick="saveContactDetails('${c.phone_number}')">💾 Salvar Alterações</button>
+            <button class="btn-save-details" onclick="saveContactDetails('${c.phone_number}')">💾 Salvar Alterações</button>
           </div>
         </div>
 
-        <!-- Farms List -->
-        <div style="margin-top:10px;">
-          ${assocRowsHtml}
+        <!-- Sub-table of Farms and Reports -->
+        <div style="overflow-x:auto;">
+          <table class="sub-table" style="width:100%; border-collapse:collapse; margin-top:10px;">
+            <thead>
+              <tr style="border-bottom:2px solid var(--border);">
+                <th style="font-size:0.75rem; color:var(--muted); font-weight:800; padding:8px 4px; text-transform:uppercase;">Fazenda</th>
+                ${ALL_REPORTS.map(r => `<th style="text-align:center; font-size:0.75rem; color:var(--muted); font-weight:800; padding:8px 4px; text-transform:uppercase;">${REPORT_LABELS[r]}</th>`).join('')}
+                <th style="text-align:right; font-size:0.75rem; color:var(--muted); font-weight:800; padding:8px 12px; text-transform:uppercase; width:120px;">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${assocRowsHtml}
+            </tbody>
+          </table>
         </div>
 
         <!-- Add Farm Selector -->
