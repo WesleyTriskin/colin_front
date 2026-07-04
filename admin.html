@@ -726,6 +726,10 @@ function renderContactsTable() {
         <td style="white-space:nowrap;">
           <button class="btn-submit" style="padding:6px 10px; background:#27ae60;" onclick="saveInlineEdit('${rawFk}', '${c.phone_number}', ${rowId})">💾 Salvar</button>
           <button class="btn-delete" style="background:#555; padding:6px 10px;" onclick="cancelInlineEdit()">✖ Cancelar</button>
+          <div style="margin-top: 6px; display: flex; gap: 4px;">
+            <button type="button" class="btn-submit" style="padding:4px 8px; font-size:0.75rem; background:#2980b9;" onclick="selectAllInlineReports(${rowId}, true)">✔ Todos</button>
+            <button type="button" class="btn-submit" style="padding:4px 8px; font-size:0.75rem; background:#7f8c8d;" onclick="selectAllInlineReports(${rowId}, false)">✖ Nenhum</button>
+          </div>
         </td>
       </tr>`;
       return rowHtml;
@@ -860,6 +864,13 @@ function resetContactForm() {
 function selectAllContactReports(select) {
   ALL_REPORTS.forEach(r => {
     const cb = document.getElementById(`c_rep_${r}`);
+    if (cb) cb.checked = select;
+  });
+}
+
+function selectAllInlineReports(rowId, select) {
+  ALL_REPORTS.forEach(r => {
+    const cb = document.getElementById(`edit_rep_${rowId}_${r}`);
     if (cb) cb.checked = select;
   });
 }
