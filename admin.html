@@ -207,7 +207,7 @@
   }
 </style>
 </head>
-<body class="dark">
+<body class="light">
 
 <div class="admin-wrap">
   <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -221,13 +221,8 @@
     </div>
   </div>
 
-  <div class="tabs">
-    <div class="tab active" onclick="switchTab('farms')">Fazendas</div>
-    <div class="tab" onclick="switchTab('contacts')">Contatos</div>
-  </div>
-
-  <!-- ABA: Fazendas -->
-  <div id="tab-farms" class="tab-content active">
+  <!-- SEÇÃO: Fazendas -->
+  <div id="tab-farms" style="margin-bottom: 45px;">
     <div style="display:flex; justify-content:space-between; align-items:center;">
       <h3>Fazendas Cadastradas</h3>
       <button class="btn-submit" onclick="document.getElementById('new-farm-container').style.display='block'">+ Nova Fazenda</button>
@@ -276,7 +271,7 @@
   </div>
 
   <!-- ABA: Contatos -->
-  <div id="tab-contacts" class="tab-content">
+  <div id="tab-contacts">
     <div style="display:flex; justify-content:space-between; align-items:center;">
       <h3>Contatos Cadastrados</h3>
       <button class="btn-submit" onclick="openNewContactForm()">+ Novo Contato</button>
@@ -390,12 +385,13 @@ function closeAlertModal() {
 }
 
 const FARM_NAME_OVERRIDES = {
-  'gjacana': 'Jaçanã',
-  'g_jacana': 'Jaçanã',
-  'apoloni': 'Boa Sorte',
-  'ws': 'Wilson Sierra',
-  'fazenda_ws': 'Wilson Sierra',
-  'piccini': 'Piccini'
+  'gjacana': 'Grupo Jacanã',
+  'g_jacana': 'Grupo Jacanã',
+  'apoloni': 'Grupo Apoloni',
+  'amazonia': 'Grupo Amazônia',
+  'ws': 'Grupo Suprema',
+  'fazenda_ws': 'Grupo Suprema',
+  'piccini': 'Grupo Piccini'
 };
 
 function formatFarmName(key, currentName) {
